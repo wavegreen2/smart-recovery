@@ -13,7 +13,7 @@
         .config-group label { font-size: 0.8em; opacity: 0.9; }
         .config-group input { padding: 5px 8px; border-radius: 4px; border: none; font-size: 1em; }
         .btn-start { background: #27ae60; color: white; padding: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 32px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; } /* ปรับเป็น 7 คอลัมน์ */
         .stat-card { background: #eee; padding: 5px; border-radius: 4px; text-align: center; border-bottom: 2px solid #ccc; }
         .stat-card span { display: block; font-size: 1.1em; font-weight: bold; color: #2c3e50; }
         .input-area { margin-bottom: 10px; padding: 8px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; display: flex; align-items: center; gap: 10px; }
@@ -37,7 +37,6 @@
         th { background: #34495e; color: white; padding: 5px; position: sticky; top: 0; }
         td { padding: 4px; border: 1px solid #ddd; text-align: center; }
         
-        /* สไตล์เมื่อถึงเป้าหมาย */
         .target-reached { background: #f1c40f !important; border-color: #d4ac0d !important; animation: pulse 1s infinite; }
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -63,7 +62,7 @@
         <div class="stat-card">Net Profit <span id="stat-profit">0</span></div>
         <div class="stat-card">1% Rebate <span id="stat-total-rebate">0</span></div>
         <div class="stat-card" style="background: #fff3cd;">ATH (Inc. Rebate) <span id="stat-ath">0</span></div>
-        <div class="stat-card">Target <span id="stat-target-val">0</span></div>
+        <div class="stat-card" style="background: #fde8e8;">Max Bet <span id="stat-max-bet">0</span></div> <div class="stat-card">Target <span id="stat-target-val">0</span></div>
         <div class="stat-card">State <span id="stat-state">FLAT</span></div>
     </div>
 
@@ -104,11 +103,10 @@
 </div>
 
 <script>
-    // --- Global Variables ---
     let initialBankroll = 100000;
     let unitSize = 1;
     let profitTarget = 0.01;
-    const fiboMult = 10000; // ปรับตัวคูณ Fibo ให้เหมาะสม
+    const fiboMult = 10000;
     const martyLimit = 12;
 
     let history = [];
@@ -116,12 +114,13 @@
     let peakBankroll = 0;
     let athProfitIncRebate = 0;
     let totalRebate = 0;
+    let maxBetEver = 0; // ตัวแปรเก็บค่า Max Bet
     let state = "FLAT";
     let martyStep = 0;
     let fiboIdx = 0;
     let hasLostSincePeak = false;
     let isStarted = false;
-    let isTargetReached = false; // ตัวแปรล็อคเมื่อถึงเป้า
+    let isTargetReached = false;
 
     function initSystem() {
         const b = parseFloat(document.getElementById('input-bankroll').value);
@@ -137,12 +136,12 @@
         unitSize = u;
         profitTarget = t;
         
-        // รีเซ็ตค่าสำหรับการเริ่มใหม่
         history = [];
         bankroll = initialBankroll;
         peakBankroll = initialBankroll;
         athProfitIncRebate = 0;
         totalRebate = 0;
+        maxBetEver = 0; // รีเซ็ต Max Bet
         state = "FLAT";
         martyStep = 0;
         fiboIdx = 0;
@@ -150,7 +149,6 @@
         isTargetReached = false;
         isStarted = true;
 
-        // รีเซ็ต UI
         document.getElementById('bet-card').classList.remove('target-reached');
         document.getElementById('bet-title').innerText = "ตาต่อไปลง:";
         enableControls(true);
@@ -172,10 +170,8 @@
 
     function calculateBet() {
         if(!isStarted || isTargetReached) return 0;
-
         let currentDrawdown = peakBankroll - bankroll;
         let rawBet = unitSize;
-
         if (state === "FLAT") {
             if (currentDrawdown > 0 && hasLostSincePeak) {
                 rawBet = Math.ceil(currentDrawdown / 4); 
@@ -186,8 +182,6 @@
         } else if (state === "FIBO") {
             rawBet = getFibo(fiboIdx) * fiboMult;
         }
-
-        // ป้องกันการลงเกินยอดที่ต้องใช้ในการถอนทุน
         let neededToRecover = currentDrawdown + unitSize;
         if (state !== "FLAT" && rawBet > neededToRecover) {
             return Math.max(unitSize, Math.ceil(neededToRecover));
@@ -197,30 +191,30 @@
 
     function recordResult(res) {
         if(!isStarted || isTargetReached) return;
-        
         if (res === 'T') {
-            history.push({ bankroll, state, currentBet: 0, rebate: 0, isWin: null, isTie: true, displayInput: 'T', totalRebateAtStep: totalRebate });
+            history.push({ bankroll, state, currentBet: 0, rebate: 0, isWin: null, isTie: true, displayInput: 'T', totalRebateAtStep: totalRebate, maxBetAtStep: maxBetEver });
             updateUI();
             return;
         }
 
         let currentBet = calculateBet();
+        
+        // เก็บค่า Max Bet
+        if (currentBet > maxBetEver) maxBetEver = currentBet;
+
         let isWin = (res === 'P');
         let rebate = currentBet * 0.01;
 
-        // บันทึก History
         history.push({
             bankroll, peakBankroll, athProfitIncRebate, totalRebate, state, 
-            martyStep, fiboIdx, hasLostSincePeak, 
+            martyStep, fiboIdx, hasLostSincePeak, maxBetEver,
             currentBet, rebate, isWin, isTie: false, displayInput: res
         });
 
         if (isWin) { bankroll += (currentBet + rebate); } 
         else { bankroll -= (currentBet - rebate); hasLostSincePeak = true; }
-        
         totalRebate += rebate;
 
-        // Logic การเปลี่ยน State
         if (isWin) {
             if (state === "FIBO") {
                 fiboIdx = Math.max(-1, fiboIdx - 2);
@@ -238,13 +232,11 @@
         }
 
         if (bankroll > peakBankroll) peakBankroll = bankroll;
-
         let currentTotalProfitPlusRebate = (bankroll - initialBankroll) + totalRebate;
         if (currentTotalProfitPlusRebate > athProfitIncRebate) athProfitIncRebate = currentTotalProfitPlusRebate;
 
         updateUI();
 
-        // ตรวจสอบเป้าหมายหลังอัปเดต UI
         if (currentTotalProfitPlusRebate >= profitTarget) {
             triggerTargetReached(currentTotalProfitPlusRebate);
         }
@@ -252,18 +244,12 @@
 
     function triggerTargetReached(val) {
         isTargetReached = true;
-        
-        // เปลี่ยนหน้าตา UI ให้รู้ว่าหยุดแล้ว
         document.getElementById('bet-card').classList.add('target-reached');
         document.getElementById('next-bet-display').innerText = "WIN!";
         document.getElementById('current-state-text').innerText = "TARGET REACHED";
-        
-        // ปิดปุ่มควบคุม
         enableControls(false);
-
-        // แจ้งเตือนเพียงครั้งเดียว
         setTimeout(() => {
-            alert(`🎯 เป้าหมายสำเร็จ!\nกำไรสุทธิรวมรีเบท: ${Math.floor(val).toLocaleString()}\n\nระบบหยุดการทำงานชั่วคราว\nกรุณากด "เริ่มระบบใหม่" เพื่อเริ่มขอนใหม่`);
+            alert(`🎯 เป้าหมายสำเร็จ!\nกำไรสุทธิรวมรีเบท: ${Math.floor(val).toLocaleString()}\nเดิมพันสูงสุดที่ใช้: ${maxBetEver.toLocaleString()}\n\nระบบหยุดการทำงานชั่วคราว\nกรุณากด "เริ่มระบบใหม่" เพื่อเริ่มขอนใหม่`);
         }, 300);
     }
 
@@ -280,19 +266,17 @@
 
     function undo() {
         if (history.length === 0) return;
-        
-        // ถ้าเคยถึงเป้าแล้วจะย้อนกลับ ต้องปลดล็อคก่อน
         if (isTargetReached) {
             isTargetReached = false;
             document.getElementById('bet-card').classList.remove('target-reached');
             enableControls(true);
         }
-
         let last = history.pop();
         bankroll = last.bankroll;
         peakBankroll = last.peakBankroll;
         athProfitIncRebate = last.athProfitIncRebate;
         totalRebate = last.totalRebate;
+        maxBetEver = last.maxBetEver || 0;
         state = last.state;
         martyStep = last.martyStep;
         fiboIdx = last.fiboIdx;
@@ -310,6 +294,7 @@
         document.getElementById('stat-profit').innerText = Math.floor(netProfit).toLocaleString();
         document.getElementById('stat-total-rebate').innerText = totalRebate.toFixed(2);
         document.getElementById('stat-ath').innerText = Math.floor(athProfitIncRebate).toLocaleString();
+        document.getElementById('stat-max-bet').innerText = Math.ceil(maxBetEver).toLocaleString();
         document.getElementById('stat-target-val').innerText = profitTarget.toLocaleString();
         document.getElementById('stat-state').innerText = state;
         
@@ -342,7 +327,6 @@
         roadBody.innerHTML = "";
         let matrix = Array.from({ length: 6 }, () => Array(50).fill(null));
         let col = 0, row = 0, lastRes = null;
-
         history.forEach((h) => {
             if (h.isTie) return;
             const currentRes = h.isWin ? 'P' : 'B';
@@ -357,7 +341,6 @@
             }
             lastRes = currentRes;
         });
-
         for (let r = 0; r < 6; r++) {
             const tr = document.createElement('tr');
             for (let c = 0; c < 50; c++) {
@@ -374,6 +357,5 @@
         }
     }
 </script>
-
 </body>
 </html>
