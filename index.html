@@ -3,106 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recovery Simulator - Profit Target Edition</title>
+    <title>Smart Recovery Simulator - Target Lock Edition</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 10px; font-size: 13px; margin: 0; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { margin: 0 0 10px 0; font-size: 1.2em; }
+        .config-area { background: #34495e; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end; }
+        .config-group { display: flex; flex-direction: column; gap: 3px; }
+        .config-group label { font-size: 0.8em; opacity: 0.9; }
+        .config-group input { padding: 5px 8px; border-radius: 4px; border: none; font-size: 1em; }
+        .btn-start { background: #27ae60; color: white; padding: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 32px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 10px; }
+        .stat-card { background: #eee; padding: 5px; border-radius: 4px; text-align: center; border-bottom: 2px solid #ccc; }
+        .stat-card span { display: block; font-size: 1.1em; font-weight: bold; color: #2c3e50; }
+        .input-area { margin-bottom: 10px; padding: 8px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; display: flex; align-items: center; gap: 10px; }
+        textarea { flex-grow: 1; height: 35px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; font-family: monospace; font-size: 12px; resize: none; }
+        .btn-bulk { background: #3498db; color: white; padding: 0 15px; height: 35px; width: auto; cursor: pointer; }
+        .main-layout { display: grid; grid-template-columns: 1fr 300px; gap: 10px; margin-bottom: 10px; }
+        .road-container { width: 100%; overflow-x: auto; background: #fff; border: 1px solid #ccc; border-radius: 6px; }
+        .big-road td { width: 25px; height: 25px; border: 1px solid #eee; text-align: center; }
+        .circle { width: 20px; height: 20px; line-height: 20px; border-radius: 50%; color: white; margin: auto; font-weight: bold; font-size: 10px; }
+        .circle-P { background: #3498db; }
+        .circle-B { background: #e74c3c; }
+        .bet-display { text-align: center; padding: 10px; background: #e8f4fd; border-radius: 8px; border: 2px solid #3498db; transition: all 0.3s; }
+        .bet-display .amount { font-size: 2em; color: #e74c3c; font-weight: bold; }
+        .controls { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
+        button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-win { background: #2ecc71; color: white; }
+        .btn-loss { background: #e74c3c; color: white; }
+        .btn-undo { background: #95a5a6; color: white; }
+        .table-container { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        th { background: #34495e; color: white; padding: 5px; position: sticky; top: 0; }
+        td { padding: 4px; border: 1px solid #ddd; text-align: center; }
         
-        .config-area { 
-            background: #34495e; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end;
+        /* สไตล์เมื่อถึงเป้าหมาย */
+        .target-reached { background: #f1c40f !important; border-color: #d4ac0d !important; animation: pulse 1s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
-        .config-group { display: flex; flex-direction: column; gap: 5px; }
-        .config-group label { font-size: 0.85em; opacity: 0.9; }
-        .config-group input { padding: 10px; border-radius: 5px; border: none; font-size: 1.1em; }
-        .btn-start { background: #27ae60; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; height: 45px; }
-        .btn-start:hover { background: #2ecc71; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: #eee; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid #ccc; }
-        .stat-card span { display: block; font-size: 1.2em; font-weight: bold; color: #2c3e50; }
-        .stat-ath { border-color: #f1c40f; background: #fff9e6; }
-        .stat-rebate { border-color: #3498db; background: #eaf2f8; }
-        .stat-target { border-color: #e67e22; background: #fdf2e9; }
-        
-        .road-container { width: 100%; overflow-x: auto; background: #fff; border: 1px solid #ccc; margin-bottom: 20px; white-space: nowrap; border-radius: 8px; }
-        .big-road { display: inline-table; border-collapse: collapse; background-image: linear-gradient(#eee 1px, transparent 1px), linear-gradient(90deg, #eee 1px, transparent 1px); background-size: 30px 30px; min-height: 181px; }
-        .big-road td { width: 30px; height: 30px; border: 1px solid #eee; text-align: center; vertical-align: middle; padding: 0; position: relative; }
-        .circle { width: 22px; height: 22px; border-radius: 50%; display: inline-block; line-height: 22px; font-size: 12px; font-weight: bold; color: white; }
-        .circle-P { background: #27ae60; }
-        .circle-B { background: #c0392b; }
-
-        .bet-display { text-align: center; margin: 20px 0; padding: 20px; background: #e8f4fd; border-radius: 10px; border: 2px solid #3498db; }
-        .bet-display .amount { font-size: 3em; color: #e74c3c; font-weight: bold; }
-        .target-reached { background: #f8d7da !important; border-color: #dc3545 !important; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-        .input-area { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        textarea { width: 100%; height: 60px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font-family: monospace; }
-        
-        .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        button { padding: 12px 25px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: 0.2s; }
-        button:disabled { background: #ccc !important; cursor: not-allowed; }
-        .btn-win { background: #27ae60; color: white; }
-        .btn-loss { background: #c0392b; color: white; }
-        .btn-tie { background: #f39c12; color: white; }
-        .btn-bulk { background: #3498db; color: white; margin-top: 10px; width: 100%; }
-        .btn-undo { background: #7f8c8d; color: white; }
-        .btn-clear { background: #f39c12; color: white; }
-
-        .table-container { max-height: 300px; overflow-y: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 0.9em; }
-        th { background: #34495e; color: white; position: sticky; top: 0; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        .row-win { background: #d4edda !important; }
-        .row-loss { background: #f8d7da !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align: center;">Smart Recovery (+1% Rebate Profit)</h2>
+    <h2 style="text-align: center;">Smart Recovery (+1% Rebate) - Pro Edition</h2>
 
     <div class="config-area" id="config-panel">
-        <div class="config-group">
-            <label>ทุนทั้งหมด (Bankroll)</label>
-            <input type="number" id="input-bankroll" value="100000">
-        </div>
-        <div class="config-group">
-            <label>เดิมพันขั้นต่ำ (Unit)</label>
-            <input type="number" id="input-unit" value="1">
-        </div>
-        <div class="config-group">
-            <label>เป้ากำไรต่อขอน (Target)</label>
-            <input type="number" id="input-target" value="0.01">
-        </div>
-        <button class="btn-start" onclick="initSystem()">เริ่มระบบ / ตั้งค่าใหม่</button>
+        <div class="config-group"><label>ทุน (Bankroll)</label><input type="number" id="input-bankroll" value="100000"></div>
+        <div class="config-group"><label>ขั้นต่ำ (Unit)</label><input type="number" id="input-unit" value="1"></div>
+        <div class="config-group"><label>เป้ากำไร (Target)</label><input type="number" id="input-target" value="0.01"></div>
+        <button class="btn-start" onclick="initSystem()">เริ่มระบบใหม่</button>
     </div>
     
     <div class="stats-grid">
         <div class="stat-card">Bankroll <span id="stat-bankroll">0</span></div>
         <div class="stat-card">Net Profit <span id="stat-profit">0</span></div>
-        <div class="stat-card stat-rebate">Total 1% Rebate <span id="stat-total-rebate">0</span></div>
-        <div class="stat-card stat-ath">ATH Profit (Inc. Rebate) <span id="stat-ath">0</span></div>
-        <div class="stat-card stat-target">Target <span id="stat-target-val">0</span></div>
+        <div class="stat-card">1% Rebate <span id="stat-total-rebate">0</span></div>
+        <div class="stat-card" style="background: #fff3cd;">ATH (Inc. Rebate) <span id="stat-ath">0</span></div>
+        <div class="stat-card">Target <span id="stat-target-val">0</span></div>
         <div class="stat-card">State <span id="stat-state">FLAT</span></div>
     </div>
 
-    <div class="road-container" id="road-scroll">
-        <table class="big-road" id="big-road-ui"><tbody id="road-body"></tbody></table>
-    </div>
-
-    <div class="bet-display" id="bet-card">
-        <h2 id="bet-title">ตาต่อไปลง:</h2>
-        <div class="amount" id="next-bet-display">0</div>
-        <p>Strategy: <span id="current-state-text">WAITING</span></p>
-    </div>
-
     <div class="input-area">
-        <label><b>ใส่ข้อมูลแบบชุด (P=Win, B=Loss, T=Tie):</b></label>
-        <textarea id="bulk-input" placeholder="P,B,P,P..."></textarea>
-        <button class="btn-bulk" id="btn-bulk" onclick="processBulkInput()" disabled>ประมวลผลข้อมูลชุด</button>
+        <label><b>ใส่ข้อมูลชุด:</b></label>
+        <textarea id="bulk-input" placeholder="P,B,P,P... (P=Win, B=Loss, T=Tie)"></textarea>
+        <button class="btn-bulk" id="btn-bulk" onclick="processBulkInput()" disabled>ประมวลผล</button>
+    </div>
+
+    <div class="main-layout">
+        <div class="road-container">
+            <table class="big-road"><tbody id="road-body"></tbody></table>
+        </div>
+
+        <div class="bet-display" id="bet-card">
+            <h2 id="bet-title">ตาต่อไปลง:</h2>
+            <div class="amount" id="next-bet-display">0</div>
+            <p style="margin:0; font-size:0.8em;">Strategy: <span id="current-state-text">WAITING</span></p>
+        </div>
     </div>
 
     <div class="controls">
@@ -116,14 +96,7 @@
     <div class="table-container">
         <table>
             <thead>
-                <tr>
-                    <th>Round</th>
-                    <th>Result</th>
-                    <th>State</th>
-                    <th>Bet</th>
-                    <th>1% Rebate</th>
-                    <th>Net Profit (Cumulative)</th>
-                </tr>
+                <tr><th>Rd</th><th>Res</th><th>State</th><th>Bet</th><th>Rebate</th><th>Profit+Rebate</th></tr>
             </thead>
             <tbody id="log-body"></tbody>
         </table>
@@ -131,23 +104,24 @@
 </div>
 
 <script>
+    // --- Global Variables ---
     let initialBankroll = 100000;
     let unitSize = 1;
     let profitTarget = 0.01;
-    const fiboMult = 10000.0;
+    const fiboMult = 10000; // ปรับตัวคูณ Fibo ให้เหมาะสม
     const martyLimit = 12;
 
     let history = [];
     let bankroll = 0;
     let peakBankroll = 0;
-    let athProfit = 0;
+    let athProfitIncRebate = 0;
     let totalRebate = 0;
     let state = "FLAT";
     let martyStep = 0;
     let fiboIdx = 0;
     let hasLostSincePeak = false;
     let isStarted = false;
-    let targetReached = false;
+    let isTargetReached = false; // ตัวแปรล็อคเมื่อถึงเป้า
 
     function initSystem() {
         const b = parseFloat(document.getElementById('input-bankroll').value);
@@ -155,7 +129,7 @@
         const t = parseFloat(document.getElementById('input-target').value);
         
         if(isNaN(b) || isNaN(u) || isNaN(t)) {
-            alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            alert("กรุณากรอกตัวเลขให้ครบถ้วน");
             return;
         }
 
@@ -163,28 +137,30 @@
         unitSize = u;
         profitTarget = t;
         
+        // รีเซ็ตค่าสำหรับการเริ่มใหม่
         history = [];
         bankroll = initialBankroll;
         peakBankroll = initialBankroll;
-        athProfit = 0;
+        athProfitIncRebate = 0;
         totalRebate = 0;
         state = "FLAT";
         martyStep = 0;
         fiboIdx = 0;
         hasLostSincePeak = false;
+        isTargetReached = false;
         isStarted = true;
-        targetReached = false;
 
-        enableControls(true);
+        // รีเซ็ต UI
         document.getElementById('bet-card').classList.remove('target-reached');
         document.getElementById('bet-title').innerText = "ตาต่อไปลง:";
-        
+        enableControls(true);
         updateUI();
     }
 
     function enableControls(status) {
-        const ids = ['btn-win', 'btn-loss', 'btn-tie', 'btn-undo', 'btn-bulk'];
-        ids.forEach(id => document.getElementById(id).disabled = !status);
+        ['btn-win', 'btn-loss', 'btn-tie', 'btn-undo', 'btn-bulk'].forEach(id => {
+            document.getElementById(id).disabled = !status;
+        });
     }
 
     function getFibo(n) {
@@ -195,7 +171,8 @@
     }
 
     function calculateBet() {
-        if(!isStarted || targetReached) return 0;
+        if(!isStarted || isTargetReached) return 0;
+
         let currentDrawdown = peakBankroll - bankroll;
         let rawBet = unitSize;
 
@@ -205,22 +182,24 @@
                 rawBet = Math.max(rawBet, unitSize);
             }
         } else if (state === "MARTY") {
-            rawBet = unitSize * Math.pow(0, martyStep); // ปรับตัวคูณ Marty เป็น 0 มาตรฐาน
+            rawBet = unitSize * Math.pow(0, martyStep); 
         } else if (state === "FIBO") {
             rawBet = getFibo(fiboIdx) * fiboMult;
         }
 
+        // ป้องกันการลงเกินยอดที่ต้องใช้ในการถอนทุน
         let neededToRecover = currentDrawdown + unitSize;
-        if (state !== "FLAT" && rawBet > neededToRecover) return Math.max(unitSize, neededToRecover);
-        
-        return rawBet;
+        if (state !== "FLAT" && rawBet > neededToRecover) {
+            return Math.max(unitSize, Math.ceil(neededToRecover));
+        }
+        return Math.ceil(rawBet);
     }
 
     function recordResult(res) {
-        if(!isStarted || targetReached) return;
+        if(!isStarted || isTargetReached) return;
         
         if (res === 'T') {
-            history.push({ bankroll, state, currentBet: 0, rebate: 0, isWin: null, isTie: true, displayInput: 'T' });
+            history.push({ bankroll, state, currentBet: 0, rebate: 0, isWin: null, isTie: true, displayInput: 'T', totalRebateAtStep: totalRebate });
             updateUI();
             return;
         }
@@ -229,23 +208,19 @@
         let isWin = (res === 'P');
         let rebate = currentBet * 0.01;
 
-        // บันทึกสถานะก่อนอัปเดต
+        // บันทึก History
         history.push({
-            bankroll, peakBankroll, athProfit, totalRebate, state, 
+            bankroll, peakBankroll, athProfitIncRebate, totalRebate, state, 
             martyStep, fiboIdx, hasLostSincePeak, 
             currentBet, rebate, isWin, isTie: false, displayInput: res
         });
 
-        // คำนวณเงิน
-        if (isWin) { 
-            bankroll += (currentBet + rebate); 
-        } else { 
-            bankroll -= (currentBet - rebate); 
-            hasLostSincePeak = true; 
-        }
+        if (isWin) { bankroll += (currentBet + rebate); } 
+        else { bankroll -= (currentBet - rebate); hasLostSincePeak = true; }
+        
         totalRebate += rebate;
 
-        // Logic ระบบ
+        // Logic การเปลี่ยน State
         if (isWin) {
             if (state === "FIBO") {
                 fiboIdx = Math.max(-1, fiboIdx - 2);
@@ -263,32 +238,41 @@
         }
 
         if (bankroll > peakBankroll) peakBankroll = bankroll;
-        
-        // อัปเดต ATH Profit (รวม Rebate แล้วเพราะอยู่ใน Bankroll)
-        let currentTotalProfit = bankroll - initialBankroll;
-        if (currentTotalProfit > athProfit) athProfit = currentTotalProfit;
 
-        checkTarget(currentTotalProfit);
+        let currentTotalProfitPlusRebate = (bankroll - initialBankroll) + totalRebate;
+        if (currentTotalProfitPlusRebate > athProfitIncRebate) athProfitIncRebate = currentTotalProfitPlusRebate;
+
         updateUI();
-    }
 
-    function checkTarget(currentProfit) {
-        if (currentProfit >= profitTarget) {
-            targetReached = true;
-            enableControls(false);
-            document.getElementById('bet-card').classList.add('target-reached');
-            document.getElementById('bet-title').innerText = "!!! กำไรถึงเป้าแล้ว !!!";
-            setTimeout(() => {
-                alert("ยินดีด้วย! กำไรสุทธิรวมค่าคอมมิชชันถึงเป้าหมายที่ตั้งไว้แล้ว\nกรุณาเปลี่ยนขอนใหม่ (เริ่มระบบใหม่) เพื่อความปลอดภัย");
-            }, 100);
+        // ตรวจสอบเป้าหมายหลังอัปเดต UI
+        if (currentTotalProfitPlusRebate >= profitTarget) {
+            triggerTargetReached(currentTotalProfitPlusRebate);
         }
     }
 
+    function triggerTargetReached(val) {
+        isTargetReached = true;
+        
+        // เปลี่ยนหน้าตา UI ให้รู้ว่าหยุดแล้ว
+        document.getElementById('bet-card').classList.add('target-reached');
+        document.getElementById('next-bet-display').innerText = "WIN!";
+        document.getElementById('current-state-text').innerText = "TARGET REACHED";
+        
+        // ปิดปุ่มควบคุม
+        enableControls(false);
+
+        // แจ้งเตือนเพียงครั้งเดียว
+        setTimeout(() => {
+            alert(`🎯 เป้าหมายสำเร็จ!\nกำไรสุทธิรวมรีเบท: ${Math.floor(val).toLocaleString()}\n\nระบบหยุดการทำงานชั่วคราว\nกรุณากด "เริ่มระบบใหม่" เพื่อเริ่มขอนใหม่`);
+        }, 300);
+    }
+
     function processBulkInput() {
+        if(isTargetReached) return;
         const input = document.getElementById('bulk-input').value;
         const parts = input.split(/[,\s\n]+/).map(item => item.trim().toUpperCase());
         for(let item of parts) {
-            if (targetReached) break;
+            if (isTargetReached) break;
             if (['P','B','T'].includes(item)) recordResult(item);
         }
         document.getElementById('bulk-input').value = "";
@@ -296,54 +280,58 @@
 
     function undo() {
         if (history.length === 0) return;
+        
+        // ถ้าเคยถึงเป้าแล้วจะย้อนกลับ ต้องปลดล็อคก่อน
+        if (isTargetReached) {
+            isTargetReached = false;
+            document.getElementById('bet-card').classList.remove('target-reached');
+            enableControls(true);
+        }
+
         let last = history.pop();
         bankroll = last.bankroll;
         peakBankroll = last.peakBankroll;
-        athProfit = last.athProfit;
+        athProfitIncRebate = last.athProfitIncRebate;
         totalRebate = last.totalRebate;
         state = last.state;
         martyStep = last.martyStep;
         fiboIdx = last.fiboIdx;
         hasLostSincePeak = last.hasLostSincePeak;
-        targetReached = false;
-        enableControls(true);
-        document.getElementById('bet-card').classList.remove('target-reached');
-        document.getElementById('bet-title').innerText = "ตาต่อไปลง:";
         updateUI();
     }
 
     function resetSimulator() {
-        if(confirm("ล้างข้อมูลและตั้งค่าใหม่ทั้งหมด?")) location.reload();
+        if(confirm("ล้างข้อมูลทั้งหมดและเริ่มใหม่หรือไม่?")) location.reload();
     }
 
     function updateUI() {
         const netProfit = bankroll - initialBankroll;
         document.getElementById('stat-bankroll').innerText = Math.floor(bankroll).toLocaleString();
         document.getElementById('stat-profit').innerText = Math.floor(netProfit).toLocaleString();
-        document.getElementById('stat-ath').innerText = Math.floor(athProfit).toLocaleString();
-        document.getElementById('stat-total-rebate').innerText = totalRebate.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('stat-total-rebate').innerText = totalRebate.toFixed(2);
+        document.getElementById('stat-ath').innerText = Math.floor(athProfitIncRebate).toLocaleString();
         document.getElementById('stat-target-val').innerText = profitTarget.toLocaleString();
         document.getElementById('stat-state').innerText = state;
         
         let nextBet = calculateBet();
-        document.getElementById('next-bet-display').innerText = targetReached ? "STOP" : Math.ceil(nextBet).toLocaleString();
-        document.getElementById('current-state-text').innerText = isStarted ? (state + (state === "MARTY" ? ` (${martyStep})` : "")) : "WAITING";
+        document.getElementById('next-bet-display').innerText = isTargetReached ? "WIN!" : Math.ceil(nextBet).toLocaleString();
+        
+        if (!isTargetReached) {
+            document.getElementById('current-state-text').innerText = isStarted ? (state + (state === "MARTY" ? ` (${martyStep})` : "")) : "WAITING";
+        }
 
         const tbody = document.getElementById('log-body');
         tbody.innerHTML = "";
         let displayHistory = [...history].reverse();
         let tempPlayCount = history.filter(h => !h.isTie).length;
 
-        displayHistory.forEach((h, idx) => {
+        displayHistory.forEach((h) => {
             const row = tbody.insertRow();
             if (h.isTie) {
-                row.className = "row-tie";
-                row.innerHTML = `<td>-</td><td>TIE</td><td>-</td><td>0</td><td>0</td><td>${Math.floor(h.bankroll - initialBankroll).toLocaleString()}</td>`;
+                row.innerHTML = `<td>-</td><td>TIE</td><td>-</td><td>0</td><td>0</td><td>-</td>`;
             } else {
-                row.className = h.isWin ? "row-win" : "row-loss";
-                // คำนวณกำไรสะสม ณ จุดนั้น (รวม rebate ของไม้นั้นด้วย)
-                let netAtStep = (h.isWin ? (h.bankroll + h.currentBet + h.rebate) : (h.bankroll - h.currentBet + h.rebate)) - initialBankroll;
-                row.innerHTML = `<td>${tempPlayCount--}</td><td>${h.isWin?'WIN':'LOSS'}</td><td>${h.state}</td><td>${Math.ceil(h.currentBet).toLocaleString()}</td><td>${h.rebate.toFixed(2)}</td><td>${Math.floor(netAtStep).toLocaleString()}</td>`;
+                let currentNet = (h.bankroll - initialBankroll) + (h.totalRebateAtStep || h.totalRebate);
+                row.innerHTML = `<td>${tempPlayCount--}</td><td>${h.isWin?'W':'L'}</td><td>${h.state}</td><td>${Math.ceil(h.currentBet).toLocaleString()}</td><td>${h.rebate.toFixed(2)}</td><td>${Math.floor(currentNet).toLocaleString()}</td>`;
             }
         });
         renderBigRoad();
@@ -352,7 +340,7 @@
     function renderBigRoad() {
         const roadBody = document.getElementById('road-body');
         roadBody.innerHTML = "";
-        let matrix = Array.from({ length: 6 }, () => []);
+        let matrix = Array.from({ length: 6 }, () => Array(50).fill(null));
         let col = 0, row = 0, lastRes = null;
 
         history.forEach((h) => {
@@ -372,7 +360,7 @@
 
         for (let r = 0; r < 6; r++) {
             const tr = document.createElement('tr');
-            for (let c = 0; c < Math.max(col + 20, 30); c++) {
+            for (let c = 0; c < 50; c++) {
                 const td = document.createElement('td');
                 if (matrix[r][c]) {
                     const circle = document.createElement('div');
