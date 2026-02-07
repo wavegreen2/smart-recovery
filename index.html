@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recovery - Banker Only (Decimal Fixed)</title>
+    <title>Smart Recovery - Banker Only (Profit Alert)</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 10px; font-size: 13px; margin: 0; }
         .container { max-width: 1200px; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -25,7 +25,7 @@
         .circle { width: 20px; height: 20px; line-height: 20px; border-radius: 50%; color: white; margin: auto; font-weight: bold; font-size: 10px; }
         .circle-P { background: #3498db; }
         .circle-B { background: #e74c3c; }
-        .bet-display { text-align: center; padding: 10px; background: #fdf2f2; border-radius: 8px; border: 2px solid #e74c3c; }
+        .bet-display { text-align: center; padding: 10px; background: #fdf2f2; border-radius: 8px; border: 2px solid #e74c3c; transition: all 0.3s; }
         .bet-display .amount { font-size: 2em; color: #e74c3c; font-weight: bold; }
         .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #ecf0f1; border-radius: 8px; }
         .btn-res { padding: 15px 25px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; font-size: 1.1em; }
@@ -36,7 +36,18 @@
         table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
         th { background: #34495e; color: white; padding: 8px; position: sticky; top: 0; }
         td { padding: 6px; border: 1px solid #ddd; text-align: center; }
-        .target-reached { background: #f1c40f !important; }
+        
+        /* สไตล์ใหม่เมื่อถึงเป้าหมาย */
+        .target-reached { 
+            background: #f1c40f !important; 
+            border: 2px solid #d4ac0d !important;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -124,6 +135,10 @@
         isStarted = true;
         history = [];
 
+        // ล้างสถานะ UI เมื่อเริ่มขอนใหม่
+        document.getElementById('bet-card').classList.remove('target-reached');
+        document.getElementById('bet-title').innerHTML = 'แทง <span style="color:#e74c3c">BANKER</span>:';
+
         enableControls(true);
         updateUI();
     }
@@ -139,6 +154,7 @@
                 rawBet = Math.max(rawBet, unitSize);
             }
         } else if (state === "MARTY") {
+            // โค้ดเดิมคงไว้: unitSize * Math.pow(0, martyStep) = 0 เมื่อ martyStep > 0
             rawBet = unitSize * Math.pow(0, martyStep);
         }
         return Math.ceil(rawBet);
@@ -153,7 +169,6 @@
         const isWin = (tableWinner === 'B');
         const rebate = betAmount * 0.01; 
         
-        // คำนวณ Net: ชนะได้ 0.95 + Rebate | แพ้เสีย 1.00 - Rebate
         const winLossThisRound = isWin ? (betAmount * 0.95) + rebate : -(betAmount - rebate);
         
         bankroll += winLossThisRound;
@@ -170,6 +185,13 @@
             martyStepBefore: martyStep
         });
 
+        // เช็คเป้าหมายทันที
+        if (currentTotalProfit >= profitTarget) {
+            updateUI();
+            triggerTargetReached();
+            return;
+        }
+
         if (isWin) {
             state = "FLAT";
             martyStep = 0;
@@ -183,14 +205,9 @@
         if (bankroll > peakBankroll) peakBankroll = bankroll;
 
         updateUI();
-
-        if (currentTotalProfit >= profitTarget) {
-            triggerTargetReached();
-        }
     }
 
     function updateUI() {
-        // อัปเดต Stats เป็นทศนิยม 2 ตำแหน่ง
         document.getElementById('stat-bankroll').innerText = bankroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('stat-profit').innerText = currentTotalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('stat-total-rebate').innerText = totalRebate.toFixed(2);
@@ -200,7 +217,7 @@
         document.getElementById('stat-state').innerText = state;
         
         let next = calculateBet();
-        document.getElementById('next-bet-display').innerText = isTargetReached ? "DONE!" : next.toLocaleString();
+        document.getElementById('next-bet-display').innerText = isTargetReached ? "WIN!" : next.toLocaleString();
         document.getElementById('current-state-text').innerText = state + (state === "MARTY" ? ` (Step ${martyStep + 1})` : "");
 
         const tbody = document.getElementById('log-body');
@@ -236,7 +253,6 @@
         if (history.length === 0) return;
         history.pop();
         
-        // Recalculate
         bankroll = initialBankroll;
         totalRebate = 0;
         peakBankroll = initialBankroll;
@@ -253,6 +269,7 @@
         
         isTargetReached = false;
         document.getElementById('bet-card').classList.remove('target-reached');
+        document.getElementById('bet-title').innerHTML = 'แทง <span style="color:#e74c3c">BANKER</span>:';
         enableControls(true);
         updateUI();
     }
@@ -260,13 +277,20 @@
     function triggerTargetReached() {
         isTargetReached = true;
         document.getElementById('bet-card').classList.add('target-reached');
+        document.getElementById('bet-title').innerHTML = '<span style="color:#27ae60">TARGET REACHED!</span>';
         enableControls(false);
+
+        // หน้าจอแจ้งเตือนเด้ง
+        setTimeout(() => {
+            alert("🎯 ถึงเป้าหมายกำไรแล้ว!\n\nกำไรปัจจุบัน: " + currentTotalProfit.toFixed(2) + "\n\nระบบหยุดทำงานชั่วคราวเพื่อความปลอดภัย\nกรุณากด 'เริ่ม/รีเซ็ตระบบ' หากต้องการเริ่มขอนใหม่");
+        }, 300);
     }
 
     function enableControls(s) {
         document.getElementById('btn-res-p').disabled = !s;
         document.getElementById('btn-res-b').disabled = !s;
         document.getElementById('btn-undo').disabled = !s;
+        document.getElementById('bulk-input').disabled = !s;
     }
 
     function renderBigRoad() {
