@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Strategy Simulator</title>
+    <title>Baccarat Strategy Simulator (Fixed)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 20px; color: #333; }
         .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -15,10 +15,10 @@
         button { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-start { background: #27ae60; color: white; }
         .btn-start:hover { background: #219150; }
-        .btn-manual { background: #3498db; color: white; margin-top: 5px; }
-        .results { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
-        .status-win { color: #2ecc71; }
-        .status-loss { color: #e74c3c; }
+        .btn-manual { background: #3498db; color: white; margin-top: 5px; flex: 1; }
+        .results { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; max-height: 400px; overflow-y: auto; line-height: 1.4; }
+        .status-win { color: #2ecc71; font-weight: bold; }
+        .status-loss { color: #e74c3c; font-weight: bold; }
         .status-virtual { color: #f1c40f; }
     </style>
 </head>
@@ -52,31 +52,28 @@
             <label>Marty Mult:</label>
             <input type="number" id="marty_mult" value="2">
             
-            <label>Fibo Mult (ถ้าใช้ Fibo):</label>
-            <input type="number" id="fibo_mult" value="10000000">
-
             <label>Stop Loss Threshold:</label>
-            <input type="number" id="stop_loss_threshold" value="1000000000">
+            <input type="number" id="stop_loss_threshold" value="5000">
         </div>
 
         <div class="config-box">
             <h3>📈 เป้าหมายและขีดจำกัด</h3>
-            <label>Max Real Sessions:</label>
+            <label>Max Real Sessions (จำนวนครั้งที่อยากกำไร):</label>
             <input type="number" id="max_sessions" value="10">
             
-            <label>Total Rounds (Random Mode เท่านั้น):</label>
+            <label>Total Rounds (Limit สำหรับ Auto/Random):</label>
             <input type="number" id="total_rounds" value="10000">
 
-            <label>Raw Data (สำหรับโหมด Auto):</label>
-            <textarea id="raw_data" style="width:100%; height:80px; font-size: 10px;">1,B,T,P,B,B,B,P,P,P,T,P,P,P,P,T,B,P,P,B,P,P,B,B,P,P,B,P,B,P,T,B,T,B,P,P,T,B,P,P,B,P,P,T,P,P,P,P,P,B,P,B,B,P,B,B,P,B,B,P,B,B,B,B,P,B,P,B,P,T,P,B,B,B,P,B,B,P,P,P</textarea>
+            <label>Raw Data (สำหรับโหมด Auto - คั่นด้วยคอมม่า):</label>
+            <textarea id="raw_data" style="width:100%; height:80px; font-size: 10px;">P,B,T,P,B,B,B,P,P,P,T,P,P,P,P,T,B,P,P,B,P,P,B,B,P,P,B,P,B,P,T,B,T,B,P,P,T,B,P,P,B,P,P,T,P,P,P,P,P,B,P,B,B,P,B,B,P,B,B,P,B,B,B,B,P,B,P,B,P,T,P,B,B,B,P,B,B,P,P,P</textarea>
 
-            <button class="btn-start" onclick="startSimulation()">🚀 เริ่มการทำงาน</button>
+            <button class="btn-start" onclick="startSimulation()">🚀 เริ่มทำงาน / Reset</button>
         </div>
     </div>
 
     <div id="manual_input_box" class="manual-box" style="display:none;">
         <h3>🎮 Manual Control (ระบุผลลัพธ์)</h3>
-        <p>คลิกเลือกผลที่ออกจริงในโต๊ะ:</p>
+        <p>คลิกเพื่อใส่ผลที่ออกจริง:</p>
         <div style="display:flex; gap:10px;">
             <button class="btn-manual" style="background:#2980b9" onclick="handleManual('P')">PLAYER (P)</button>
             <button class="btn-manual" style="background:#c0392b" onclick="handleManual('B')">BANKER (B)</button>
@@ -88,7 +85,6 @@
 </div>
 
 <script>
-    // --- Global Logic Variables ---
     let simState = {
         running: false,
         full_results: [],
@@ -96,21 +92,17 @@
         total_real_sessions: 0,
         consecutive_virtual_losses: 0,
         total_loss_accumulated: 0,
-        current_target: 0.01,
-        base_bankroll: 20.0,
-        current_bankroll: 20.0,
+        current_target: 10, // กำไรเป้าหมายต่อรอบ (ปรับตาม Unit ได้)
+        current_bankroll: 0,
         max_bet_encountered: 0,
         max_drawdown: 0,
         max_consecutive_busts: 0,
         current_consecutive_busts: 0,
-        
-        // Single Session State
         session_active: false,
         s_bankroll: 0,
         s_peak: 0,
         s_state: "FLAT",
         s_marty_step: 0,
-        s_fibo_idx: 0,
         s_has_lost: false,
         s_initial_br: 0
     };
@@ -118,18 +110,6 @@
     function toggleManualBox() {
         const mode = document.getElementById('mode').value;
         document.getElementById('manual_input_box').style.display = (mode === 'm') ? 'block' : 'none';
-    }
-
-    function getFibo(n) {
-        if (n <= 0) return 1;
-        if (n === 1) return 1;
-        let a = 1, b = 1;
-        for (let i = 2; i <= n; i++) {
-            let temp = a + b;
-            a = b;
-            b = temp;
-        }
-        return b;
     }
 
     function log(msg, className = "") {
@@ -140,28 +120,30 @@
 
     function startSimulation() {
         const mode = document.getElementById('mode').value;
-        document.getElementById('log_output').innerHTML = "--- เริ่มการจำลอง ---\n";
+        const unit = parseFloat(document.getElementById('unit_size').value);
+        document.getElementById('log_output').innerHTML = "--- เริ่มต้นระบบ ---\n";
         
-        // Reset Variables
         simState.running = true;
         simState.total_real_sessions = 0;
         simState.total_loss_accumulated = 0;
         simState.current_data_idx = 0;
         simState.consecutive_virtual_losses = 0;
-        simState.current_target = 0.01;
-        simState.current_bankroll = 20.0;
+        simState.current_target = unit; 
+        simState.current_bankroll = unit * 10; // ทุนเริ่มต้นสมมติ
         simState.max_bet_encountered = 0;
         simState.max_drawdown = 0;
+        simState.max_consecutive_busts = 0;
 
         if (mode === 'a') {
             const raw = document.getElementById('raw_data').value;
-            simState.full_results = raw.split(',').filter(x => ['P','B','T'].includes(x.trim().toUpperCase())).map(x => x.trim().toUpperCase());
+            simState.full_results = raw.split(',').map(x => x.trim().toUpperCase()).filter(x => ['P','B','T'].includes(x));
         }
 
         runNextSession();
     }
 
     function runNextSession() {
+        if (!simState.running) return;
         const mode = document.getElementById('mode').value;
         const max_sessions = parseInt(document.getElementById('max_sessions').value);
         const virtual_trigger = parseInt(document.getElementById('virtual_loss_trigger').value);
@@ -172,118 +154,75 @@
         }
 
         const isVirtual = simState.consecutive_virtual_losses < virtual_trigger;
-        
         if (isVirtual) {
-            log(`\n--- 🧪 VIRTUAL SESSION (Wait: ${simState.consecutive_virtual_losses}/${virtual_trigger}) ---`, "status-virtual");
+            log(`\n--- 🧪 VIRTUAL (รอเสียติดกัน: ${simState.consecutive_virtual_losses}/${virtual_trigger}) ---`, "status-virtual");
         } else {
-            log(`\n--- 💰 REAL SESSION ${simState.total_real_sessions + 1} (START) ---`, "status-win");
+            log(`\n--- 💰 REAL SESSION ${simState.total_real_sessions + 1} ---`, "status-win");
         }
 
-        setupSession(isVirtual);
+        setupSession();
 
         if (mode === 'r' || mode === 'a') {
             autoProcess();
-        } else {
-            log("กรุณากดปุ่ม P/B/T เพื่อส่งผลแฮนด์ถัดไป...");
         }
     }
 
-    function setupSession(isVirtual) {
+    function setupSession() {
         simState.session_active = true;
         simState.s_initial_br = simState.current_bankroll;
         simState.s_bankroll = simState.current_bankroll;
         simState.s_peak = simState.current_bankroll;
         simState.s_state = "FLAT";
         simState.s_marty_step = 0;
-        simState.s_fibo_idx = 0;
         simState.s_has_lost = false;
     }
 
     function calculateBet() {
         const unit_size = parseFloat(document.getElementById('unit_size').value);
         const marty_mult = parseFloat(document.getElementById('marty_mult').value);
-        const fibo_mult = parseFloat(document.getElementById('fibo_mult').value);
-        const stop_loss = parseFloat(document.getElementById('stop_loss_threshold').value);
         
-        let raw_bet = unit_size;
-        let current_drawdown = simState.s_peak - simState.s_bankroll;
-
-        if (current_drawdown >= stop_loss) {
-            simState.s_state = "FLAT"; simState.s_marty_step = 0;
+        let bet = unit_size;
+        if (simState.s_state === "MARTY") {
+            bet = unit_size * Math.pow(marty_mult, simState.s_marty_step);
         }
-
-        if (simState.s_state === "FLAT") {
-            if (current_drawdown > 0 && simState.s_has_lost) {
-                raw_bet = Math.max(Math.ceil(current_drawdown / 4), unit_size);
-            } else {
-                raw_bet = unit_size;
-            }
-        } else if (simState.s_state === "MARTY") {
-            raw_bet = unit_size * Math.pow(marty_mult, simState.s_marty_step);
-        } else if (simState.s_state === "FIBO") {
-            raw_bet = getFibo(simState.s_fibo_idx) * fibo_mult;
-        }
-
-        let needed = current_drawdown + unit_size;
-        let bet = (simState.s_state !== "FLAT") ? Math.min(raw_bet, needed) : raw_bet;
-
-        if (bet >= stop_loss) bet = stop_loss;
         
-        // Target limit
+        // กรองไม่ให้ลงเกินเป้าหมายที่เหลือ
         let current_profit = simState.s_bankroll - simState.s_initial_br;
         let remaining = simState.current_target - current_profit;
-        if (bet > remaining && remaining > 0) bet = Math.max(unit_size, remaining);
+        if (remaining > 0 && bet > remaining) {
+            bet = Math.max(unit_size, remaining);
+        }
 
         return bet;
     }
 
     function processHand(actual_result) {
         if (!simState.session_active) return;
+
+        // เคลียร์ผล Tie ก่อน: Tie ไม่นับชนะแพ้ ไม่เปลี่ยน State แต่ต้องขยับดัชนี
         if (actual_result === 'T') {
-            log(`   Hand ${simState.current_data_idx + 1}: TIE - Skip`);
+            log(`   ตาที่ ${simState.current_data_idx + 1}: [TIE] - คืนเงิน/ข้าม`);
+            simState.current_data_idx++;
             return;
         }
 
         const side = document.getElementById('side_preference').value;
-        const stop_loss = parseFloat(document.getElementById('stop_loss_threshold').value);
-        const rebate_rate = 0.01;
         const bet = calculateBet();
-        
         if (bet > simState.max_bet_encountered) simState.max_bet_encountered = bet;
 
-        const isWin = (actual_result === 'P' && side === 'PLAYER') || (actual_result === 'B' && side === 'BANKER');
+        const isWin = (actual_result === side[0]); // 'P' หรือ 'B'
         const payout = (side === 'BANKER') ? 0.95 : 1.0;
-        
-        simState.s_bankroll += (bet * rebate_rate);
 
         if (isWin) {
             simState.s_bankroll += (bet * payout);
-            log(`   Bet: ${bet.toFixed(2)} (${actual_result}) | ✅ WIN | BR: ${simState.s_bankroll.toFixed(2)}`, "status-win");
-            
-            if (simState.s_state === "FIBO") {
-                simState.s_fibo_idx = Math.max(-1, simState.s_fibo_idx - 2);
-                if (simState.s_fibo_idx < 0) { simState.s_state = "FLAT"; simState.s_fibo_idx = 0; }
-            } else {
-                if (simState.s_bankroll >= simState.s_peak) simState.s_has_lost = false;
-                simState.s_state = "FLAT"; simState.s_marty_step = 0;
-            }
+            log(`   Bet: ${bet.toFixed(0)} (${actual_result}) | ✅ WIN | BR: ${simState.s_bankroll.toFixed(1)}`, "status-win");
+            simState.s_state = "FLAT";
+            simState.s_marty_step = 0;
         } else {
             simState.s_bankroll -= bet;
-            simState.s_has_lost = true;
-            log(`   Bet: ${bet.toFixed(2)} (${actual_result}) | ❌ LOSS | BR: ${simState.s_bankroll.toFixed(2)}`, "status-loss");
-            
-            if (bet >= stop_loss) {
-                simState.s_state = "FLAT"; simState.s_marty_step = 0;
-            } else {
-                if (simState.s_state === "FLAT") {
-                    simState.s_state = "MARTY"; simState.s_marty_step = 1;
-                } else if (simState.s_state === "MARTY") {
-                    simState.s_marty_step++;
-                    if (simState.s_marty_step > 12) { simState.s_state = "FIBO"; simState.s_fibo_idx = 0; }
-                } else if (simState.s_state === "FIBO") {
-                    simState.s_fibo_idx++;
-                }
-            }
+            log(`   Bet: ${bet.toFixed(0)} (${actual_result}) | ❌ LOSS | BR: ${simState.s_bankroll.toFixed(1)}`, "status-loss");
+            simState.s_state = "MARTY";
+            simState.s_marty_step++;
         }
 
         if (simState.s_bankroll > simState.s_peak) simState.s_peak = simState.s_bankroll;
@@ -292,11 +231,45 @@
 
         simState.current_data_idx++;
 
-        // Check Session End
+        // ตรวจสอบการจบ Session
         let current_p = simState.s_bankroll - simState.s_initial_br;
         if (simState.s_bankroll <= 0 || current_p >= simState.current_target) {
             const status = (simState.s_bankroll <= 0) ? "BUST" : "WIN";
             finalizeSession(status, current_p);
+        }
+    }
+
+    function handleManual(res) {
+        if (!simState.running) {
+            alert("กรุณากดปุ่ม 'เริ่มทำงาน' ก่อนครับ");
+            return;
+        }
+        if (!simState.session_active) {
+            runNextSession();
+        }
+        processHand(res);
+    }
+
+    function autoProcess() {
+        const mode = document.getElementById('mode').value;
+        const total_rounds = parseInt(document.getElementById('total_rounds').value);
+
+        while (simState.session_active) {
+            let res = "";
+            if (mode === 'r') {
+                if (simState.current_data_idx >= total_rounds) break;
+                res = (Math.random() > 0.5) ? "B" : "P"; // Simple Random
+            } else if (mode === 'a') {
+                if (simState.current_data_idx >= simState.full_results.length) break;
+                res = simState.full_results[simState.current_data_idx];
+            } else {
+                break; // Manual mode uses buttons
+            }
+            processHand(res);
+        }
+        
+        if (simState.running && !simState.session_active && mode !== 'm') {
+            setTimeout(runNextSession, 50);
         }
     }
 
@@ -308,68 +281,34 @@
         if (isVirtual) {
             if (status === "BUST") simState.consecutive_virtual_losses++;
             else simState.consecutive_virtual_losses = 0;
-            log(`📉 Virtual Result: ${status} (${simState.consecutive_virtual_losses}/${virtual_trigger})`);
+            log(`📉 Virtual Result: ${status} (สะสมเสีย: ${simState.consecutive_virtual_losses})`);
         } else {
             simState.total_real_sessions++;
             if (status === "WIN") {
-                log(`✅ REAL WIN: Profit +${profit.toFixed(2)}`, "status-win");
-                simState.total_loss_accumulated = 0;
-                simState.current_target = 0.01;
-                simState.current_bankroll = 20.0;
-                simState.current_consecutive_busts = 0;
+                log(`✅ REAL SESSION WIN! | กำไรสะสมรอบนี้: ${profit.toFixed(2)}`, "status-win");
                 simState.consecutive_virtual_losses = 0;
+                simState.total_loss_accumulated = 0;
             } else {
-                log(`❌ REAL BUST: Loss ${profit.toFixed(2)}`, "status-loss");
+                log(`❌ REAL SESSION BUST! | เสีย: ${profit.toFixed(2)}`, "status-loss");
                 simState.total_loss_accumulated += Math.abs(profit);
-                simState.current_target = simState.total_loss_accumulated + 0.01;
-                simState.current_bankroll = simState.current_target * 1.5;
-                simState.current_consecutive_busts++;
-                if (simState.current_consecutive_busts > simState.max_consecutive_busts) 
-                    simState.max_consecutive_busts = simState.current_consecutive_busts;
-                log(`⚠️ RECOVERY | Accumulated Loss: ${simState.total_loss_accumulated.toFixed(2)}`);
+                simState.consecutive_virtual_losses = 0; // Reset รอ Virtual ใหม่
             }
         }
         
-        setTimeout(runNextSession, 100);
-    }
-
-    function autoProcess() {
         const mode = document.getElementById('mode').value;
-        const total_rounds = parseInt(document.getElementById('total_rounds').value);
-
-        while (simState.session_active) {
-            let res = "";
-            if (mode === 'r') {
-                if (simState.current_data_idx >= total_rounds) break;
-                res = (Math.random() * 100 <= 50.68) ? "B" : "P";
-            } else if (mode === 'a') {
-                if (simState.current_data_idx >= simState.full_results.length) break;
-                res = simState.full_results[simState.current_data_idx];
-            }
-            processHand(res);
+        if (mode === 'm') {
+            log("--- จบเซสชั่นแล้ว (กด P/B/T เพื่อเริ่มเซสชั่นถัดไป) ---");
         }
-        
-        if (!simState.session_active && (mode === 'r' || mode === 'a')) {
-            // continue next session if needed
-        } else {
-            finishReport();
-        }
-    }
-
-    function handleManual(res) {
-        if (!simState.session_active) return;
-        processHand(res);
     }
 
     function finishReport() {
         simState.running = false;
         log("\n" + "═".repeat(30));
-        log(" 📊 SUMMARY REPORT");
+        log(" 📊 สรุปภาพรวมการจำลอง");
         log("═".repeat(30));
-        log(`🎯 Total Real Sessions    : ${simState.total_real_sessions}`);
-        log(`🔥 Max Consecutive Busts  : ${simState.max_consecutive_busts}`);
-        log(`💸 Max Bet Encountered    : ${simState.max_bet_encountered.toLocaleString()}`);
-        log(`📉 Max Drawdown           : ${simState.max_drawdown.toLocaleString()}`);
+        log(`🎯 จบรอบ Real ทั้งหมด    : ${simState.total_real_sessions}`);
+        log(`💸 ไม้สูงสุดที่เคยลง      : ${simState.max_bet_encountered.toLocaleString()}`);
+        log(`📉 Drawdown สูงสุด    : ${simState.max_drawdown.toLocaleString()}`);
         log("═".repeat(30));
     }
 </script>
