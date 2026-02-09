@@ -38,12 +38,11 @@
 
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
         
-        /* เพิ่มสไตล์สำหรับ Last Result */
         .last-result-box { margin-bottom: 10px; font-size: 1.1em; font-weight: bold; text-align: right; padding-right: 10px; }
         .win-text { color: #27ae60; }
         .loss-text { color: #e74c3c; }
 
-        .stat-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
+        .stat-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
         .stat-item { text-align: center; border-right: 1px solid #5d6d7e; }
         .stat-item:last-child { border-right: none; }
         
@@ -72,13 +71,12 @@
         <div id="bigRoadGrid" class="big-road-grid"></div>
     </div>
 
-    <div class="last-result-box" id="last-result-display">Last: -</div>
+    <div class="last-result-box" id="last-result-display">Real Win/Loss: -</div>
 
     <div id="next-bet-display" class="next-bet-box">ยังไม่เดิมพัน - NO BET</div>
 
     <div class="stat-box">
         <div class="stat-item">Profit: <span id="stat-profit">0.00</span></div>
-        <div class="stat-item">Last P/L: <span id="stat-last-pl">0.00</span></div>
         <div class="stat-item">Max Bet: <span id="stat-maxbet">0.00</span></div>
         <div class="stat-item">Mode: <span id="stat-mode">WAITING</span></div>
     </div>
@@ -127,7 +125,7 @@ let globalState = {
     consecutiveVirtualLosses: 0, totalRealSessions: 0, overallMaxBet: 0,
     bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
     handCount: 0, hasLostSincePeak: false, initialBRInSession: 0,
-    lastPL: 0 // เพิ่มสถานะเก็บยอดได้เสียล่าสุด
+    lastRealWin: 0, lastWasVirtual: false // เพิ่ม state สำหรับเก็บยอดได้เสียจริง
 };
 let stateHistory = [];
 
@@ -232,7 +230,14 @@ function processResult(actualResult) {
     initSession();
     const config = getConfig();
     const isVirtual = globalState.consecutiveVirtualLosses < config.vLossTrigger;
-    if (actualResult === 'T') { history.push('T'); updateUI(); return; }
+    
+    globalState.lastWasVirtual = isVirtual; // บันทึกว่าตานี้เป็น Virtual หรือไม่
+
+    if (actualResult === 'T') { 
+        history.push('T'); 
+        updateUI(); 
+        return; 
+    }
     
     let bet = calculateNextBet() || config.unitSize;
     if (bet > globalState.overallMaxBet) globalState.overallMaxBet = bet;
@@ -240,15 +245,15 @@ function processResult(actualResult) {
     const isWin = (actualResult === 'P' && config.side === 'PLAYER') || (actualResult === 'B' && config.side === 'BANKER');
     const payout = (config.side === 'BANKER') ? 0.95 : 1.0;
     
-    let currentHandPL = (bet * config.rebateRate); // เริ่มด้วยค่า Rebate
     globalState.bankroll += (bet * config.rebateRate);
     globalState.handCount++;
     history.push(actualResult);
     
     if (isWin) {
-        const winAmount = (bet * payout);
-        globalState.bankroll += winAmount;
-        currentHandPL += winAmount; // รวมยอดชนะ
+        globalState.bankroll += (bet * payout);
+        // หากชนะและเป็น Real Bet ให้เก็บยอดเดิมพัน แต่ถ้าแพ้หรือ Virtual ให้เป็น 0 (ตามเงื่อนไขที่ขอ)
+        globalState.lastRealWin = isVirtual ? 0 : bet; 
+
         if (globalState.state === "FIBO") {
             globalState.fiboIdx = Math.max(-1, globalState.fiboIdx - 2);
             if (globalState.fiboIdx < 0) { globalState.state = "FLAT"; globalState.fiboIdx = 0; }
@@ -258,7 +263,8 @@ function processResult(actualResult) {
         }
     } else {
         globalState.bankroll -= bet;
-        currentHandPL -= bet; // รวมยอดเสีย
+        globalState.lastRealWin = 0; // ถ้าแพ้ให้แสดงผลเป็น 0
+
         globalState.hasLostSincePeak = true;
         if (bet >= config.stopLoss) { globalState.state = "FLAT"; globalState.martyStep = 0; globalState.fiboIdx = 0; }
         else {
@@ -271,7 +277,6 @@ function processResult(actualResult) {
         }
     }
     
-    globalState.lastPL = currentHandPL; // บันทึกยอดล่าสุด
     if (globalState.bankroll > globalState.peakBankroll) globalState.peakBankroll = globalState.bankroll;
     
     if (globalState.bankroll <= 0 || (globalState.bankroll - globalState.initialBRInSession) >= globalState.currentSessionTarget) {
@@ -349,25 +354,21 @@ function updateUI() {
     const nextBetAmount = calculateNextBet();
     const nextBetEl = document.getElementById('next-bet-display');
     const statusEl = document.getElementById('stat-mode');
-    const lastResEl = document.getElementById('last-result-display');
+    const lastResDisplay = document.getElementById('last-result-display');
     
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
-    
-    // แสดงยอด P/L ล่าสุด
-    const lastPLVal = globalState.lastPL;
-    const lastPLEl = document.getElementById('stat-last-pl');
-    lastPLEl.innerText = lastPLVal.toFixed(2);
-    lastPLEl.style.color = lastPLVal >= 0 ? "#2ecc71" : "#e74c3c";
 
-    // แสดงข้อความสรุปด้านบนปุ่ม
-    if(history.length > 0) {
-        const lastSymbol = history[history.length-1];
-        const statusText = lastPLVal >= 0 ? "WIN" : "LOSS";
-        const colorClass = lastPLVal >= 0 ? "win-text" : "loss-text";
-        lastResEl.innerHTML = `Last: <span class="${colorClass}">${lastSymbol} ${statusText} (${lastPLVal.toFixed(2)})</span>`;
+    // แสดงผล "ยอดได้หรือเสีย" แบบอัปเดตล่าสุด
+    if (history.length > 0) {
+        if (globalState.lastWasVirtual) {
+            lastResDisplay.innerHTML = `Real Win/Loss: <span style="color:#7f8c8d">Virtual (0)</span>`;
+        } else {
+            const color = globalState.lastRealWin > 0 ? "#27ae60" : "#e74c3c";
+            lastResDisplay.innerHTML = `Real Win/Loss: <span style="color:${color}">${globalState.lastRealWin.toLocaleString()}</span>`;
+        }
     } else {
-        lastResEl.innerText = "Last: -";
+        lastResDisplay.innerText = "Real Win/Loss: -";
     }
 
     if (nextBetAmount === null) {
@@ -399,7 +400,7 @@ function resetAll() {
         consecutiveVirtualLosses: 0, totalRealSessions: 0, overallMaxBet: 0,
         bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
         handCount: 0, hasLostSincePeak: false, initialBRInSession: 0,
-        lastPL: 0
+        lastRealWin: 0, lastWasVirtual: false
     };
     updateUI();
 }
