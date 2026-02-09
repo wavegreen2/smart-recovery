@@ -3,110 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recovery Tracker</title>
+    <title>Smart Recovery Simulator (Custom Data)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Kanit', sans-serif; }
-        .main-card { border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .bet-next { font-size: 2.5rem; font-weight: bold; color: #2d3436; }
-        .side-indicator { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; margin: 0 auto; margin-bottom: 10px; }
-        .side-p { background-color: #0984e3; } /* Blue */
-        .side-b { background-color: #d63031; } /* Red */
-        .side-n { background-color: #636e72; } /* Grey */
-        .table-log { font-size: 0.9rem; }
-        .stat-box { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #eee; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .card { border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .log-container { height: 400px; overflow-y: auto; background: #212529; color: #00ff00; font-family: monospace; padding: 15px; font-size: 13px; }
+        .stat-card { text-align: center; padding: 15px; border-radius: 10px; color: white; }
+        textarea { font-family: monospace; font-size: 12px; height: 150px !important; }
     </style>
 </head>
 <body>
 
-<div class="container py-4">
-    <h3 class="text-center mb-4">📈 Smart Recovery Controller</h3>
-
+<div class="container py-5">
+    <h2 class="text-center mb-4">🎰 Smart Recovery (Manual Data Mode)</h2>
+    
     <div class="row g-4">
-        <div class="col-lg-5">
-            <div class="card main-card p-4 mb-4">
-                <div class="text-center">
-                    <h5>ตาถัดไปเดิมพันที่:</h5>
-                    <div id="next_side_color" class="side-indicator side-n">?</div>
-                    <div class="bet-next" id="next_bet_display">0.00</div>
-                    <p class="text-muted" id="current_state_display">State: FLAT | Step: 0</p>
+        <div class="col-md-4">
+            <div class="card p-4">
+                <h5 class="mb-3">Config & Data</h5>
+                <div class="mb-3">
+                    <label class="form-label">Paste Shoe Data (CSV format)</label>
+                    <textarea id="raw_data" class="form-control" placeholder="1,P,B,T,P...&#10;2,B,B,P,P...">1,B,T,P,B,B,B,P,P,P,T,P,P,P,P,T,B,P,P,B,P,P,B,B,P,P,B,P,B,P,T,B,T,B,P,P,T,B,P,P,B,P,P,T,P,P,P,P,P,B,P,B,B,P,B,B,P,B,B,P,B,B,B,B,P,B,P,B,P,T,P,B,B,B,P,B,B,P,P,P
+2,T,P,B,P,B,B,P,P,B,B,T,P,B,B,T,P,P,B,B,B,B,P,T,B,T,B,B,B,P,P,B,P,P,P,B,P,B,P,T,B,P,B,P,B,B,B,B,P,B,B,B,P,P,P,B,T,B,P,B,B,P,B,B,P,B,P,P,B,B,P,P,P,B,B,P,B,P,P,P,P,T</textarea>
                 </div>
-
-                <hr>
-
-                <div class="row g-2">
-                    <div class="col-6">
-                        <button onclick="submitResult('PLAYER')" class="btn btn-primary w-100 py-3 fw-bold">PLAYER ออก</button>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Unit Size</label>
+                        <input type="number" id="unit_size" class="form-control" value="10">
                     </div>
-                    <div class="col-6">
-                        <button onclick="submitResult('BANKER')" class="btn btn-danger w-100 py-3 fw-bold">BANKER ออก</button>
-                    </div>
-                </div>
-                <button onclick="resetSystem()" class="btn btn-link btn-sm text-secondary mt-3">Reset ข้อมูลทั้งหมด</button>
-            </div>
-
-            <div class="card main-card p-4">
-                <h6>Settings</h6>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <label class="small">Unit Size</label>
-                        <input type="number" id="unit_size" class="form-control" value="10" onchange="updateUI()">
-                    </div>
-                    <div class="col-6">
-                        <label class="small">Target Profit</label>
-                        <input type="number" id="target_profit" class="form-control" value="100">
-                    </div>
-                    <div class="col-12 mt-2">
-                        <label class="small">Side Preference</label>
-                        <select id="side_pref" class="form-select" onchange="updateUI()">
-                            <option value="PLAYER">ตาม PLAYER ตลอด</option>
-                            <option value="BANKER">ตาม BANKER ตลอด</option>
-                            <option value="RANDOM">สลับฝั่ง (Random)</option>
-                        </select>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Virtual Trigger</label>
+                        <input type="number" id="virtual_trigger" class="form-control" value="2">
                     </div>
                 </div>
+                <button onclick="startSimulation()" class="btn btn-primary w-100 mt-3" id="runBtn">Run Data Simulation</button>
             </div>
         </div>
 
-        <div class="col-lg-7">
+        <div class="col-md-8">
             <div class="row g-3 mb-4">
                 <div class="col-4">
-                    <div class="stat-box">
-                        <small class="text-muted">กำไรปัจจุบัน</small>
-                        <h4 id="stat_profit" class="text-success">0.00</h4>
+                    <div class="stat-card bg-dark">
+                        <small>Total Hands Played</small>
+                        <h4 id="stat_total_hands">0</h4>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="stat-box">
-                        <small class="text-muted">Max Drawdown</small>
-                        <h4 id="stat_mdd" class="text-danger">0.00</h4>
+                    <div class="stat-card bg-danger">
+                        <small>Max Consecutive Busts</small>
+                        <h4 id="stat_busts">0</h4>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="stat-box">
-                        <small class="text-muted">ทุนที่ต้องการ</small>
-                        <h4 id="stat_br">0.00</h4>
+                    <div class="stat-card bg-success">
+                        <small>Final Profit</small>
+                        <h4 id="stat_profit">0</h4>
                     </div>
                 </div>
             </div>
 
-            <div class="card main-card overflow-hidden">
-                <div class="card-header bg-white fw-bold">History Log</div>
-                <div class="table-responsive" style="max-height: 450px;">
-                    <table class="table table-hover table-log mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Side</th>
-                                <th>Bet</th>
-                                <th>Result</th>
-                                <th>Profit</th>
-                                <th>State</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history_body">
-                            </tbody>
-                    </table>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span>Live Simulation Log</span>
+                    <small id="current_state_label" class="text-muted">Idle</small>
+                </div>
+                <div id="log" class="log-container">
+                    Waiting for data...
                 </div>
             </div>
         </div>
@@ -114,167 +77,139 @@
 </div>
 
 <script>
-// --- Core Logic State ---
-let state = {
-    bankroll: 0,
-    peak_bankroll: 0,
-    current_profit: 0,
-    max_drawdown: 0,
-    
-    current_state: "FLAT", // FLAT, MARTY, FIBO
-    marty_step: 0,
-    fibo_idx: 0,
-    has_lost_since_peak: false,
-    
-    history: []
-};
+let globalResults = [];
+
+function parseInputData() {
+    const text = document.getElementById('raw_data').value;
+    const lines = text.split('\n');
+    let results = [];
+    lines.forEach(line => {
+        const parts = line.split(',');
+        // ข้ามตัวแรกที่เป็นเลข Shoe แล้วเอาที่เหลือ
+        for(let i = 1; i < parts.length; i++) {
+            let res = parts[i].trim().toUpperCase();
+            if (res === 'P' || res === 'B' || res === 'T') {
+                results.push(res);
+            }
+        }
+    });
+    return results;
+}
 
 function getFibo(n) {
     if (n <= 0) return 1;
     if (n === 1) return 1;
     let a = 1, b = 1;
     for (let i = 2; i <= n; i++) {
-        let temp = a + b;
-        a = b; b = temp;
+        let temp = a + b; a = b; b = temp;
     }
     return b;
 }
 
-function calculateNextBet() {
-    const unit_size = parseFloat(document.getElementById('unit_size').value);
-    const marty_mult = 2;
-    const fibo_mult = unit_size * 2; // ปรับตัวคูณ Fibo ตามเหมาะสม
+async function startSimulation() {
+    const logEl = document.getElementById('log');
+    const runBtn = document.getElementById('runBtn');
+    const data = parseInputData();
+    
+    if (data.length === 0) {
+        alert("กรุณาใส่ข้อมูลผลลัพธ์ก่อนครับ");
+        return;
+    }
 
-    let raw_bet = unit_size;
-    let current_drawdown = state.peak_bankroll - state.bankroll;
+    logEl.innerHTML = `Loaded ${data.length} hands. Starting simulation...<br>---<br>`;
+    runBtn.disabled = true;
 
-    if (state.current_state === "FLAT") {
-        if (current_drawdown > 0 && state.has_lost_since_peak) {
-            raw_bet = Math.max(Math.ceil(current_drawdown / 4), unit_size);
+    // Config
+    let config = {
+        virtual_trigger: parseInt(document.getElementById('virtual_trigger').value),
+        unit_size: parseFloat(document.getElementById('unit_size').value),
+        marty_mult: 2,
+        initial_bankroll: 5000, // ปรับให้เยอะหน่อยเพื่อการทดสอบ
+        target_per_win: 10
+    };
+
+    let bankroll = 0; // Cumulative Profit
+    let virtual_losses = 0;
+    let state = "FLAT";
+    let marty_step = 0;
+    let fibo_idx = 0;
+    let current_session_loss = 0;
+    let max_busts = 0;
+    let current_consecutive_busts = 0;
+    
+    for (let i = 0; i < data.length; i++) {
+        let handResult = data[i];
+        let is_virtual = virtual_losses < config.virtual_trigger;
+        
+        // ข้ามการคำนวณถ้าเป็น Tie (คืนทุน)
+        if (handResult === 'T') {
+            logEl.innerHTML += `<span style="color:yellow">Hand ${i+1}: [TIE] - Skip</span><br>`;
+            continue;
+        }
+
+        // Betting Logic
+        let bet = config.unit_size;
+        if (state === "MARTY") {
+            bet = config.unit_size * Math.pow(config.marty_mult, marty_step);
+        } else if (state === "FIBO") {
+            bet = getFibo(fibo_idx) * config.unit_size;
+        }
+
+        // Simulation result
+        // สมมติแทง Player เสมอ (หรือจะสลับฝั่งตามใจชอบ แต่ในที่นี้เน้นทดสอบระบบเดินเงิน)
+        let is_win = (handResult === 'P'); 
+        
+        let prefix = is_virtual ? `<span style="color:gray">[VIRT]</span>` : `<span style="color:white">[REAL]</span>`;
+        
+        if (is_win) {
+            if (!is_virtual) bankroll += bet;
+            
+            logEl.innerHTML += `${prefix} Hand ${i+1}: WIN (Bet: ${bet})<br>`;
+            
+            // Success Recovery
+            state = "FLAT";
+            marty_step = 0;
+            fibo_idx = 0;
+            virtual_losses = 0; // Reset virtual count
+            current_consecutive_busts = 0;
         } else {
-            raw_bet = unit_size;
+            if (!is_virtual) bankroll -= bet;
+            
+            logEl.innerHTML += `${prefix} Hand ${i+1}: <span style="color:#ff4444">LOSS</span> (Bet: ${bet})<br>`;
+            
+            if (is_virtual) {
+                virtual_losses++;
+            } else {
+                // Real Logic Recovery
+                if (state === "FLAT") {
+                    state = "MARTY";
+                    marty_step = 1;
+                } else if (state === "MARTY") {
+                    marty_step++;
+                    if (marty_step > 8) { // แตกที่ 8 ไม้
+                        state = "FIBO";
+                        fibo_idx = 0;
+                        current_consecutive_busts++;
+                        max_busts = Math.max(max_busts, current_consecutive_busts);
+                    }
+                } else {
+                    fibo_idx++;
+                }
+            }
         }
-    } else if (state.current_state === "MARTY") {
-        raw_bet = unit_size * Math.pow(marty_mult, state.marty_step);
-    } else if (state.current_state === "FIBO") {
-        raw_bet = getFibo(state.fibo_idx) * fibo_mult;
+
+        // Update UI
+        document.getElementById('stat_total_hands').innerText = i + 1;
+        document.getElementById('stat_profit').innerText = bankroll.toLocaleString();
+        document.getElementById('stat_busts').innerText = max_busts;
+        
+        logEl.scrollTop = logEl.scrollHeight;
+        if (i % 20 === 0) await new Promise(r => setTimeout(r, 10));
     }
 
-    // Recovery Limit
-    if (state.current_state !== "FLAT") {
-        let needed = current_drawdown + unit_size;
-        raw_bet = Math.min(raw_bet, needed);
-    }
-
-    return raw_bet;
+    logEl.innerHTML += "--- END OF DATA ---<br>";
+    runBtn.disabled = false;
 }
-
-function submitResult(resultSide) {
-    const unit_size = parseFloat(document.getElementById('unit_size').value);
-    const side_pref = document.getElementById('side_pref').value;
-    
-    // 1. คำนวณฝั่งที่เดิมพันไป (ตาที่เพิ่งจบ)
-    let bet_side = side_pref;
-    if (side_pref === "RANDOM") {
-        // ในระบบจริงต้องจำไว้ว่าตานี้แทงอะไร (สมมติว่าดูจาก History ล่าสุด)
-        bet_side = Math.random() < 0.5 ? "PLAYER" : "BANKER";
-    }
-
-    const bet_amount = calculateNextBet();
-    const is_win = (bet_side === resultSide);
-    
-    // 2. อัปเดตการเงิน
-    let profit_loss = 0;
-    if (is_win) {
-        let payout = (bet_side === "BANKER") ? 0.95 : 1.0;
-        profit_loss = bet_amount * payout;
-        state.bankroll += profit_loss;
-    } else {
-        profit_loss = -bet_amount;
-        state.bankroll += profit_loss;
-        state.has_lost_since_peak = true;
-    }
-
-    // 3. อัปเดตสถานะ (Logic เดียวกับ Python)
-    if (is_win) {
-        if (state.current_state === "FIBO") {
-            state.fibo_idx = Math.max(-1, state.fibo_idx - 2);
-            if (state.fibo_idx < 0) { state.current_state = "FLAT"; state.fibo_idx = 0; }
-        } else {
-            state.current_state = "FLAT";
-            state.marty_step = 0;
-            if (state.bankroll >= state.peak_bankroll) state.has_lost_since_peak = false;
-        }
-    } else {
-        if (state.current_state === "FLAT") {
-            state.current_state = "MARTY";
-            state.marty_step = 1;
-        } else if (state.current_state === "MARTY") {
-            state.marty_step++;
-            if (state.marty_step > 12) { state.current_state = "FIBO"; state.fibo_idx = 0; }
-        } else if (state.current_state === "FIBO") {
-            state.fibo_idx++;
-        }
-    }
-
-    // Peak & Drawdown
-    state.peak_bankroll = Math.max(state.peak_bankroll, state.bankroll);
-    state.max_drawdown = Math.max(state.max_drawdown, state.peak_bankroll - state.bankroll);
-
-    // เก็บประวัติ
-    state.history.unshift({
-        round: state.history.length + 1,
-        side: bet_side,
-        bet: bet_amount,
-        result: is_win ? "WIN" : "LOSS",
-        pl: profit_loss,
-        state: state.current_state
-    });
-
-    updateUI();
-}
-
-function updateUI() {
-    const next_bet = calculateNextBet();
-    const side_pref = document.getElementById('side_pref').value;
-    
-    // แสดงตัวเลข
-    document.getElementById('next_bet_display').innerText = next_bet.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('stat_profit').innerText = state.bankroll.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('stat_mdd').innerText = state.max_drawdown.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('stat_br').innerText = (state.max_drawdown + parseFloat(document.getElementById('unit_size').value)).toLocaleString();
-    
-    document.getElementById('current_state_display').innerText = `State: ${state.current_state} | Step/Idx: ${state.current_state === 'MARTY' ? state.marty_step : state.fibo_idx}`;
-
-    // แสดงฝั่งที่จะแทง
-    const indicator = document.getElementById('next_side_color');
-    indicator.innerText = side_pref === "RANDOM" ? "?" : side_pref[0];
-    indicator.className = "side-indicator " + (side_pref === "PLAYER" ? "side-p" : (side_pref === "BANKER" ? "side-b" : "side-n"));
-
-    // วาดตาราง
-    const tbody = document.getElementById('history_body');
-    tbody.innerHTML = state.history.map(h => `
-        <tr>
-            <td>${h.round}</td>
-            <td><span class="badge ${h.side === 'PLAYER' ? 'bg-primary' : 'bg-danger'}">${h.side}</span></td>
-            <td>${h.bet.toFixed(2)}</td>
-            <td class="${h.result === 'WIN' ? 'text-success' : 'text-danger'} fw-bold">${h.result}</td>
-            <td class="${h.pl >= 0 ? 'text-success' : 'text-danger'}">${h.pl >= 0 ? '+' : ''}${h.pl.toFixed(2)}</td>
-            <td><small class="text-muted">${h.state}</small></td>
-        </tr>
-    `).join('');
-}
-
-function resetSystem() {
-    if(confirm("ต้องการล้างข้อมูลทั้งหมดหรือไม่?")) {
-        state = { bankroll: 0, peak_bankroll: 0, current_profit: 0, max_drawdown: 0, current_state: "FLAT", marty_step: 0, fibo_idx: 0, has_lost_since_peak: false, history: [] };
-        updateUI();
-    }
-}
-
-// Initial Call
-updateUI();
 </script>
-
 </body>
 </html>
