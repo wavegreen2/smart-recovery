@@ -37,12 +37,7 @@
         .big-circle.B { border-color: #e74c3c; }
 
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
-        
-        .last-result-box { margin-bottom: 10px; font-size: 1.1em; font-weight: bold; text-align: right; padding-right: 10px; }
-        .win-text { color: #27ae60; }
-        .loss-text { color: #e74c3c; }
-
-        .stat-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
+        .stat-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
         .stat-item { text-align: center; border-right: 1px solid #5d6d7e; }
         .stat-item:last-child { border-right: none; }
         
@@ -71,12 +66,11 @@
         <div id="bigRoadGrid" class="big-road-grid"></div>
     </div>
 
-    <div class="last-result-box" id="last-result-display">Real Win/Loss: -</div>
-
     <div id="next-bet-display" class="next-bet-box">ยังไม่เดิมพัน - NO BET</div>
 
     <div class="stat-box">
-        <div class="stat-item">Profit: <span id="stat-profit">0.00</span></div>
+        <div class="stat-item">Real Profit: <span id="stat-real-profit" style="color: #2ecc71; font-weight: bold;">0.00</span></div>
+        <div class="stat-item">Session P/L: <span id="stat-profit">0.00</span></div>
         <div class="stat-item">Max Bet: <span id="stat-maxbet">0.00</span></div>
         <div class="stat-item">Mode: <span id="stat-mode">WAITING</span></div>
     </div>
@@ -121,11 +115,12 @@
 /** Logic & State **/
 let history = [];
 let globalState = {
-    totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
+    totalAccumulatedProfit: 0, 
+    realTimeNetProfit: 0, // เพิ่มตัวแปรเก็บยอดได้เสียจริง Real-Time
+    currentSessionBR: 0, currentSessionTarget: 0,
     consecutiveVirtualLosses: 0, totalRealSessions: 0, overallMaxBet: 0,
     bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
-    handCount: 0, hasLostSincePeak: false, initialBRInSession: 0,
-    lastRealWin: 0, lastWasVirtual: false // เพิ่ม state สำหรับเก็บยอดได้เสียจริง
+    handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
 };
 let stateHistory = [];
 
@@ -230,14 +225,7 @@ function processResult(actualResult) {
     initSession();
     const config = getConfig();
     const isVirtual = globalState.consecutiveVirtualLosses < config.vLossTrigger;
-    
-    globalState.lastWasVirtual = isVirtual; // บันทึกว่าตานี้เป็น Virtual หรือไม่
-
-    if (actualResult === 'T') { 
-        history.push('T'); 
-        updateUI(); 
-        return; 
-    }
+    if (actualResult === 'T') { history.push('T'); updateUI(); return; }
     
     let bet = calculateNextBet() || config.unitSize;
     if (bet > globalState.overallMaxBet) globalState.overallMaxBet = bet;
@@ -249,11 +237,19 @@ function processResult(actualResult) {
     globalState.handCount++;
     history.push(actualResult);
     
+    // --- ส่วนคำนวณกำไรจริง Real-Time ---
+    if (!isVirtual) {
+        globalState.realTimeNetProfit += (bet * config.rebateRate); // บวกค่าคอมจริง
+        if (isWin) {
+            globalState.realTimeNetProfit += (bet * payout);
+        } else {
+            globalState.realTimeNetProfit -= bet;
+        }
+    }
+    // --------------------------------
+
     if (isWin) {
         globalState.bankroll += (bet * payout);
-        // หากชนะและเป็น Real Bet ให้เก็บยอดเดิมพัน แต่ถ้าแพ้หรือ Virtual ให้เป็น 0 (ตามเงื่อนไขที่ขอ)
-        globalState.lastRealWin = isVirtual ? 0 : bet; 
-
         if (globalState.state === "FIBO") {
             globalState.fiboIdx = Math.max(-1, globalState.fiboIdx - 2);
             if (globalState.fiboIdx < 0) { globalState.state = "FLAT"; globalState.fiboIdx = 0; }
@@ -263,8 +259,6 @@ function processResult(actualResult) {
         }
     } else {
         globalState.bankroll -= bet;
-        globalState.lastRealWin = 0; // ถ้าแพ้ให้แสดงผลเป็น 0
-
         globalState.hasLostSincePeak = true;
         if (bet >= config.stopLoss) { globalState.state = "FLAT"; globalState.martyStep = 0; globalState.fiboIdx = 0; }
         else {
@@ -354,22 +348,14 @@ function updateUI() {
     const nextBetAmount = calculateNextBet();
     const nextBetEl = document.getElementById('next-bet-display');
     const statusEl = document.getElementById('stat-mode');
-    const lastResDisplay = document.getElementById('last-result-display');
     
+    // แสดงผลยอดสะสม Real-Time
+    const realProfitEl = document.getElementById('stat-real-profit');
+    realProfitEl.innerText = globalState.realTimeNetProfit.toFixed(4);
+    realProfitEl.style.color = globalState.realTimeNetProfit >= 0 ? "#2ecc71" : "#e74c3c";
+
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
-
-    // แสดงผล "ยอดได้หรือเสีย" แบบอัปเดตล่าสุด
-    if (history.length > 0) {
-        if (globalState.lastWasVirtual) {
-            lastResDisplay.innerHTML = `Real Win/Loss: <span style="color:#7f8c8d">Virtual (0)</span>`;
-        } else {
-            const color = globalState.lastRealWin > 0 ? "#27ae60" : "#e74c3c";
-            lastResDisplay.innerHTML = `Real Win/Loss: <span style="color:${color}">${globalState.lastRealWin.toLocaleString()}</span>`;
-        }
-    } else {
-        lastResDisplay.innerText = "Real Win/Loss: -";
-    }
 
     if (nextBetAmount === null) {
         nextBetEl.innerText = "ยังไม่เดิมพัน - NO BET";
@@ -396,11 +382,12 @@ function resetAll() {
     if(!confirm("ล้างข้อมูลทั้งหมด?")) return;
     history = []; stateHistory = [];
     globalState = {
-        totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
+        totalAccumulatedProfit: 0, 
+        realTimeNetProfit: 0,
+        currentSessionBR: 0, currentSessionTarget: 0,
         consecutiveVirtualLosses: 0, totalRealSessions: 0, overallMaxBet: 0,
         bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
-        handCount: 0, hasLostSincePeak: false, initialBRInSession: 0,
-        lastRealWin: 0, lastWasVirtual: false
+        handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
     };
     updateUI();
 }
