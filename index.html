@@ -102,7 +102,7 @@
 </div>
 
 <script>
-/** Logic & State (Hard-coded values from removed inputs) **/
+/** Logic & State **/
 let history = [];
 let globalState = {
     totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
@@ -112,7 +112,6 @@ let globalState = {
 };
 let stateHistory = [];
 
-// เก็บค่าที่ถูกนำออกจากหน้าจอไว้ที่นี่ (ห้ามเปลี่ยนค่าเหล่านี้ตามคำสั่ง)
 const SETTINGS = {
     side: "PLAYER",
     initBR: 20.0,
@@ -182,6 +181,7 @@ function calculateNextBet() {
     const config = getConfig();
     let currentDrawdown = globalState.peakBankroll - globalState.bankroll;
     let bet = 0;
+    
     if (globalState.state === "FLAT") {
         bet = (currentDrawdown > 0 && globalState.hasLostSincePeak) ? Math.max(Math.ceil(currentDrawdown / 4), config.unitSize) : config.unitSize;
     } else if (globalState.state === "MARTY") {
@@ -189,13 +189,17 @@ function calculateNextBet() {
     } else if (globalState.state === "FIBO") {
         bet = getFibo(globalState.fiboIdx) * config.fiboMult;
     }
+    
     let neededToRecover = currentDrawdown + config.unitSize;
     if (globalState.state !== "FLAT") bet = Math.min(bet, neededToRecover);
     if (bet >= config.stopLoss) bet = config.stopLoss;
+    
     let currentProfitThisSession = globalState.bankroll - globalState.initialBRInSession;
     let remainingToTarget = globalState.currentSessionTarget - currentProfitThisSession;
     if (bet > remainingToTarget && remainingToTarget > 0) bet = Math.max(config.unitSize, remainingToTarget);
-    return bet;
+    
+    // ปรับปรุง: ปัดเศษขึ้นเป็นจำนวนเต็ม (หลักหน่วย)
+    return Math.ceil(bet);
 }
 
 function processResult(actualResult) {
@@ -204,13 +208,18 @@ function processResult(actualResult) {
     const config = getConfig();
     const isVirtual = globalState.consecutiveVirtualLosses < config.vLossTrigger;
     if (actualResult === 'T') { history.push('T'); updateUI(); return; }
+    
     let bet = calculateNextBet() || config.unitSize;
     if (bet > globalState.overallMaxBet) globalState.overallMaxBet = bet;
+    
     const isWin = (actualResult === 'P' && config.side === 'PLAYER') || (actualResult === 'B' && config.side === 'BANKER');
     const payout = (config.side === 'BANKER') ? 0.95 : 1.0;
+    
+    // คำนวณยอดเงินในระบบ (ใช้ทศนิยมตามจริงเพื่อความแม่นยำของระบบ Profit)
     globalState.bankroll += (bet * config.rebateRate);
     globalState.handCount++;
     history.push(actualResult);
+    
     if (isWin) {
         globalState.bankroll += (bet * payout);
         if (globalState.state === "FIBO") {
@@ -233,7 +242,9 @@ function processResult(actualResult) {
             else if (globalState.state === "FIBO") { globalState.fiboIdx++; }
         }
     }
+    
     if (globalState.bankroll > globalState.peakBankroll) globalState.peakBankroll = globalState.bankroll;
+    
     if (globalState.bankroll <= 0 || (globalState.bankroll - globalState.initialBRInSession) >= globalState.currentSessionTarget) {
         const sessionProfit = globalState.bankroll - globalState.initialBRInSession;
         if (isVirtual) { globalState.consecutiveVirtualLosses = (globalState.bankroll <= 0) ? globalState.consecutiveVirtualLosses + 1 : 0; }
