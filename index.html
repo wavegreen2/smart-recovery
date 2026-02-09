@@ -9,20 +9,18 @@
         .container { max-width: 950px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 0; }
         
-        /* Road Containers - เพิ่มความสามารถในการ Scroll */
         .road-section { 
             margin-top: 20px; 
             background: #fff; 
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 8px; 
-            overflow-x: auto; /* เปิดให้เลื่อนซ้าย-ขวาได้ */
+            overflow-x: auto; 
             white-space: nowrap;
             scroll-behavior: smooth;
         }
         .road-title { font-size: 0.8em; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; }
         
-        /* Big Road Styles - ปรับให้ขยายตามจำนวนคอลัมน์จริง */
         .big-road-grid { 
             display: grid; 
             grid-template-rows: repeat(6, 20px); 
@@ -31,7 +29,7 @@
             gap: 1px; 
             background-color: #eee; 
             border: 1px solid #ddd; 
-            width: max-content; /* ขยายความกว้างตามเนื้อหา */
+            width: max-content; 
         }
         .big-cell { width: 20px; height: 20px; background: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; position: relative; }
         .big-circle { width: 16px; height: 16px; border-radius: 50%; border-width: 2px; border-style: solid; }
@@ -39,7 +37,9 @@
         .big-circle.B { border-color: #e74c3c; }
 
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
-        .stat-box { display: flex; justify-content: space-between; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .stat-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
+        .stat-item { text-align: center; border-right: 1px solid #5d6d7e; }
+        .stat-item:last-child { border-right: none; }
         
         .btn-group { margin-top: 15px; display: flex; gap: 10px; }
         button { flex: 1; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 1em; }
@@ -52,7 +52,7 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fafafa; }
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         #log-area { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; height: 150px; overflow-y: auto; border-radius: 8px; font-family: monospace; font-size: 0.85em; }
     </style>
 </head>
@@ -69,9 +69,10 @@
     <div id="next-bet-display" class="next-bet-box">ยังไม่เดิมพัน - NO BET</div>
 
     <div class="stat-box">
-        <div>Profit: <span id="stat-profit">0.00</span></div>
-        <div>Max Bet: <span id="stat-maxbet">0.00</span></div>
-        <div>Mode: <span id="stat-mode">WAITING</span></div>
+        <div class="stat-item">Profit: <span id="stat-profit">0.00</span></div>
+        <div class="stat-item">Max Bet: <span id="stat-maxbet">0.00</span></div>
+        <div class="stat-item">Mode: <span id="stat-mode">WAITING</span></div>
+        <div class="stat-item" style="border-top: 1px solid #5d6d7e; padding-top: 5px; grid-column: span 3;">Rebate Rate: <span id="stat-rebate">1.00%</span></div>
     </div>
 
     <div class="btn-group">
@@ -86,27 +87,14 @@
 
     <div class="grid">
         <div class="card">
-            <label>Side Preference:</label>
-            <select id="sidePreference" onchange="updateUI()">
-                <option value="PLAYER" selected>PLAYER</option>
-                <option value="BANKER">BANKER</option>
-            </select>
             <label>Unit Size:</label>
             <input type="number" id="unitSize" value="10.0">
-            <label>Martingale Multiplier:</label>
-            <input type="number" id="martyMult" value="2.0">
-            <label>Fibonacci Multiplier:</label>
-            <input type="number" id="fiboMult" value="1000000.0">
-        </div>
-        <div class="card">
-            <label>Initial Bankroll:</label>
-            <input type="number" id="initBR" value="20.0">
-            <label>Virtual Loss Trigger (ครั้ง):</label>
-            <input type="number" id="vLossTrigger" value="1">
-            <label>Base Profit Target:</label>
-            <input type="number" id="baseInc" value="0.01">
             <label>Stop Loss:</label>
             <input type="number" id="stopLoss" value="1000000.0">
+        </div>
+        <div class="card">
+            <label>Virtual Loss Trigger (ครั้ง):</label>
+            <input type="number" id="vLossTrigger" value="1">
         </div>
     </div>
 
@@ -114,7 +102,7 @@
 </div>
 
 <script>
-/** Logic & State (ห้ามปรับการตั้งค่าอื่นๆ) **/
+/** Logic & State (Hard-coded values from removed inputs) **/
 let history = [];
 let globalState = {
     totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
@@ -123,6 +111,16 @@ let globalState = {
     handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
 };
 let stateHistory = [];
+
+// เก็บค่าที่ถูกนำออกจากหน้าจอไว้ที่นี่ (ห้ามเปลี่ยนค่าเหล่านี้ตามคำสั่ง)
+const SETTINGS = {
+    side: "PLAYER",
+    initBR: 20.0,
+    baseInc: 0.01,
+    martyMult: 2.0,
+    fiboMult: 1000000.0,
+    rebateRate: 0.01
+};
 
 function getFibo(n) {
     if (n <= 0) return 1;
@@ -137,14 +135,14 @@ function getFibo(n) {
 function getConfig() {
     return {
         unitSize: parseFloat(document.getElementById('unitSize').value),
-        martyMult: parseFloat(document.getElementById('martyMult').value),
-        fiboMult: parseFloat(document.getElementById('fiboMult').value),
+        martyMult: SETTINGS.martyMult,
+        fiboMult: SETTINGS.fiboMult,
         stopLoss: parseFloat(document.getElementById('stopLoss').value),
-        initBR: parseFloat(document.getElementById('initBR').value),
+        initBR: SETTINGS.initBR,
         vLossTrigger: parseInt(document.getElementById('vLossTrigger').value),
-        rebateRate: 0.01,
-        baseInc: parseFloat(document.getElementById('baseInc').value),
-        side: document.getElementById('sidePreference').value
+        rebateRate: SETTINGS.rebateRate,
+        baseInc: SETTINGS.baseInc,
+        side: SETTINGS.side
     };
 }
 
@@ -210,7 +208,7 @@ function processResult(actualResult) {
     if (bet > globalState.overallMaxBet) globalState.overallMaxBet = bet;
     const isWin = (actualResult === 'P' && config.side === 'PLAYER') || (actualResult === 'B' && config.side === 'BANKER');
     const payout = (config.side === 'BANKER') ? 0.95 : 1.0;
-    globalState.bankroll += (bet * 0.01);
+    globalState.bankroll += (bet * config.rebateRate);
     globalState.handCount++;
     history.push(actualResult);
     if (isWin) {
@@ -256,12 +254,9 @@ function processResult(actualResult) {
     updateUI();
 }
 
-/** Infinite Big Road Logic **/
 function renderBigRoad() {
     const bigRoadGrid = document.getElementById('bigRoadGrid');
     bigRoadGrid.innerHTML = '';
-    
-    // คำนวณตารางแบบ Dynamic ตามความยาวของผลลัพธ์จริง
     let matrix = [];
     let col = 0, row = 0;
     let lastResult = null;
@@ -291,9 +286,7 @@ function renderBigRoad() {
         }
     });
 
-    // กำหนดจำนวนคอลัมน์ขั้นต่ำเพื่อให้ตารางดูสวยงาม (เช่น 30 คอลัมน์)
     const displayCols = Math.max(30, matrix.length);
-
     for (let c = 0; c < displayCols; c++) {
         for (let r = 0; r < 6; r++) {
             const cell = document.createElement('div');
@@ -306,8 +299,6 @@ function renderBigRoad() {
             bigRoadGrid.appendChild(cell);
         }
     }
-
-    // เลื่อน Scroll ไปขวาสุดอัตโนมัติ
     const container = document.getElementById('roadScrollContainer');
     container.scrollLeft = container.scrollWidth;
 }
@@ -321,6 +312,7 @@ function updateUI() {
     
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
+    document.getElementById('stat-rebate').innerText = (config.rebateRate * 100).toFixed(2) + "%";
 
     if (nextBetAmount === null) {
         nextBetEl.innerText = "ยังไม่เดิมพัน - NO BET";
@@ -334,7 +326,7 @@ function updateUI() {
         } else {
             statusEl.innerText = "REAL BETTING";
             nextBetEl.style.color = "white";
-            const sideTxt = config.side === 'PLAYER' ? 'PLAYER' : 'BANKER';
+            const sideTxt = config.side;
             nextBetEl.style.background = config.side === 'PLAYER' ? "#3498db" : "#e74c3c";
             nextBetEl.innerHTML = `🔥 REAL BET: ${sideTxt} (${nextBetAmount.toLocaleString()})`;
         }
