@@ -329,15 +329,29 @@ function updateUI() {
     const nextBetAmount = calculateNextBet();
 
     if (globalState.consecutiveVirtualLosses < config.vLossTrigger) {
+        // --- สถานะ VIRTUAL WAIT (สีเหลืองเหมือนเดิม) ---
         statusEl.innerText = `VIRTUAL WAIT (${globalState.consecutiveVirtualLosses}/${config.vLossTrigger})`;
         statusEl.className = 'virtual';
         nextBetEl.innerHTML = `🔭 <span class="virtual">VIRTUAL:</span> แทงฝั่ง <b style="color:#d35400">${config.side}</b> ที่ <b style="color:#d35400">${nextBetAmount.toFixed(2)}</b> (รอกินลม)`;
         nextBetEl.style.background = "#f1c40f";
+        nextBetEl.style.color = "#2c3e50";
+        nextBetEl.style.border = "2px dashed #d35400";
     } else {
+        // --- สถานะ REAL BETTING (ปรับสีตามฝั่ง) ---
         statusEl.innerText = `REAL BETTING (Sess: ${globalState.totalRealSessions + 1})`;
         statusEl.className = 'loss';
+        
+        if (config.side === 'PLAYER') {
+            // กรณี PLAYER ให้เป็นสีน้ำเงิน
+            nextBetEl.style.background = "#3498db"; 
+            nextBetEl.style.border = "2px solid #2980b9";
+        } else {
+            // กรณี BANKER ให้เป็นสีแดง (เดิม)
+            nextBetEl.style.background = "#e74c3c";
+            nextBetEl.style.border = "2px solid #c0392b";
+        }
+        
         nextBetEl.innerHTML = `🔥 <span style="color:white">REAL BET:</span> แทงฝั่ง <b style="color:white">${config.side}</b> ยอด <b style="color:white">${nextBetAmount.toFixed(2)}</b> (ลงเงินจริง!)`;
-        nextBetEl.style.background = "#e74c3c";
         nextBetEl.style.color = "white";
     }
 }
@@ -360,4 +374,5 @@ updateUI();
 
 </body>
 </html>
+
 
