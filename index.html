@@ -3,44 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Strategy - Infinite Road Map</title>
+    <title>Baccarat Strategy - Big Road Focus</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #333; margin: 20px; }
         .container { max-width: 950px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fafafa; }
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
-        /* Road Containers - เพิ่มความสามารถในการ Scroll */
-        .road-section { 
-            margin-top: 20px; 
-            background: #fff; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; 
-            overflow-x: auto; /* เปิดให้เลื่อนซ้าย-ขวาได้ */
-            white-space: nowrap;
-            scroll-behavior: smooth;
-        }
+        /* Road Containers */
+        .road-section { margin-top: 20px; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 8px; overflow-x: auto; }
         .road-title { font-size: 0.8em; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; }
         
-        /* Big Road Styles - ปรับให้ขยายตามจำนวนคอลัมน์จริง */
-        .big-road-grid { 
-            display: grid; 
-            grid-template-rows: repeat(6, 20px); 
-            grid-auto-columns: 20px; 
-            grid-auto-flow: column; 
-            gap: 1px; 
-            background-color: #eee; 
-            border: 1px solid #ddd; 
-            width: max-content; /* ขยายความกว้างตามเนื้อหา */
-        }
+        /* Big Road Styles */
+        .big-road-grid { display: grid; grid-template-rows: repeat(6, 20px); grid-auto-columns: 20px; grid-auto-flow: column; gap: 1px; background-color: #eee; border: 1px solid #ddd; width: max-content; }
         .big-cell { width: 20px; height: 20px; background: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; position: relative; }
         .big-circle { width: 16px; height: 16px; border-radius: 50%; border-width: 2px; border-style: solid; }
         .big-circle.P { border-color: #3498db; }
         .big-circle.B { border-color: #e74c3c; }
 
+        /* Next Bet & Stats */
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
         .stat-box { display: flex; justify-content: space-between; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; }
         
+        /* Buttons */
         .btn-group { margin-top: 15px; display: flex; gap: 10px; }
         button { flex: 1; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 1em; }
         .btn-p { background: #3498db; color: white; }
@@ -48,11 +36,7 @@
         .btn-t { background: #27ae60; color: white; }
         .btn-back { background: #f39c12; color: white; }
         .btn-reset { background: #95a5a6; color: white; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fafafa; }
-        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button:hover { opacity: 0.8; }
         #log-area { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; height: 150px; overflow-y: auto; border-radius: 8px; font-family: monospace; font-size: 0.85em; }
     </style>
 </head>
@@ -61,7 +45,7 @@
 <div class="container">
     <h2>📊 Baccarat Strategy & Big Road</h2>
 
-    <div class="road-section" id="roadScrollContainer">
+    <div class="road-section">
         <div class="road-title">Big Road</div>
         <div id="bigRoadGrid" class="big-road-grid"></div>
     </div>
@@ -114,7 +98,7 @@
 </div>
 
 <script>
-/** Logic & State (ห้ามปรับการตั้งค่าอื่นๆ) **/
+/** Logic & State Management **/
 let history = [];
 let globalState = {
     totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
@@ -122,6 +106,7 @@ let globalState = {
     bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
     handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
 };
+
 let stateHistory = [];
 
 function getFibo(n) {
@@ -149,7 +134,10 @@ function getConfig() {
 }
 
 function saveState() {
-    stateHistory.push(JSON.parse(JSON.stringify({ state: globalState, history: history })));
+    stateHistory.push(JSON.parse(JSON.stringify({
+        state: globalState,
+        history: history
+    })));
 }
 
 function undoLast() {
@@ -180,10 +168,12 @@ function initSession() {
 
 function calculateNextBet() {
     if (globalState.handCount === 0 && globalState.totalRealSessions === 0 && globalState.totalAccumulatedProfit === 0) return null;
+    
     initSession();
     const config = getConfig();
     let currentDrawdown = globalState.peakBankroll - globalState.bankroll;
     let bet = 0;
+    
     if (globalState.state === "FLAT") {
         bet = (currentDrawdown > 0 && globalState.hasLostSincePeak) ? Math.max(Math.ceil(currentDrawdown / 4), config.unitSize) : config.unitSize;
     } else if (globalState.state === "MARTY") {
@@ -191,12 +181,15 @@ function calculateNextBet() {
     } else if (globalState.state === "FIBO") {
         bet = getFibo(globalState.fiboIdx) * config.fiboMult;
     }
+
     let neededToRecover = currentDrawdown + config.unitSize;
     if (globalState.state !== "FLAT") bet = Math.min(bet, neededToRecover);
     if (bet >= config.stopLoss) bet = config.stopLoss;
+
     let currentProfitThisSession = globalState.bankroll - globalState.initialBRInSession;
     let remainingToTarget = globalState.currentSessionTarget - currentProfitThisSession;
     if (bet > remainingToTarget && remainingToTarget > 0) bet = Math.max(config.unitSize, remainingToTarget);
+
     return bet;
 }
 
@@ -205,14 +198,24 @@ function processResult(actualResult) {
     initSession();
     const config = getConfig();
     const isVirtual = globalState.consecutiveVirtualLosses < config.vLossTrigger;
-    if (actualResult === 'T') { history.push('T'); updateUI(); return; }
+    
+    if (actualResult === 'T') {
+        history.push('T');
+        updateUI();
+        return;
+    }
+
     let bet = calculateNextBet() || config.unitSize;
+    let isMaxBetActive = bet >= config.stopLoss;
     if (bet > globalState.overallMaxBet) globalState.overallMaxBet = bet;
+
     const isWin = (actualResult === 'P' && config.side === 'PLAYER') || (actualResult === 'B' && config.side === 'BANKER');
     const payout = (config.side === 'BANKER') ? 0.95 : 1.0;
+    
     globalState.bankroll += (bet * 0.01);
     globalState.handCount++;
     history.push(actualResult);
+
     if (isWin) {
         globalState.bankroll += (bet * payout);
         if (globalState.state === "FIBO") {
@@ -225,8 +228,9 @@ function processResult(actualResult) {
     } else {
         globalState.bankroll -= bet;
         globalState.hasLostSincePeak = true;
-        if (bet >= config.stopLoss) { globalState.state = "FLAT"; globalState.martyStep = 0; globalState.fiboIdx = 0; }
-        else {
+        if (isMaxBetActive) {
+            globalState.state = "FLAT"; globalState.martyStep = 0; globalState.fiboIdx = 0;
+        } else {
             if (globalState.state === "FLAT") { globalState.state = "MARTY"; globalState.martyStep = 1; }
             else if (globalState.state === "MARTY") { 
                 globalState.martyStep++; 
@@ -235,11 +239,14 @@ function processResult(actualResult) {
             else if (globalState.state === "FIBO") { globalState.fiboIdx++; }
         }
     }
+
     if (globalState.bankroll > globalState.peakBankroll) globalState.peakBankroll = globalState.bankroll;
+
     if (globalState.bankroll <= 0 || (globalState.bankroll - globalState.initialBRInSession) >= globalState.currentSessionTarget) {
         const sessionProfit = globalState.bankroll - globalState.initialBRInSession;
-        if (isVirtual) { globalState.consecutiveVirtualLosses = (globalState.bankroll <= 0) ? globalState.consecutiveVirtualLosses + 1 : 0; }
-        else {
+        if (isVirtual) {
+            globalState.consecutiveVirtualLosses = (globalState.bankroll <= 0) ? globalState.consecutiveVirtualLosses + 1 : 0;
+        } else {
             globalState.totalAccumulatedProfit += sessionProfit;
             globalState.totalRealSessions++;
             if (globalState.bankroll > 0) {
@@ -256,13 +263,11 @@ function processResult(actualResult) {
     updateUI();
 }
 
-/** Infinite Big Road Logic **/
 function renderBigRoad() {
     const bigRoadGrid = document.getElementById('bigRoadGrid');
     bigRoadGrid.innerHTML = '';
     
-    // คำนวณตารางแบบ Dynamic ตามความยาวของผลลัพธ์จริง
-    let matrix = [];
+    let matrix = Array(6).fill().map(() => Array(100).fill(null));
     let col = 0, row = 0;
     let lastResult = null;
 
@@ -270,67 +275,61 @@ function renderBigRoad() {
         if (res === 'T') return; 
 
         if (!lastResult) {
-            matrix[0] = Array(6).fill(null);
-            matrix[0][0] = { res: res };
+            matrix[row][col] = { res: res };
             lastResult = res;
         } else if (res === lastResult) {
-            if (row + 1 < 6 && (!matrix[col] || matrix[col][row + 1] === null)) {
+            if (row + 1 < 6 && matrix[row + 1][col] === null) {
                 row++;
             } else {
-                col++;
-                if (!matrix[col]) matrix[col] = Array(6).fill(null);
+                col++; 
             }
-            matrix[col][row] = { res: res };
+            matrix[row][col] = { res: res };
         } else {
             row = 0;
             col++;
-            while(matrix[col] && matrix[col][row] !== null) col++; 
-            if (!matrix[col]) matrix[col] = Array(6).fill(null);
-            matrix[col][row] = { res: res };
+            while(matrix[row][col] !== null) col++; 
+            matrix[row][col] = { res: res };
             lastResult = res;
         }
     });
 
-    // กำหนดจำนวนคอลัมน์ขั้นต่ำเพื่อให้ตารางดูสวยงาม (เช่น 30 คอลัมน์)
-    const displayCols = Math.max(30, matrix.length);
-
-    for (let c = 0; c < displayCols; c++) {
+    for (let c = 0; c < 50; c++) {
         for (let r = 0; r < 6; r++) {
             const cell = document.createElement('div');
             cell.className = 'big-cell';
-            if (matrix[c] && matrix[c][r]) {
+            if (matrix[r][c]) {
                 const circle = document.createElement('div');
-                circle.className = `big-circle ${matrix[c][r].res}`;
+                circle.className = `big-circle ${matrix[r][c].res}`;
                 cell.appendChild(circle);
             }
             bigRoadGrid.appendChild(cell);
         }
     }
-
-    // เลื่อน Scroll ไปขวาสุดอัตโนมัติ
-    const container = document.getElementById('roadScrollContainer');
-    container.scrollLeft = container.scrollWidth;
 }
 
 function updateUI() {
-    renderBigRoad();
     const config = getConfig();
     const nextBetAmount = calculateNextBet();
     const nextBetEl = document.getElementById('next-bet-display');
     const statusEl = document.getElementById('stat-mode');
     
+    // Big Road Render
+    renderBigRoad();
+
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
 
     if (nextBetAmount === null) {
         nextBetEl.innerText = "ยังไม่เดิมพัน - NO BET";
-        nextBetEl.style.background = "#eee"; nextBetEl.style.color = "#333";
+        nextBetEl.style.background = "#eee";
+        nextBetEl.style.color = "#333";
         statusEl.innerText = "WAITING";
     } else {
         if (globalState.consecutiveVirtualLosses < config.vLossTrigger) {
             statusEl.innerText = "VIRTUAL WAIT";
             nextBetEl.innerHTML = `🔭 VIRTUAL: <small>รอจบชุดนี้</small>`;
-            nextBetEl.style.background = "#f1c40f"; nextBetEl.style.color = "#2c3e50";
+            nextBetEl.style.background = "#f1c40f";
+            nextBetEl.style.color = "#2c3e50";
         } else {
             statusEl.innerText = "REAL BETTING";
             nextBetEl.style.color = "white";
