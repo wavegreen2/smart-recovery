@@ -184,7 +184,7 @@
                 if (sessionState.currentDataIdx >= sessionState.fullResults.length) return { status: "OUT_OF_DATA", profit: bankroll - initialBR, mdd: maxDD, mBet: maxBet };
                 result = sessionState.fullResults[sessionState.currentDataIdx++];
             } else if (config.mode === 'r') {
-                if (sessionState.currentDataIdx >= 10000000) return { status: "OUT_OF_DATA", profit: bankroll - initialBR, mdd: maxDD, mBet: maxBet };
+                if (sessionState.currentDataIdx >= 10000) return { status: "OUT_OF_DATA", profit: bankroll - initialBR, mdd: maxDD, mBet: maxBet };
                 result = (Math.random() * 100 <= 50.68) ? "B" : "P";
                 sessionState.currentDataIdx++;
             } else if (config.mode === 'm') {
@@ -397,3 +397,4 @@
 
 </body>
 </html>
+
