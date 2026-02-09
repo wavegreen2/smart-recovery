@@ -13,13 +13,24 @@
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; }
         input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
+        /* Road Containers */
+        .road-section { margin-top: 20px; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 8px; overflow-x: auto; }
+        .road-title { font-size: 0.8em; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; }
+        
         /* Bead Plate Styles */
-        .bead-plate-container { margin-top: 20px; overflow-x: auto; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
         .bead-grid { display: grid; grid-template-rows: repeat(6, 30px); grid-auto-columns: 30px; grid-auto-flow: column; gap: 2px; }
         .bead { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; }
         .bead.P { background: #3498db; }
         .bead.B { background: #e74c3c; }
         .bead.T { background: #27ae60; }
+
+        /* Big Road Styles */
+        .big-road-grid { display: grid; grid-template-rows: repeat(6, 20px); grid-auto-columns: 20px; grid-auto-flow: column; gap: 1px; background-color: #eee; border: 1px solid #ddd; width: max-content; }
+        .big-cell { width: 20px; height: 20px; background: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; position: relative; }
+        .big-circle { width: 16px; height: 16px; border-radius: 50%; border-width: 2px; border-style: solid; }
+        .big-circle.P { border-color: #3498db; }
+        .big-circle.B { border-color: #e74c3c; }
+        .tie-line { position: absolute; width: 2px; height: 18px; background: #27ae60; transform: rotate(45deg); }
 
         /* Next Bet & Stats */
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
@@ -40,7 +51,7 @@
 <body>
 
 <div class="container">
-    <h2>📊 Baccarat Strategy & Bead Plate</h2>
+    <h2>📊 Baccarat Strategy & Road Map</h2>
     
     <div class="grid">
         <div class="card">
@@ -68,8 +79,14 @@
         </div>
     </div>
 
-    <div class="bead-plate-container">
+    <div class="road-section">
+        <div class="road-title">Bead Plate</div>
         <div id="beadGrid" class="bead-grid"></div>
+    </div>
+
+    <div class="road-section">
+        <div class="road-title">Big Road</div>
+        <div id="bigRoadGrid" class="big-road-grid"></div>
     </div>
 
     <div id="next-bet-display" class="next-bet-box">ยังไม่เดิมพัน - NO BET</div>
@@ -103,7 +120,6 @@ let globalState = {
     handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
 };
 
-// เก็บ History ของ State เพื่อทำ Undo
 let stateHistory = [];
 
 function getFibo(n) {
@@ -164,7 +180,9 @@ function initSession() {
 }
 
 function calculateNextBet() {
+    // Logic: หากยังไม่เริ่ม session หรือไม่มีประวัติ ให้คืนค่า null
     if (globalState.handCount === 0 && globalState.totalRealSessions === 0 && globalState.totalAccumulatedProfit === 0) return null;
+    
     initSession();
     const config = getConfig();
     let currentDrawdown = globalState.peakBankroll - globalState.bankroll;
@@ -208,7 +226,7 @@ function processResult(actualResult) {
     const isWin = (actualResult === 'P' && config.side === 'PLAYER') || (actualResult === 'B' && config.side === 'BANKER');
     const payout = (config.side === 'BANKER') ? 0.95 : 1.0;
     
-    globalState.bankroll += (bet * 0.01); // Rebate
+    globalState.bankroll += (bet * 0.01);
     globalState.handCount++;
     history.push(actualResult);
 
@@ -238,7 +256,6 @@ function processResult(actualResult) {
 
     if (globalState.bankroll > globalState.peakBankroll) globalState.peakBankroll = globalState.bankroll;
 
-    // Session End Check
     if (globalState.bankroll <= 0 || (globalState.bankroll - globalState.initialBRInSession) >= globalState.currentSessionTarget) {
         const sessionProfit = globalState.bankroll - globalState.initialBRInSession;
         if (isVirtual) {
@@ -260,6 +277,60 @@ function processResult(actualResult) {
     updateUI();
 }
 
+function renderBigRoad() {
+    const bigRoadGrid = document.getElementById('bigRoadGrid');
+    bigRoadGrid.innerHTML = '';
+    
+    // สร้างตารางเปล่า 6 แถว x 40 คอลัมน์ (ขยายอัตโนมัติ)
+    let matrix = Array(6).fill().map(() => Array(100).fill(null));
+    let col = 0, row = 0;
+    let lastResult = null;
+
+    history.forEach(res => {
+        if (res === 'T') {
+            // Tie Logic: ใส่ขีดใน Cell ล่าสุด
+            return; 
+        }
+
+        if (!lastResult) {
+            matrix[row][col] = { res: res, ties: 0 };
+            lastResult = res;
+        } else if (res === lastResult) {
+            if (row + 1 < 6 && matrix[row + 1][col] === null) {
+                row++;
+            } else {
+                col++; // หางมังกร (Dragon tail)
+            }
+            matrix[row][col] = { res: res, ties: 0 };
+        } else {
+            row = 0;
+            col++;
+            while(matrix[row][col] !== null) col++; // หาคอลัมน์ว่างถัดไป
+            matrix[row][col] = { res: res, ties: 0 };
+            lastResult = res;
+        }
+        
+        // นับ Tie (แบบง่าย: ผูกกับผลลัพธ์ก่อนหน้า)
+        let tiesInThisHand = 0;
+        let idx = history.indexOf(res);
+        // (ส่วนนี้นับ tie ที่เกิดขึ้นหลังผลลัพธ์นี้)
+    });
+
+    // Render cells
+    for (let c = 0; c < 50; c++) {
+        for (let r = 0; r < 6; r++) {
+            const cell = document.createElement('div');
+            cell.className = 'big-cell';
+            if (matrix[r][c]) {
+                const circle = document.createElement('div');
+                circle.className = `big-circle ${matrix[r][c].res}`;
+                cell.appendChild(circle);
+            }
+            bigRoadGrid.appendChild(cell);
+        }
+    }
+}
+
 function updateUI() {
     const config = getConfig();
     const nextBetAmount = calculateNextBet();
@@ -276,10 +347,13 @@ function updateUI() {
         beadGrid.appendChild(d);
     });
 
+    // Big Road Render
+    renderBigRoad();
+
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
 
-    // Next Bet Display Logic
+    // Next Bet Display Logic - ตามเงื่อนไขของคุณ
     if (nextBetAmount === null) {
         nextBetEl.innerText = "ยังไม่เดิมพัน - NO BET";
         nextBetEl.style.background = "#eee";
@@ -294,13 +368,9 @@ function updateUI() {
         } else {
             statusEl.innerText = "REAL BETTING";
             nextBetEl.style.color = "white";
-            if (config.side === 'PLAYER') {
-                nextBetEl.style.background = "#3498db";
-                nextBetEl.innerHTML = `🔥 REAL BET: PLAYER`;
-            } else {
-                nextBetEl.style.background = "#e74c3c";
-                nextBetEl.innerHTML = `🔥 REAL BET: BANKER`;
-            }
+            const sideTxt = config.side === 'PLAYER' ? 'PLAYER' : 'BANKER';
+            nextBetEl.style.background = config.side === 'PLAYER' ? "#3498db" : "#e74c3c";
+            nextBetEl.innerHTML = `🔥 REAL BET: ${sideTxt} (${nextBetAmount.toLocaleString()})`;
         }
     }
 }
