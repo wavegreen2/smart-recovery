@@ -3,213 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Recovery Simulator (Custom Data)</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Baccarat Recovery Simulator</title>
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-        .card { border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .log-container { height: 400px; overflow-y: auto; background: #212529; color: #00ff00; font-family: monospace; padding: 15px; font-size: 13px; }
-        .stat-card { text-align: center; padding: 15px; border-radius: 10px; color: white; }
-        textarea { font-family: monospace; font-size: 12px; height: 150px !important; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .input-item { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
+        input, select, textarea { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #3498db; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #2980b9; }
+        #log-area { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 4px; height: 400px; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 13px; margin-top: 20px; white-space: pre-wrap; }
+        .summary { background: #e8f4fd; padding: 15px; border-radius: 4px; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <h2 class="text-center mb-4">🎰 Smart Recovery (Manual Data Mode)</h2>
+<div class="container">
+    <h2>📊 Baccarat Recovery Simulator</h2>
     
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card p-4">
-                <h5 class="mb-3">Config & Data</h5>
-                <div class="mb-3">
-                    <label class="form-label">Paste Shoe Data (CSV format)</label>
-                    <textarea id="raw_data" class="form-control" placeholder="1,P,B,T,P...&#10;2,B,B,P,P...">1,B,T,P,B,B,B,P,P,P,T,P,P,P,P,T,B,P,P,B,P,P,B,B,P,P,B,P,B,P,T,B,T,B,P,P,T,B,P,P,B,P,P,T,P,P,P,P,P,B,P,B,B,P,B,B,P,B,B,P,B,B,B,B,P,B,P,B,P,T,P,B,B,B,P,B,B,P,P,P
-2,T,P,B,P,B,B,P,P,B,B,T,P,B,B,T,P,P,B,B,B,B,P,T,B,T,B,B,B,P,P,B,P,P,P,B,P,B,P,T,B,P,B,P,B,B,B,B,P,B,B,B,P,P,P,B,T,B,P,B,B,P,B,B,P,B,P,P,B,B,P,P,P,B,B,P,B,P,P,P,P,T</textarea>
-                </div>
-                <div class="row">
-                    <div class="col-6 mb-2">
-                        <label class="form-label">Unit Size</label>
-                        <input type="number" id="unit_size" class="form-control" value="10">
-                    </div>
-                    <div class="col-6 mb-2">
-                        <label class="form-label">Virtual Trigger</label>
-                        <input type="number" id="virtual_trigger" class="form-control" value="2">
-                    </div>
-                </div>
-                <button onclick="startSimulation()" class="btn btn-primary w-100 mt-3" id="runBtn">Run Data Simulation</button>
-            </div>
+    <div class="input-group">
+        <div class="input-item">
+            <label>Mode</label>
+            <select id="mode">
+                <option value="r">Random Simulation</option>
+                <option value="a">Auto Data (from text below)</option>
+            </select>
         </div>
-
-        <div class="col-md-8">
-            <div class="row g-3 mb-4">
-                <div class="col-4">
-                    <div class="stat-card bg-dark">
-                        <small>Total Hands Played</small>
-                        <h4 id="stat_total_hands">0</h4>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="stat-card bg-danger">
-                        <small>Max Consecutive Busts</small>
-                        <h4 id="stat_busts">0</h4>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="stat-card bg-success">
-                        <small>Final Profit</small>
-                        <h4 id="stat_profit">0</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <span>Live Simulation Log</span>
-                    <small id="current_state_label" class="text-muted">Idle</small>
-                </div>
-                <div id="log" class="log-container">
-                    Waiting for data...
-                </div>
-            </div>
+        <div class="input-item">
+            <label>Side Preference</label>
+            <select id="side_preference">
+                <option value="PLAYER">PLAYER</option>
+                <option value="BANKER">BANKER</option>
+            </select>
+        </div>
+        <div class="input-item">
+            <label>Unit Size</label>
+            <input type="number" id="unit_size" value="10">
+        </div>
+        <div class="input-item">
+            <label>Virtual Loss Trigger (Wait)</label>
+            <input type="number" id="virtual_loss_trigger" value="2">
+        </div>
+        <div class="input-item">
+            <label>Total Rounds (Random Mode)</label>
+            <input type="number" id="total_rounds" value="1000">
+        </div>
+        <div class="input-item">
+            <label>Rebate Rate (%)</label>
+            <input type="number" id="rebate_rate" step="0.01" value="1.0">
         </div>
     </div>
+
+    <div class="input-item" style="margin-bottom: 15px;">
+        <label>Raw Data (CSV format: Index,Result,Result...)</label>
+        <textarea id="raw_data" rows="3">1,B,T,P,B,B,B,P,P,P,T,P,P,P,P,T,B,P,P,B,P,P,B,B,P,P,B,P,B,P,T,B,T,B,P,P,T,B,P,P,B,P,P,T,P,P,P,P,P,B,P,B,B,P,B,B,P,B,B,P,B,B,B,B,P,B,P,B,P,T,P,B,B,B,P,B,B,P,P,P</textarea>
+    </div>
+
+    <button onclick="startSimulation()">🚀 Start Simulation</button>
+
+    <div id="summary" class="summary"></div>
+    <div id="log-area">Log system ready... (Results will appear here)</div>
 </div>
 
 <script>
-let globalResults = [];
-
-function parseInputData() {
-    const text = document.getElementById('raw_data').value;
-    const lines = text.split('\n');
-    let results = [];
-    lines.forEach(line => {
-        const parts = line.split(',');
-        // ข้ามตัวแรกที่เป็นเลข Shoe แล้วเอาที่เหลือ
-        for(let i = 1; i < parts.length; i++) {
-            let res = parts[i].trim().toUpperCase();
-            if (res === 'P' || res === 'B' || res === 'T') {
-                results.push(res);
-            }
+    // --- Logic Functions ---
+    const getFibo = (n) => {
+        if (n <= 0) return 1;
+        if (n === 1) return 1;
+        let a = 1, b = 1;
+        for (let i = 2; i <= n; i++) {
+            [a, b] = [b, a + b];
         }
-    });
-    return results;
-}
-
-function getFibo(n) {
-    if (n <= 0) return 1;
-    if (n === 1) return 1;
-    let a = 1, b = 1;
-    for (let i = 2; i <= n; i++) {
-        let temp = a + b; a = b; b = temp;
-    }
-    return b;
-}
-
-async function startSimulation() {
-    const logEl = document.getElementById('log');
-    const runBtn = document.getElementById('runBtn');
-    const data = parseInputData();
-    
-    if (data.length === 0) {
-        alert("กรุณาใส่ข้อมูลผลลัพธ์ก่อนครับ");
-        return;
-    }
-
-    logEl.innerHTML = `Loaded ${data.length} hands. Starting simulation...<br>---<br>`;
-    runBtn.disabled = true;
-
-    // Config
-    let config = {
-        virtual_trigger: parseInt(document.getElementById('virtual_trigger').value),
-        unit_size: parseFloat(document.getElementById('unit_size').value),
-        marty_mult: 2,
-        initial_bankroll: 5000, // ปรับให้เยอะหน่อยเพื่อการทดสอบ
-        target_per_win: 10
+        return b;
     };
 
-    let bankroll = 0; // Cumulative Profit
-    let virtual_losses = 0;
-    let state = "FLAT";
-    let marty_step = 0;
-    let fibo_idx = 0;
-    let current_session_loss = 0;
-    let max_busts = 0;
-    let current_consecutive_busts = 0;
-    
-    for (let i = 0; i < data.length; i++) {
-        let handResult = data[i];
-        let is_virtual = virtual_losses < config.virtual_trigger;
-        
-        // ข้ามการคำนวณถ้าเป็น Tie (คืนทุน)
-        if (handResult === 'T') {
-            logEl.innerHTML += `<span style="color:yellow">Hand ${i+1}: [TIE] - Skip</span><br>`;
-            continue;
-        }
-
-        // Betting Logic
-        let bet = config.unit_size;
-        if (state === "MARTY") {
-            bet = config.unit_size * Math.pow(config.marty_mult, marty_step);
-        } else if (state === "FIBO") {
-            bet = getFibo(fibo_idx) * config.unit_size;
-        }
-
-        // Simulation result
-        // สมมติแทง Player เสมอ (หรือจะสลับฝั่งตามใจชอบ แต่ในที่นี้เน้นทดสอบระบบเดินเงิน)
-        let is_win = (handResult === 'P'); 
-        
-        let prefix = is_virtual ? `<span style="color:gray">[VIRT]</span>` : `<span style="color:white">[REAL]</span>`;
-        
-        if (is_win) {
-            if (!is_virtual) bankroll += bet;
-            
-            logEl.innerHTML += `${prefix} Hand ${i+1}: WIN (Bet: ${bet})<br>`;
-            
-            // Success Recovery
-            state = "FLAT";
-            marty_step = 0;
-            fibo_idx = 0;
-            virtual_losses = 0; // Reset virtual count
-            current_consecutive_busts = 0;
-        } else {
-            if (!is_virtual) bankroll -= bet;
-            
-            logEl.innerHTML += `${prefix} Hand ${i+1}: <span style="color:#ff4444">LOSS</span> (Bet: ${bet})<br>`;
-            
-            if (is_virtual) {
-                virtual_losses++;
-            } else {
-                // Real Logic Recovery
-                if (state === "FLAT") {
-                    state = "MARTY";
-                    marty_step = 1;
-                } else if (state === "MARTY") {
-                    marty_step++;
-                    if (marty_step > 8) { // แตกที่ 8 ไม้
-                        state = "FIBO";
-                        fibo_idx = 0;
-                        current_consecutive_busts++;
-                        max_busts = Math.max(max_busts, current_consecutive_busts);
-                    }
-                } else {
-                    fibo_idx++;
-                }
-            }
-        }
-
-        // Update UI
-        document.getElementById('stat_total_hands').innerText = i + 1;
-        document.getElementById('stat_profit').innerText = bankroll.toLocaleString();
-        document.getElementById('stat_busts').innerText = max_busts;
-        
-        logEl.scrollTop = logEl.scrollHeight;
-        if (i % 20 === 0) await new Promise(r => setTimeout(r, 10));
+    function logToScreen(msg) {
+        const logArea = document.getElementById('log-area');
+        logArea.innerText += msg + "\n";
+        logArea.scrollTop = logArea.scrollHeight;
     }
 
-    logEl.innerHTML += "--- END OF DATA ---<br>";
-    runBtn.disabled = false;
-}
+    async function runSingleSession(config) {
+        let { mode, resultList, startIdx, targetProfit, unitSize, initialBankroll, rebateRate, sidePreference, stopLossThreshold, martyMult, fiboMult } = config;
+
+        let bankroll = initialBankroll;
+        let peakBankroll = initialBankroll;
+        let maxBetEncountered = 0;
+        let maxDrawdown = 0;
+        
+        let state = "FLAT";
+        let martyStep = 0;
+        let fiboIdx = 0;
+        let martyStepsLimit = 12;
+        let hasLostSincePeak = false;
+        let currentIdx = startIdx;
+
+        while (true) {
+            let currentDrawdown = peakBankroll - bankroll;
+            if (currentDrawdown >= stopLossThreshold) {
+                state = "FLAT"; martyStep = 0; fiboIdx = 0;
+            }
+
+            let rawBet = unitSize;
+            if (state === "FLAT") {
+                if (currentDrawdown > 0 && hasLostSincePeak) {
+                    rawBet = Math.max(Math.ceil(currentDrawdown / 4), unitSize);
+                }
+            } else if (state === "MARTY") {
+                rawBet = unitSize * Math.pow(martyMult, martyStep);
+            } else if (state === "FIBO") {
+                rawBet = getFibo(fiboIdx) * fiboMult;
+            }
+
+            let neededToRecover = currentDrawdown + unitSize;
+            let bet = (state !== "FLAT") ? Math.min(rawBet, neededToRecover) : rawBet;
+
+            let isMaxBetActive = false;
+            if (bet >= stopLossThreshold) {
+                bet = stopLossThreshold;
+                isMaxBetActive = true;
+            }
+
+            let currentProfit = bankroll - initialBankroll;
+            let remainingToTarget = targetProfit - currentProfit;
+            if (bet > remainingToTarget && remainingToTarget > 0) {
+                bet = Math.max(unitSize, remainingToTarget);
+            }
+
+            if (bet > maxBetEncountered) maxBetEncountered = bet;
+
+            // Get Result
+            let actualResult = null;
+            if (mode === 'a') {
+                if (currentIdx < resultList.length) {
+                    actualResult = resultList[currentIdx];
+                    currentIdx++;
+                } else {
+                    return { status: "OUT_OF_DATA", profit: (bankroll - initialBankroll), mdd: maxDrawdown, m_bet: maxBetEncountered, nextIdx: currentIdx };
+                }
+            } else {
+                if (currentIdx >= config.totalRoundsLimit) {
+                    return { status: "OUT_OF_DATA", profit: (bankroll - initialBankroll), mdd: maxDrawdown, m_bet: maxBetEncountered, nextIdx: currentIdx };
+                }
+                actualResult = Math.random() * 100 <= 50.68 ? "B" : "P";
+                currentIdx++;
+            }
+
+            if (actualResult === "T") continue;
+
+            let isWin = (actualResult === "P" && sidePreference === "PLAYER") || (actualResult === "B" && sidePreference === "BANKER");
+            let payout = (sidePreference === "BANKER") ? 0.95 : 1.0;
+            
+            bankroll += (bet * rebateRate);
+
+            if (isWin) {
+                bankroll += (bet * payout);
+                logToScreen(`   [Hand ${currentIdx}] Bet: ${bet.toLocaleString()} (${actualResult}) | ✅ WIN | BR: ${bankroll.toLocaleString()}`);
+                if (state === "FIBO") {
+                    fiboIdx = Math.max(-1, fiboIdx - 2);
+                    if (fiboIdx < 0) { state = "FLAT"; fiboIdx = 0; }
+                } else {
+                    if (bankroll >= peakBankroll) hasLostSincePeak = false;
+                    state = "FLAT"; martyStep = 0;
+                }
+            } else {
+                bankroll -= bet;
+                hasLostSincePeak = true;
+                logToScreen(`   [Hand ${currentIdx}] Bet: ${bet.toLocaleString()} (${actualResult}) | ❌ LOSS | BR: ${bankroll.toLocaleString()}`);
+                if (isMaxBetActive) {
+                    state = "FLAT"; martyStep = 0; fiboIdx = 0;
+                } else {
+                    if (state === "FLAT") { state = "MARTY"; martyStep = 1; }
+                    else if (state === "MARTY") {
+                        martyStep++;
+                        if (martyStep > martyStepsLimit) { state = "FIBO"; fiboIdx = 0; }
+                    } else if (state === "FIBO") {
+                        fiboIdx++;
+                    }
+                }
+            }
+
+            if (bankroll > peakBankroll) peakBankroll = bankroll;
+            let ddown = peakBankroll - bankroll;
+            if (ddown > maxDrawdown) maxDrawdown = ddown;
+
+            if (bankroll <= 0) return { status: "BUST", profit: (bankroll - initialBankroll), mdd: maxDrawdown, m_bet: maxBetEncountered, nextIdx: currentIdx };
+            if ((bankroll - initialBankroll) >= targetProfit) return { status: "WIN", profit: (bankroll - initialBankroll), mdd: maxDrawdown, m_bet: maxBetEncountered, nextIdx: currentIdx };
+        }
+    }
+
+    async function startSimulation() {
+        // UI Reset
+        document.getElementById('log-area').innerText = "";
+        const summaryDiv = document.getElementById('summary');
+        summaryDiv.style.display = "none";
+
+        // Get Inputs
+        const mode = document.getElementById('mode').value;
+        const rawData = document.getElementById('raw_data').value;
+        const sidePreference = document.getElementById('side_preference').value;
+        const unitSize = parseFloat(document.getElementById('unit_size').value);
+        const virtualLossTrigger = parseInt(document.getElementById('virtual_loss_trigger').value);
+        const totalRoundsInput = parseInt(document.getElementById('total_rounds').value);
+        const rebateRate = parseFloat(document.getElementById('rebate_rate').value) / 100;
+
+        let fullResults = [];
+        if (mode === 'a') {
+            rawData.trim().split('\n').forEach(line => {
+                const parts = line.split(',');
+                fullResults.push(...parts.slice(1).map(x => x.trim()));
+            });
+        }
+
+        let baseTarget = 0.01;
+        let baseBankroll = 20.0;
+        let totalLossAccumulated = 0;
+        let currentTarget = baseTarget;
+        let currentBankroll = baseBankroll;
+        
+        let overallMaxBet = 0, overallMaxDrawdown = 0, maxConsecutiveBusts = 0, currentConsecutiveBusts = 0;
+        let consecutiveVirtualLosses = 0, totalRealSessions = 0, currentDataIdx = 0;
+
+        while (true) {
+            if (mode === 'r' && currentDataIdx >= totalRoundsInput) break;
+            if (totalRealSessions >= 1000) break; // Safety limit
+
+            let isVirtual = consecutiveVirtualLosses < virtualLossTrigger;
+
+            if (isVirtual) {
+                logToScreen(`\n--- 🧪 VIRTUAL SESSION (Wait: ${consecutiveVirtualLosses}/${virtualLossTrigger}) ---`);
+            } else {
+                logToScreen(`\n--- 💰 REAL SESSION ${totalRealSessions + 1} (START) ---`);
+            }
+
+            let result = await runSingleSession({
+                mode,
+                resultList: fullResults,
+                startIdx: currentDataIdx,
+                targetProfit: currentTarget,
+                initialBankroll: currentBankroll,
+                unitSize,
+                martyMult: 2,
+                fiboMult: 10,
+                rebateRate,
+                sidePreference,
+                stopLossThreshold: 5000,
+                totalRoundsLimit: totalRoundsInput
+            });
+
+            currentDataIdx = result.nextIdx;
+
+            if (isVirtual) {
+                if (result.status === "BUST") {
+                    consecutiveVirtualLosses++;
+                    logToScreen(`📉 Virtual Result: BUST (${consecutiveVirtualLosses}/${virtualLossTrigger})`);
+                } else if (result.status === "WIN") {
+                    consecutiveVirtualLosses = 0;
+                    logToScreen(`🔄 Virtual Result: WIN (Resetting)`);
+                } else if (result.status === "OUT_OF_DATA") break;
+                continue;
+            }
+
+            // Real Session Logic
+            totalRealSessions++;
+            if (result.m_bet > overallMaxBet) overallMaxBet = result.m_bet;
+            if (result.mdd > overallMaxDrawdown) overallMaxDrawdown = result.mdd;
+
+            if (result.status === "WIN") {
+                logToScreen(`✅ REAL WIN: Profit +${result.profit.toFixed(2)}`);
+                totalLossAccumulated = 0;
+                currentTarget = baseTarget;
+                currentBankroll = baseBankroll;
+                currentConsecutiveBusts = 0;
+                consecutiveVirtualLosses = 0;
+            } else {
+                logToScreen(`❌ REAL ${result.status}: Loss ${result.profit.toFixed(2)}`);
+                totalLossAccumulated += Math.abs(result.profit);
+                currentTarget = totalLossAccumulated + baseTarget;
+                currentBankroll = currentTarget * 1.5;
+                currentConsecutiveBusts++;
+                if (currentConsecutiveBusts > maxConsecutiveBusts) maxConsecutiveBusts = currentConsecutiveBusts;
+                logToScreen(`⚠️ RECOVERY | Accumulated Loss: ${totalLossAccumulated.toFixed(2)}`);
+            }
+
+            if (result.status === "OUT_OF_DATA") break;
+        }
+
+        // Final Summary
+        summaryDiv.style.display = "block";
+        summaryDiv.innerHTML = `
+            <h3>📊 Summary Report</h3>
+            <p>🎯 Total Real Sessions: <b>${totalRealSessions}</b></p>
+            <p>🔥 Max Consecutive Busts: <b>${maxConsecutiveBusts}</b></p>
+            <p>💸 Overall Max Bet: <b>${overallMaxBet.toLocaleString()}</b></p>
+            <p>📉 Overall Max Drawdown: <b>${overallMaxDrawdown.toLocaleString()}</b></p>
+        `;
+    }
 </script>
+
 </body>
 </html>
