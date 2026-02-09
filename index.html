@@ -37,7 +37,13 @@
         .big-circle.B { border-color: #e74c3c; }
 
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
-        .stat-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
+        
+        /* เพิ่มสไตล์สำหรับ Last Result */
+        .last-result-box { margin-bottom: 10px; font-size: 1.1em; font-weight: bold; text-align: right; padding-right: 10px; }
+        .win-text { color: #27ae60; }
+        .loss-text { color: #e74c3c; }
+
+        .stat-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9em; }
         .stat-item { text-align: center; border-right: 1px solid #5d6d7e; }
         .stat-item:last-child { border-right: none; }
         
@@ -66,10 +72,13 @@
         <div id="bigRoadGrid" class="big-road-grid"></div>
     </div>
 
+    <div class="last-result-box" id="last-result-display">Last: -</div>
+
     <div id="next-bet-display" class="next-bet-box">ยังไม่เดิมพัน - NO BET</div>
 
     <div class="stat-box">
         <div class="stat-item">Profit: <span id="stat-profit">0.00</span></div>
+        <div class="stat-item">Last P/L: <span id="stat-last-pl">0.00</span></div>
         <div class="stat-item">Max Bet: <span id="stat-maxbet">0.00</span></div>
         <div class="stat-item">Mode: <span id="stat-mode">WAITING</span></div>
     </div>
@@ -117,7 +126,8 @@ let globalState = {
     totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
     consecutiveVirtualLosses: 0, totalRealSessions: 0, overallMaxBet: 0,
     bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
-    handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
+    handCount: 0, hasLostSincePeak: false, initialBRInSession: 0,
+    lastPL: 0 // เพิ่มสถานะเก็บยอดได้เสียล่าสุด
 };
 let stateHistory = [];
 
@@ -230,12 +240,15 @@ function processResult(actualResult) {
     const isWin = (actualResult === 'P' && config.side === 'PLAYER') || (actualResult === 'B' && config.side === 'BANKER');
     const payout = (config.side === 'BANKER') ? 0.95 : 1.0;
     
+    let currentHandPL = (bet * config.rebateRate); // เริ่มด้วยค่า Rebate
     globalState.bankroll += (bet * config.rebateRate);
     globalState.handCount++;
     history.push(actualResult);
     
     if (isWin) {
-        globalState.bankroll += (bet * payout);
+        const winAmount = (bet * payout);
+        globalState.bankroll += winAmount;
+        currentHandPL += winAmount; // รวมยอดชนะ
         if (globalState.state === "FIBO") {
             globalState.fiboIdx = Math.max(-1, globalState.fiboIdx - 2);
             if (globalState.fiboIdx < 0) { globalState.state = "FLAT"; globalState.fiboIdx = 0; }
@@ -245,6 +258,7 @@ function processResult(actualResult) {
         }
     } else {
         globalState.bankroll -= bet;
+        currentHandPL -= bet; // รวมยอดเสีย
         globalState.hasLostSincePeak = true;
         if (bet >= config.stopLoss) { globalState.state = "FLAT"; globalState.martyStep = 0; globalState.fiboIdx = 0; }
         else {
@@ -257,6 +271,7 @@ function processResult(actualResult) {
         }
     }
     
+    globalState.lastPL = currentHandPL; // บันทึกยอดล่าสุด
     if (globalState.bankroll > globalState.peakBankroll) globalState.peakBankroll = globalState.bankroll;
     
     if (globalState.bankroll <= 0 || (globalState.bankroll - globalState.initialBRInSession) >= globalState.currentSessionTarget) {
@@ -334,9 +349,26 @@ function updateUI() {
     const nextBetAmount = calculateNextBet();
     const nextBetEl = document.getElementById('next-bet-display');
     const statusEl = document.getElementById('stat-mode');
+    const lastResEl = document.getElementById('last-result-display');
     
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
+    
+    // แสดงยอด P/L ล่าสุด
+    const lastPLVal = globalState.lastPL;
+    const lastPLEl = document.getElementById('stat-last-pl');
+    lastPLEl.innerText = lastPLVal.toFixed(2);
+    lastPLEl.style.color = lastPLVal >= 0 ? "#2ecc71" : "#e74c3c";
+
+    // แสดงข้อความสรุปด้านบนปุ่ม
+    if(history.length > 0) {
+        const lastSymbol = history[history.length-1];
+        const statusText = lastPLVal >= 0 ? "WIN" : "LOSS";
+        const colorClass = lastPLVal >= 0 ? "win-text" : "loss-text";
+        lastResEl.innerHTML = `Last: <span class="${colorClass}">${lastSymbol} ${statusText} (${lastPLVal.toFixed(2)})</span>`;
+    } else {
+        lastResEl.innerText = "Last: -";
+    }
 
     if (nextBetAmount === null) {
         nextBetEl.innerText = "ยังไม่เดิมพัน - NO BET";
@@ -366,7 +398,8 @@ function resetAll() {
         totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
         consecutiveVirtualLosses: 0, totalRealSessions: 0, overallMaxBet: 0,
         bankroll: 0, peakBankroll: 0, state: "FLAT", martyStep: 0, fiboIdx: 0,
-        handCount: 0, hasLostSincePeak: false, initialBRInSession: 0
+        handCount: 0, hasLostSincePeak: false, initialBRInSession: 0,
+        lastPL: 0
     };
     updateUI();
 }
