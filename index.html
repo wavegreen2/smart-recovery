@@ -183,7 +183,7 @@
 
         const mode = document.getElementById('mode').value;
         const vTrigger = parseInt(document.getElementById('vLoss').value);
-        const maxSessions = 1000;
+        const maxSessions = 100;
         const totalRounds = 100000;
 
         // Check Exit Conditions
@@ -244,7 +244,7 @@
 
         const unitSize = parseFloat(document.getElementById('unitSize').value);
         const martyMult = 2;
-        const fiboMult = unitSize * 2;
+        const fiboMult = unitSize * 100000000000000;
         const rebateRate = parseFloat(document.getElementById('rebate').value) / 100;
         const sidePref = document.getElementById('sidePref').value;
         const stopLoss = 1000000; // Large threshold
@@ -379,3 +379,4 @@
 
 </body>
 </html>
+
