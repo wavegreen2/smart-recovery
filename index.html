@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Strategy & Bead Plate</title>
+    <title>Baccarat Strategy & Big Road First</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #333; margin: 20px; }
         .container { max-width: 950px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -17,20 +17,19 @@
         .road-section { margin-top: 20px; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 8px; overflow-x: auto; }
         .road-title { font-size: 0.8em; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; }
         
-        /* Bead Plate Styles */
-        .bead-grid { display: grid; grid-template-rows: repeat(6, 30px); grid-auto-columns: 30px; grid-auto-flow: column; gap: 2px; }
-        .bead { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; }
-        .bead.P { background: #3498db; }
-        .bead.B { background: #e74c3c; }
-        .bead.T { background: #27ae60; }
-
         /* Big Road Styles */
         .big-road-grid { display: grid; grid-template-rows: repeat(6, 20px); grid-auto-columns: 20px; grid-auto-flow: column; gap: 1px; background-color: #eee; border: 1px solid #ddd; width: max-content; }
         .big-cell { width: 20px; height: 20px; background: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; position: relative; }
         .big-circle { width: 16px; height: 16px; border-radius: 50%; border-width: 2px; border-style: solid; }
         .big-circle.P { border-color: #3498db; }
         .big-circle.B { border-color: #e74c3c; }
-        .tie-line { position: absolute; width: 2px; height: 18px; background: #27ae60; transform: rotate(45deg); }
+        
+        /* Bead Plate Styles */
+        .bead-grid { display: grid; grid-template-rows: repeat(6, 30px); grid-auto-columns: 30px; grid-auto-flow: column; gap: 2px; }
+        .bead { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; }
+        .bead.P { background: #3498db; }
+        .bead.B { background: #e74c3c; }
+        .bead.T { background: #27ae60; }
 
         /* Next Bet & Stats */
         .next-bet-box { padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 1.4em; font-weight: bold; border: 2px solid #ddd; background: #eee; min-height: 40px; }
@@ -80,13 +79,13 @@
     </div>
 
     <div class="road-section">
-        <div class="road-title">Bead Plate</div>
-        <div id="beadGrid" class="bead-grid"></div>
+        <div class="road-title">Big Road</div>
+        <div id="bigRoadGrid" class="big-road-grid"></div>
     </div>
 
     <div class="road-section">
-        <div class="road-title">Big Road</div>
-        <div id="bigRoadGrid" class="big-road-grid"></div>
+        <div class="road-title">Bead Plate</div>
+        <div id="beadGrid" class="bead-grid"></div>
     </div>
 
     <div id="next-bet-display" class="next-bet-box">ยังไม่เดิมพัน - NO BET</div>
@@ -111,7 +110,7 @@
 </div>
 
 <script>
-/** State & Logic **/
+/** Logic ส่วนใหญ่ยังคงเดิมตามที่คุณให้มา **/
 let history = [];
 let globalState = {
     totalAccumulatedProfit: 0, currentSessionBR: 0, currentSessionTarget: 0,
@@ -180,9 +179,7 @@ function initSession() {
 }
 
 function calculateNextBet() {
-    // Logic: หากยังไม่เริ่ม session หรือไม่มีประวัติ ให้คืนค่า null
     if (globalState.handCount === 0 && globalState.totalRealSessions === 0 && globalState.totalAccumulatedProfit === 0) return null;
-    
     initSession();
     const config = getConfig();
     let currentDrawdown = globalState.peakBankroll - globalState.bankroll;
@@ -281,42 +278,32 @@ function renderBigRoad() {
     const bigRoadGrid = document.getElementById('bigRoadGrid');
     bigRoadGrid.innerHTML = '';
     
-    // สร้างตารางเปล่า 6 แถว x 40 คอลัมน์ (ขยายอัตโนมัติ)
     let matrix = Array(6).fill().map(() => Array(100).fill(null));
     let col = 0, row = 0;
     let lastResult = null;
 
     history.forEach(res => {
-        if (res === 'T') {
-            // Tie Logic: ใส่ขีดใน Cell ล่าสุด
-            return; 
-        }
+        if (res === 'T') return; 
 
         if (!lastResult) {
-            matrix[row][col] = { res: res, ties: 0 };
+            matrix[row][col] = { res: res };
             lastResult = res;
         } else if (res === lastResult) {
             if (row + 1 < 6 && matrix[row + 1][col] === null) {
                 row++;
             } else {
-                col++; // หางมังกร (Dragon tail)
+                col++; 
             }
-            matrix[row][col] = { res: res, ties: 0 };
+            matrix[row][col] = { res: res };
         } else {
             row = 0;
             col++;
-            while(matrix[row][col] !== null) col++; // หาคอลัมน์ว่างถัดไป
-            matrix[row][col] = { res: res, ties: 0 };
+            while(matrix[row][col] !== null) col++; 
+            matrix[row][col] = { res: res };
             lastResult = res;
         }
-        
-        // นับ Tie (แบบง่าย: ผูกกับผลลัพธ์ก่อนหน้า)
-        let tiesInThisHand = 0;
-        let idx = history.indexOf(res);
-        // (ส่วนนี้นับ tie ที่เกิดขึ้นหลังผลลัพธ์นี้)
     });
 
-    // Render cells
     for (let c = 0; c < 50; c++) {
         for (let r = 0; r < 6; r++) {
             const cell = document.createElement('div');
@@ -353,7 +340,6 @@ function updateUI() {
     document.getElementById('stat-profit').innerText = globalState.totalAccumulatedProfit.toFixed(4);
     document.getElementById('stat-maxbet').innerText = globalState.overallMaxBet.toLocaleString();
 
-    // Next Bet Display Logic - ตามเงื่อนไขของคุณ
     if (nextBetAmount === null) {
         nextBetEl.innerText = "ยังไม่เดิมพัน - NO BET";
         nextBetEl.style.background = "#eee";
@@ -389,4 +375,3 @@ function resetAll() {
 </script>
 </body>
 </html>
-
