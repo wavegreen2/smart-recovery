@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Dynamic Recovery (Fixed Logic)</title>
+    <title>Baccarat AI: Dynamic Recovery (Pro)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -17,7 +17,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', 'Sarabun', Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -30,7 +30,7 @@
             width: 100%;
             max-width: 1000px;
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 320px 1fr;
             gap: 20px;
         }
 
@@ -45,7 +45,7 @@
         .sidebar h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
 
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #7f8c8d; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #555; }
         .form-group input { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; }
         .form-group input:focus { border-color: var(--accent); outline: none; }
 
@@ -71,8 +71,8 @@
         }
         .stat-card.profit { border-top-color: var(--tie); }
         .stat-card.loss { border-top-color: var(--banker); }
-        .stat-label { font-size: 0.8rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 1.4rem; font-weight: 800; margin-top: 5px; }
+        .stat-label { font-size: 0.75rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.3rem; font-weight: 800; margin-top: 5px; }
 
         .road-map {
             background: var(--card-bg);
@@ -148,46 +148,46 @@
 
 <div class="container">
     <div class="sidebar">
-        <h2>⚙️ Configuration</h2>
+        <h2>⚙️ ตั้งค่า (Settings)</h2>
         <div class="form-group">
-            <label>Initial Bankroll</label>
+            <label>เงินทุนเริ่มต้น (Initial Bankroll)</label>
             <input type="number" id="init_bank" value="50000">
         </div>
         <div class="form-group">
-            <label>Unit Size (Target)</label>
+            <label>เงินเริ่มต้นเดินไม้ (Unit Size)</label>
             <input type="number" id="unit_size" value="5">
         </div>
         <div class="form-group">
-            <label>Chip Size (Rounding)</label>
+            <label>ชิปขั้นต่ำ (Chip Size)</label>
             <input type="number" id="chip_size" value="5">
         </div>
         <div class="form-group">
-            <label>Stop Loss (Steps)</label>
-            <input type="number" id="max_steps" value="4" readonly style="background:#eee;">
+            <label>ยอดเดิมพันสูงสุด (Max Bet Limit)</label>
+            <input type="number" id="stop_loss_limit" value="75000.0">
         </div>
         <div class="form-group">
-            <label>Virtual Wins Trigger</label>
-            <input type="number" id="v_trigger" value="5">
+            <label>ค่าคอม (Rebate %)</label>
+            <input type="number" id="rebate_rate" value="0.00" step="0.01">
         </div>
-        <button class="btn-reset" onclick="resetAll()">RESET SYSTEM</button>
+        <button class="btn-reset" onclick="resetAll()">รีเซ็ตระบบ (RESET)</button>
     </div>
 
     <div class="main-content">
         <div class="stats-grid">
             <div class="stat-card profit">
-                <div class="stat-label">Net Profit</div>
+                <div class="stat-label">กำไรสุทธิ (Net Profit)</div>
                 <div class="stat-value" id="disp_net">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Current Bet</div>
+                <div class="stat-label">เดิมพันปัจจุบัน (Current Bet)</div>
                 <div class="stat-value" id="disp_bet">0</div>
             </div>
             <div class="stat-card loss">
-                <div class="stat-label">Session Drawdown</div>
+                <div class="stat-label">ไม้ที่ (Step)</div>
                 <div class="stat-value" id="disp_dd">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Bankroll</div>
+                <div class="stat-label">เงินทุนรวม (Total Bankroll)</div>
                 <div class="stat-value" id="disp_total">50,000</div>
             </div>
         </div>
@@ -200,7 +200,7 @@
             <div id="status_badge" class="status-badge">VIRTUAL WAIT: 0/5</div>
 
             <div class="recommendation">
-                <div class="rec-title">NEXT BET AMOUNT</div>
+                <div class="rec-title">ยอดเดิมพันถัดไป (NEXT BET)</div>
                 <div class="rec-amount" id="rec_amount">WAIT</div>
                 <div class="rec-side" id="rec_side">PLAYER</div>
             </div>
@@ -209,7 +209,7 @@
                 <button class="btn-ctrl btn-p" onclick="processResult('P')">PLAYER</button>
                 <button class="btn-ctrl btn-t" onclick="processResult('T')">TIE</button>
                 <button class="btn-ctrl btn-b" onclick="processResult('B')">BANKER</button>
-                <button class="btn-ctrl btn-u" onclick="undo()">↩</button>
+                <button class="btn-ctrl btn-u" onclick="undo()">↩ Undo</button>
             </div>
         </div>
     </div>
@@ -225,7 +225,7 @@
         mode: 'VIRTUAL', // VIRTUAL, REAL
         vWins: 0,
         realStep: 0,
-        baseUnit: 0,     // ยอดเงินเริ่มต้นของ Session นั้นๆ (สำคัญสำหรับ Undo)
+        baseUnit: 0,     
         sessionStartNet: 0
     };
 
@@ -234,52 +234,47 @@
             initBank: parseFloat(document.getElementById('init_bank').value),
             unit: parseFloat(document.getElementById('unit_size').value),
             chip: parseFloat(document.getElementById('chip_size').value),
-            trigger: parseInt(document.getElementById('v_trigger').value, 10),
-            stopLossSteps: 4
+            maxBet: parseFloat(document.getElementById('stop_loss_limit').value),
+            rebate: parseFloat(document.getElementById('rebate_rate').value) / 100, // แปลง % เป็นทศนิยม
+            trigger: 5, // ค่าคงที่ภายใน
+            stopLossSteps: 4 // ค่าคงที่ภายใน
         };
     }
 
-    // ฟังก์ชันคำนวณ Base Unit (ยอดเริ่มเดินเงินเมื่อเข้า Real Mode)
     function computeBaseUnit(net, unit, chip) {
-        // สูตร: (ขาดทุนสะสม + กำไรเป้าหมาย) / 5
         let targetRecovery = (net < 0 ? Math.abs(net) : 0) + unit;
         let calcBase = Math.ceil(targetRecovery / 5);
-        // ปัดเศษตาม Chip size
         calcBase = Math.ceil(calcBase / chip) * chip;
-        // ต้องไม่ต่ำกว่า Unit เริ่มต้น
         return Math.max(calcBase, unit);
     }
 
-    // ฟังก์ชันคำนวณเงินเดิมพัน (Deterministic: คำนวณใหม่ทุกครั้งจาก State)
     function calculateNextBet() {
         const cfg = getSettings();
 
         if (state.mode === 'VIRTUAL') return 0;
 
-        // ถ้าไม่มี baseUnit (เช่นเพิ่งโหลดหน้า) ให้คำนวณใหม่
         let currentBase = state.baseUnit;
         if (!currentBase) currentBase = computeBaseUnit(state.net, cfg.unit, cfg.chip);
 
-        // สูตรเดินเงิน: Base -> Base*2-Chip -> ...
-        // ใช้ Loop คำนวณเพื่อให้ค่าตรงกันเสมอไม่ว่าจะ Undo มากี่ครั้ง
         let calculatedBet = currentBase;
         for (let i = 0; i < state.realStep; i++) {
             calculatedBet = calculatedBet * 2;
-            // Heuristic adjustment ตาม Log: ถ้าไม้ก่อนหน้า > 10 และไม่ใช่ไม้สุดท้าย ให้ลบ Chip
-            // (เป็นการจำลอง Logic จาก Log ตัวอย่าง)
             if (calculatedBet > 20 && i < 2) { 
                 calculatedBet -= cfg.chip;
             }
         }
 
-        // Smart Recovery Cap: ไม่แทงเกินความจำเป็น
         let currentDeficit = Math.abs(state.net);
         let targetTotal = currentDeficit + cfg.unit;
         
-        // ถ้าเบทที่จะแทง มันมากกว่ายอดที่ต้องการเพื่อจบงาน ให้แทงเท่าที่จำเป็น
         if (calculatedBet > targetTotal && state.net < 0) {
             let smartBet = Math.ceil(targetTotal / cfg.chip) * cfg.chip;
             calculatedBet = Math.max(smartBet, currentBase);
+        }
+
+        // ตรวจสอบ Max Bet Limit
+        if (calculatedBet > cfg.maxBet) {
+            calculatedBet = cfg.maxBet;
         }
 
         return calculatedBet;
@@ -288,7 +283,6 @@
     function processResult(res) {
         const cfg = getSettings();
 
-        // 1. Save State for Undo (บันทึกก่อนเปลี่ยนแปลงค่าใดๆ)
         saveState();
 
         if (res === 'T') {
@@ -299,29 +293,30 @@
 
         let betSide = document.getElementById('rec_side').innerText.charAt(0); // P or B
         let isWin = (res === betSide);
-        let betAmount = calculateNextBet(); // ใช้ยอดที่คำนวณได้ปัจจุบัน
+        let betAmount = calculateNextBet(); 
+
+        // คำนวณ Rebate (ค่าคอม)
+        let rebateAmount = 0;
+        if (state.mode === 'REAL') {
+            rebateAmount = betAmount * cfg.rebate;
+            state.net += rebateAmount; // บวกค่าคอมเข้ากำไรทันที
+        }
 
         if (state.mode === 'VIRTUAL') {
             if (res === SIDE_PREF) state.vWins++;
             else state.vWins = 0;
 
             if (state.vWins >= cfg.trigger) {
-                // เข้าสู่ Real Mode
                 state.mode = 'REAL';
                 state.realStep = 0;
                 state.sessionStartNet = state.net;
-                // ล็อก Base Unit ทันทีที่เข้า Session
                 state.baseUnit = computeBaseUnit(state.net, cfg.unit, cfg.chip);
             }
         } else if (state.mode === 'REAL') {
             if (isWin) {
                 state.net += betAmount * (betSide === 'B' ? 0.95 : 1.0);
 
-                // เงื่อนไขจบ Session (แก้ไขใหม่)
-                // 1. ถ้า Net เป็นบวก (กำไรแล้ว) -> จบงาน (Global Win)
-                // 2. หรือ ถ้า Net มากกว่าตอนเริ่ม Session + Unit -> จบงาน (Session Win)
-                
-                let globalTarget = cfg.unit; // เป้าหมายกำไรขั้นต่ำ
+                let globalTarget = cfg.unit; 
                 let isProfit = state.net >= globalTarget;
                 
                 if (isProfit) {
@@ -331,9 +326,7 @@
                     state.baseUnit = 0;
                     alert(`🎉 SESSION WIN! Net: ${state.net.toFixed(0)}`);
                 } else {
-                    // ชนะแต่ยังไม่คืนทุนครบ -> เดินเงินไม้ 1 (Flat Bet) ต่อไป
                     state.realStep = 0; 
-                    // baseUnit คงเดิม ไม่เปลี่ยน
                 }
             } else {
                 state.net -= betAmount;
@@ -357,18 +350,13 @@
     let undoStack = [];
 
     function saveState() {
-        // Deep copy state
         undoStack.push(JSON.parse(JSON.stringify(state)));
         if (undoStack.length > 50) undoStack.shift();
     }
 
     function undo() {
         if (undoStack.length === 0) return;
-        
-        // Restore state
         state = undoStack.pop();
-        
-        // อัปเดตหน้าจอทันที โดยไม่ต้องคำนวณอะไรเพิ่ม
         updateUI();
     }
 
@@ -378,11 +366,8 @@
 
     function updateUI() {
         const cfg = getSettings();
-
-        // คำนวณ Bet ที่จะแสดงผล
         let nextBet = calculateNextBet();
 
-        // แสดงผล Net
         let netElem = document.getElementById('disp_net');
         netElem.innerText = state.net.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
         netElem.style.color = state.net >= 0 ? 'var(--tie)' : 'var(--banker)';
