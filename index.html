@@ -109,36 +109,29 @@
 
         if (consecutiveLoss === 0) {
             if (globalNet < 0) {
-                // คำนวณเบทเพื่อดึงทุนคืน (Session 03 logic: 70.0)
-                // ใช้สูตร ABS(Net) / 4 + Unit เพื่อเฉลี่ยสู้ 4 ไม้
-                bet = Math.ceil((Math.abs(globalNet) / LOSS_LIMIT) + unit);
+                // คำนวณเบทเริ่มต้นเพื่อดึงทุนคืน (Session 03 logic)
+                // เป้าหมายคือทุนสะสม + กำไร 1 unit หาร 4 ไม้
+                bet = Math.ceil((Math.abs(globalNet) + unit) / 4);
             } else {
                 bet = unit;
             }
         } else {
-            // สูตรทบเงินกรณีแพ้ใน Session (Session 01-02 logic: x2)
-            // ปรับตัวคูณให้ตรงกับพฤติกรรม 5 -> 10 -> 20 -> 40
-            bet = Math.ceil(sessionLoss + unit) * 1.5; 
-            // ปรับให้เป็นเลขกลมๆ ตาม Chip
-            bet = Math.ceil(bet / unit) * unit;
-            
-            // ตรวจสอบ Manual Override สำหรับกรณีเฉพาะ (ตัวคูณ 2.0 สำหรับ Martingale)
-            if (sessionLoss == 5) bet = 10;
-            if (sessionLoss == 15) bet = 20;
-            if (sessionLoss == 35) bet = 40;
+            // Martingale Logic (Session 01-02 logic)
+            // ทบตามยอดที่เสียไปจริงใน Session + กำไรที่ตั้งเป้า
+            bet = sessionLoss + unit;
         }
 
-        // เช็คไม้ปิดยอด (Session 03: เหลือ 66.0 เพื่อจบวิน)
-        let targetToWin = (globalNet < 0 ? Math.abs(globalNet) : 0) + unit;
-        if (bet > targetToWin && globalNet < 0) {
-            bet = targetToWin;
+        // เช็คยอดปิด (Target Close) - ถ้าแทงแล้วยอดสุทธิจะเป็นบวกพอดี (Session 03: 66.0)
+        let neededToTarget = (globalNet < 0 ? Math.abs(globalNet) : 0) + unit;
+        if (bet > neededToTarget && globalNet < 0) {
+            bet = neededToTarget;
         }
 
-        // ป้องกันเบทต่ำกว่า Chip Size
-        if (bet < chip) bet = chip;
+        // ป้องกันเบทต่ำกว่า Unit/Chip และปัดเศษ
+        if (bet < unit) bet = unit;
         bet = Math.ceil(bet / chip) * chip;
 
-        return bet > limit ? limit : bet;
+        return (bet > limit) ? limit : bet;
     }
 
     function addHand(res) {
@@ -167,16 +160,18 @@
             if (isWin) {
                 consecutiveLoss = 0;
                 sessionLoss = 0;
-                // ถ้ากำไรกลับมาเป็นบวกแล้ว ให้จบ Session
+                // จบ Session เมื่อยอดรวมกลับมาเป็นบวกตามเป้าหมาย (Unit)
                 if (globalNet >= parseFloat(document.getElementById('unit_size').value)) {
-                    isReal = false; vWins = 0;
+                    isReal = false; 
+                    vWins = 0;
                     alert("SESSION WIN! Net: " + globalNet.toFixed(1));
                 }
             } else {
                 consecutiveLoss++;
                 sessionLoss += bet;
                 if (consecutiveLoss >= LOSS_LIMIT) {
-                    isReal = false; vWins = 0;
+                    isReal = false; 
+                    vWins = 0;
                     alert("STOP LOSS! Net: " + globalNet.toFixed(1));
                 }
             }
@@ -224,7 +219,7 @@
         let cols = [[]], cIdx = 0, last = '';
         history.filter(x => x !== 'T').forEach(r => {
             if (last && r !== last) { cIdx++; cols[cIdx] = []; }
-            if (cols[cIdx].length >= 6) { cIdx++; cols[cIdx] = []; } // ขึ้นคอลัมน์ใหม่ถ้าเต็ม 6
+            if (cols[cIdx].length >= 6) { cIdx++; cols[cIdx] = []; }
             cols[cIdx].push(r); last = r;
         });
         cols.forEach(col => { for (let i = 0; i < 6; i++) {
