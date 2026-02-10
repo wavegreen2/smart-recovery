@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Pro (Python Logic + Alert)</title>
+    <title>Baccarat AI: Pro (Python Logic + Bi-Lingual Alert)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -217,17 +217,19 @@
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            max-width: 300px;
+            max-width: 320px;
             width: 90%;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .modal-icon { font-size: 3rem; margin-bottom: 15px; }
-        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--primary); }
-        .modal-desc { font-size: 0.95rem; color: #7f8c8d; margin-bottom: 20px; }
+        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--primary); line-height: 1.4; }
+        .modal-desc { font-size: 0.95rem; color: #7f8c8d; margin-bottom: 20px; line-height: 1.4; }
+        .modal-sub { display: block; font-size: 0.8em; font-weight: normal; opacity: 0.8; }
+        
         .btn-ack {
-            background: var(--tie); color: white; border: none; padding: 10px 20px;
+            background: var(--tie); color: white; border: none; padding: 12px 20px;
             border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
         .btn-ack:hover { background: #219150; }
 
@@ -346,9 +348,15 @@
 <div class="modal-overlay" id="winModal">
     <div class="modal-box">
         <div class="modal-icon">🎉</div>
-        <div class="modal-title">กำไรตามเป้าหมาย</div>
-        <div class="modal-desc">แนะนำให้รีเซ็ตระบบ</div>
-        <button class="btn-ack" onclick="closeWinModal()">อ่านแล้ว</button>
+        <div class="modal-title">
+            กำไรตามเป้าหมาย <br>
+            <span class="modal-sub">Target Profit Reached</span>
+        </div>
+        <div class="modal-desc">
+            แนะนำให้รีเซ็ตระบบ <br>
+            <span class="modal-sub">Recommend System Reset</span>
+        </div>
+        <button class="btn-ack" onclick="closeWinModal()">อ่านแล้ว (Acknowledge)</button>
     </div>
 </div>
 
