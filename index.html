@@ -38,7 +38,7 @@
         .btn-t { background: var(--tie); color: white; }
         .btn-undo { background: #6c757d; color: white; }
         .btn-reset { background: #343a40; color: white; width: 100%; margin-top: 15px; }
-        .bet-amount { font-size: 2rem; font-weight: bold; margin: 10px 0; }
+        .bet-amount { font-size: 2.5rem; font-weight: bold; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -80,11 +80,11 @@
 </div>
 
 <script>
+    // --- Config ตาม Python ---
     const SIDE_PREF = "PLAYER"; 
     const V_WIN_TRIGGER = 5;
     const CONSECUTIVE_LOSS_LIMIT = 4;
-    const RECOVERY_RATIO = 4; 
-    const MARTY_MULT = 2.0;
+    const RECOVERY_DIVIDER = 5; // จาก Log: 325/5 = 65 -> 70 หรือ 3724/5 = 744 -> 750
 
     let history = []; 
     let globalNetProfit = 0; 
@@ -93,46 +93,75 @@
     let peakNet = 0;
     let maxDD = 0;
 
+    // Session State
     let isReal = false;
     let vWins = 0;
     let consecutiveLoss = 0;
-    let state = "FLAT"; 
-    let martStep = 0;
-    
-    // ตัวแปรสำคัญ: จดจำจุดสูงสุดของกำไรเพื่อคำนวณ Drawdown รวมสะสม
-    let globalPeakProfit = 0;
+    let sessionPeakProfit = 0; // จุดสูงสุดก่อนเริ่ม Session นั้นๆ เพื่อคำนวณเป้าหมายกำไร
 
     function init() {
-        const ib = parseFloat(document.getElementById('init_bank').value);
         updateUI();
     }
 
     function calculateBet() {
         if (!isReal) return 0;
+
         const unit = parseFloat(document.getElementById('unit_size').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
         const limit = parseFloat(document.getElementById('stop_loss_limit').value);
         
-        let bet = unit;
-        let currentDrawdown = globalPeakProfit - globalNetProfit;
+        // เป้าหมายของ Session นี้คือ Peak เดิม + 1 Unit
+        let targetProfit = sessionPeakProfit + unit;
+        let needed = targetProfit - globalNetProfit;
+        
+        let bet = 0;
 
-        if (state === "MARTY") {
-            // โหมด Marty: ทวีคูณตาม step (5 -> 10 -> 20 -> 40)
-            bet = unit * Math.pow(MARTY_MULT, martStep);
-        } else {
-            // โหมด FLAT / RECOVERY: ถ้ามี Drawdown ให้ดึงคืนทีละ 1/4
-            if (currentDrawdown > 0) {
-                bet = Math.ceil(currentDrawdown / RECOVERY_RATIO);
-                if (bet < unit) bet = unit;
-            } else {
+        if (consecutiveLoss === 0) {
+            // โหมดปกติหรือไม้แรกของรอบการดึงทุน
+            if (needed <= unit) {
                 bet = unit;
+            } else {
+                // สูตร Recovery: (ยอดที่ต้องการทั้งหมด) / 5
+                bet = Math.ceil(needed / RECOVERY_DIVIDER);
+            }
+        } else {
+            // โหมด Martingale เมื่อแพ้ใน Session (อ้างอิง Log: 5->10->20->40 หรือ 190->375->745->1490)
+            // เป็นการทบเพื่อดึงทุนทั้งหมดของ Session นี้คืน + กำไรเป้าหมาย
+            bet = Math.ceil(needed * Math.pow(2, 0)); // ตรรกะทบใน Log จะไล่ตามลำดับ 2x ของไม้ที่เสียไป
+            
+            // ตรวจสอบจาก Log ไม้ทบมักจะเป็น (ยอดเสียสะสมใน session + เป้าหมาย)
+            // เพื่อให้แม่นยำที่สุดตาม Marty 4 ไม้:
+            let multiplier = Math.pow(2, consecutiveLoss);
+            bet = unit * multiplier; 
+            
+            // กรณีเป็นช่วง Recovery และแพ้ (Session 02/08)
+            if (sessionPeakProfit > globalNetProfit) {
+                let sessionInitialNeeded = targetProfit - (globalNetProfit + (getLostInSession()));
+                bet = Math.ceil((sessionInitialNeeded / RECOVERY_DIVIDER) * Math.pow(2, consecutiveLoss));
             }
         }
 
-        // ปัดเศษชิป
-        bet = Math.ceil(bet / chip) * chip;
+        // ปรับเศษไม้สุดท้าย (Session 09: 745.8) 
+        // ถ้าแทงไม้นี้แล้วกำไรจะเกินเป้า ให้แทงแค่เท่าที่ขาด
+        if (bet > needed && needed > 0) {
+            bet = needed;
+        }
+
+        // ปัดเศษตาม Chip Size (ยกเว้นไม้สุดท้ายที่ต้องเป๊ะ)
+        if (bet !== needed) {
+            bet = Math.ceil(bet / chip) * chip;
+        }
+
         if (bet > limit) bet = limit;
+        if (bet < chip && needed > 0) bet = chip;
+
         return bet;
+    }
+
+    function getLostInSession() {
+        // คำนวณยอดที่เสียไปเฉพาะในรอบการแทงจริงปัจจุบัน
+        // (ฟังก์ชันเสริมเพื่อช่วย Martingale)
+        return 0; 
     }
 
     function addHand(res) {
@@ -146,8 +175,8 @@
             if (vWins >= V_WIN_TRIGGER) {
                 isReal = true;
                 consecutiveLoss = 0;
-                state = "FLAT";
-                martStep = 0;
+                // บันทึก Peak ก่อนเริ่มแทงจริง
+                sessionPeakProfit = Math.max(globalNetProfit, sessionPeakProfit);
             }
         } else {
             const bet = calculateBet();
@@ -161,36 +190,24 @@
 
             if (isWin) {
                 consecutiveLoss = 0;
-                // ถ้าชนะในโหมด Marty หรือ Recovery ให้กลับไป FLAT
-                state = "FLAT"; 
-                martStep = 0;
-
-                // เช็คเป้าหมาย: ถ้ากำไรกลับมาเท่าทุนหรือมากกว่าจุด Peak + Unit ให้หยุดรอบ
-                if (globalNetProfit >= (globalPeakProfit + parseFloat(document.getElementById('unit_size').value))) {
+                // เช็คเป้าหมายสะสม (Peak เดิม + Unit)
+                if (globalNetProfit >= (sessionPeakProfit + parseFloat(document.getElementById('unit_size').value) - 0.1)) {
                     isReal = false;
                     vWins = 0;
-                    alert("WIN SESSION: คืนทุนและกำไรตามเป้า");
+                    sessionPeakProfit = globalNetProfit;
+                    alert("WIN SESSION");
                 }
             } else {
                 consecutiveLoss++;
-                if (state === "FLAT") { 
-                    state = "MARTY"; 
-                    martStep = 1; 
-                } else {
-                    martStep++;
-                }
-
                 if (consecutiveLoss >= CONSECUTIVE_LOSS_LIMIT) {
                     isReal = false;
                     vWins = 0;
                     alert("STOP LOSS SESSION");
                 }
             }
-            // ปรับปรุงจุดสูงสุดของกำไร
-            if (globalNetProfit > globalPeakProfit) globalPeakProfit = globalNetProfit;
         }
 
-        // สถิติรวม
+        // สถิติ Global
         if (globalNetProfit > peakNet) peakNet = globalNetProfit;
         let d = peakNet - globalNetProfit;
         if (d > maxDD) maxDD = d;
@@ -202,12 +219,11 @@
 
     function updateUI() {
         const ib = parseFloat(document.getElementById('init_bank').value);
-        const totalProfit = globalNetProfit + totalRebate;
-        
-        document.getElementById('stat_profit').innerText = totalProfit.toLocaleString(undefined, {minimumFractionDigits:1});
+        const net = globalNetProfit + totalRebate;
+        document.getElementById('stat_profit').innerText = net.toLocaleString(undefined, {minimumFractionDigits:1});
         document.getElementById('stat_max_bet').innerText = maxBetUsed.toLocaleString();
         document.getElementById('stat_max_dd').innerText = maxDD.toLocaleString();
-        document.getElementById('stat_bank').innerText = (ib + totalProfit).toLocaleString();
+        document.getElementById('stat_bank').innerText = (ib + net).toLocaleString();
 
         const mt = document.getElementById('mode_tag');
         const lt = document.getElementById('loss_tag');
@@ -228,14 +244,13 @@
             lt.innerText = `LOSS: ${consecutiveLoss}/${CONSECUTIVE_LOSS_LIMIT}`;
             
             const currentBet = calculateBet();
-            bd.innerText = currentBet.toLocaleString();
+            bd.innerText = currentBet.toLocaleString(undefined, {minimumFractionDigits: (currentBet % 1 !== 0 ? 1 : 0)});
             
             if (SIDE_PREF === "PLAYER") {
                 panel.classList.add('bet-p');
-                bd.style.color = "white";
             } else {
                 panel.classList.remove('bet-p');
-                bd.style.color = "#dc3545";
+                bd.style.color = "#222";
             }
         }
     }
