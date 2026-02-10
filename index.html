@@ -48,7 +48,7 @@
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #7f8c8d; }
         .form-group input { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; }
-        .form-group input:focus { border-color: var(--accent); outline: none; }
+        .form-group input:focus { border-color: var(--accent); }
 
         .btn-reset {
             width: 100%; padding: 12px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;
@@ -397,7 +397,8 @@
     function undo() {
         if (undoStack.length > 0) {
             state = undoStack.pop();
-            state.history.pop(); // Remove last result from history visual
+            // Reset current bet to the last calculated value
+            state.currentBet = calculateNextBet(); // Recalculate the current bet based on the previous state
             updateUI();
         }
     }
