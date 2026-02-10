@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Pro (Python Logic)</title>
+    <title>Baccarat AI: Pro (Python Logic + Alert)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -203,6 +203,39 @@
         .btn-t { background: var(--tie); box-shadow: 0 3px 0 #1e8449; }
         .btn-u { background: #95a5a6; box-shadow: 0 3px 0 #7f8c8d; }
 
+        /* Custom Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+            justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 300px;
+            width: 90%;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-icon { font-size: 3rem; margin-bottom: 15px; }
+        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--primary); }
+        .modal-desc { font-size: 0.95rem; color: #7f8c8d; margin-bottom: 20px; }
+        .btn-ack {
+            background: var(--tie); color: white; border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;
+            font-size: 1rem;
+        }
+        .btn-ack:hover { background: #219150; }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
         @media (max-width: 768px) {
             body { height: auto; overflow: auto; }
             .container { grid-template-columns: 1fr; height: auto; }
@@ -309,17 +342,26 @@
     </div>
 </div>
 
+<!-- Success Modal -->
+<div class="modal-overlay" id="winModal">
+    <div class="modal-box">
+        <div class="modal-icon">🎉</div>
+        <div class="modal-title">กำไรตามเป้าหมาย</div>
+        <div class="modal-desc">แนะนำให้รีเซ็ตระบบ</div>
+        <button class="btn-ack" onclick="closeWinModal()">อ่านแล้ว</button>
+    </div>
+</div>
+
 <script>
-    const SIDE_PREF = 'P'; // Fixed as per Python Logic
+    const SIDE_PREF = 'P'; 
 
     let state = {
         history: [],
         net: 0,
         mode: 'VIRTUAL', 
         vWins: 0,
-        realStep: 0, // Counts consecutive losses in Real Mode
+        realStep: 0, 
         baseUnit: 0,     
-        // Stats Tracking
         maxBetRecord: 0,
         minNetRecord: 0 
     };
@@ -331,52 +373,32 @@
             chip: parseFloat(document.getElementById('chip_size').value),
             maxBet: parseFloat(document.getElementById('max_bet_limit').value),
             rebate: parseFloat(document.getElementById('rebate_rate').value) / 100,
-            trigger: 5, // Virtual Win Trigger
-            stopLossSteps: 4 // Stop after 4 consecutive losses
+            trigger: 5, 
+            stopLossSteps: 4 
         };
     }
 
-    // --- PYTHON LOGIC MATCH: Compute Base Unit ---
-    // Python: active_unit = max(unit, target / 5)
-    // Python: active_unit = ceil(active_unit / chip) * chip
     function computeBaseUnit(net, unit, chip) {
-        // Target is always to get back to +Unit (Global)
         let targetRecovery = (net < 0 ? Math.abs(net) : 0) + unit;
-        
-        // Recovery Ratio = 5 (Aggressive)
         let calcBase = Math.max(unit, targetRecovery / 5);
-        
-        // Round up to nearest Chip Size
         calcBase = Math.ceil(calcBase / chip) * chip;
-        
         return Math.max(calcBase, chip);
     }
 
-    // --- PYTHON LOGIC MATCH: Calculate Next Bet ---
     function calculateNextBet() {
         const cfg = getSettings();
 
         if (state.mode === 'VIRTUAL') return 0;
 
-        // 1. Determine Raw Bet (Martingale Logic: 2^step)
-        // Step 0: Base, Step 1: Base*2, Step 2: Base*4...
         let rawBet = state.baseUnit * Math.pow(2, state.realStep);
-
-        // 2. Betting Constraints (The "Last Bet" Fix)
-        // Python: remaining = target - current_profit
-        // If bet > remaining, adjust bet.
-        
-        let targetGlobalNet = cfg.unit; // We want to reach at least +Unit globally
+        let targetGlobalNet = cfg.unit; 
         let remaining = targetGlobalNet - state.net;
 
         if (remaining > 0 && rawBet > remaining) {
-            // Python: required_bet = math.ceil(remaining / chip) * chip
             let requiredBet = Math.ceil(remaining / cfg.chip) * cfg.chip;
-            // Python: bet = max(unit_size, required_bet)
             rawBet = Math.max(cfg.unit, requiredBet);
         }
 
-        // Cap at Max Bet
         if (rawBet > cfg.maxBet) {
             rawBet = cfg.maxBet;
         }
@@ -395,59 +417,48 @@
             return;
         }
 
-        let betSide = SIDE_PREF; // Always PLAYER preference as per Python
+        let betSide = SIDE_PREF; 
         let isWin = (res === betSide);
         let betAmount = calculateNextBet(); 
 
-        // Track Max Bet Record
         if (state.mode === 'REAL' && betAmount > state.maxBetRecord) {
             state.maxBetRecord = betAmount;
         }
 
-        // Rebate Logic
         if (state.mode === 'REAL') {
             let rebateAmount = betAmount * cfg.rebate;
             state.net += rebateAmount;
         }
 
         if (state.mode === 'VIRTUAL') {
-            // Virtual Mode: Wait for consecutive wins
             if (isWin) state.vWins++;
             else state.vWins = 0;
 
             if (state.vWins >= cfg.trigger) {
                 state.mode = 'REAL';
                 state.realStep = 0;
-                // Calculate Base Unit for the new session
                 state.baseUnit = computeBaseUnit(state.net, cfg.unit, cfg.chip);
             }
         } else if (state.mode === 'REAL') {
             if (isWin) {
-                // WIN Logic
                 state.net += betAmount * (betSide === 'B' ? 0.95 : 1.0);
 
-                // Check Session Win Condition
-                // Python: if (bankroll - initial) >= target -> Win
-                // Target is basically getting back to positive (+Unit)
                 if (state.net >= cfg.unit) {
                     state.mode = 'VIRTUAL';
                     state.vWins = 0;
                     state.realStep = 0;
                     state.baseUnit = 0;
-                    if (!isBatch) console.log(`🎉 SESSION WIN! Net: ${state.net.toFixed(0)}`);
+                    
+                    // Trigger Alert if not in batch mode
+                    if (!isBatch) showWinModal();
+
                 } else {
-                    // Won the hand, but haven't reached target yet?
-                    // Python script resets to FLAT after a win within a session
-                    // "if is_win: state, mart_step = FLAT, 0"
                     state.realStep = 0; 
                 }
             } else {
-                // LOSS Logic
                 state.net -= betAmount;
-                state.realStep++; // Increment Step
+                state.realStep++; 
 
-                // Check Stop Loss Condition
-                // Python: if consecutive_loss >= stop_after_consecutive_loss (4)
                 if (state.realStep >= cfg.stopLossSteps) {
                     state.mode = 'VIRTUAL';
                     state.vWins = 0;
@@ -458,13 +469,21 @@
             }
         }
 
-        // Track Max Drawdown (Lowest Net)
         if (state.net < state.minNetRecord) {
             state.minNetRecord = state.net;
         }
 
         state.history.push(res);
         if (!isBatch) updateUI();
+    }
+
+    // --- Modal Functions ---
+    function showWinModal() {
+        document.getElementById('winModal').style.display = 'flex';
+    }
+
+    function closeWinModal() {
+        document.getElementById('winModal').style.display = 'none';
     }
 
     // --- Import & Simulation Logic ---
