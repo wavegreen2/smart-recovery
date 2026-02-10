@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Dynamic Recovery (Pro)</title>
+    <title>Baccarat AI: Dynamic Recovery (Pro + Sim)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -24,8 +24,8 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            height: 100vh; /* Fix height to viewport */
-            overflow: hidden; /* Prevent body scroll if not needed */
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
@@ -34,7 +34,7 @@
             display: grid;
             grid-template-columns: 320px 1fr;
             gap: 20px;
-            height: 95vh; /* Contain within screen */
+            height: 95vh;
         }
 
         /* Sidebar Settings */
@@ -44,20 +44,28 @@
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             height: fit-content;
-            overflow-y: auto; /* Scroll sidebar if too tall */
+            overflow-y: auto;
             max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .sidebar h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        .sidebar h2 { margin-top: 0; font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 0;}
+        .section-title { font-size: 0.9rem; font-weight: bold; color: var(--accent); margin-top: 10px; border-bottom: 1px dashed #bdc3c7; padding-bottom: 5px; }
 
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #555; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; }
-        .form-group input:focus { border-color: var(--accent); outline: none; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 3px; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box; transition: 0.3s; }
+        .form-group textarea { resize: vertical; height: 60px; font-family: monospace; font-size: 0.8rem; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); outline: none; }
 
-        .btn-reset {
-            width: 100%; padding: 12px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;
+        .btn-action {
+            width: 100%; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-top: 5px;
         }
+        .btn-sim { background: var(--accent); }
+        .btn-sim:hover { background: #2980b9; }
+        .btn-reset { background: #95a5a6; margin-top: 15px; }
         .btn-reset:hover { background: #7f8c8d; }
 
         /* Main Content */
@@ -65,7 +73,7 @@
             display: flex; 
             flex-direction: column; 
             gap: 20px; 
-            overflow-y: auto; /* Allow main content to scroll vertically if needed */
+            overflow-y: auto; 
             padding-right: 5px;
         }
 
@@ -74,7 +82,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
-            flex-shrink: 0; /* Prevent shrinking */
+            flex-shrink: 0;
         }
         .stat-card {
             background: var(--card-bg);
@@ -89,7 +97,7 @@
         .stat-label { font-size: 0.75rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-value { font-size: 1.3rem; font-weight: 800; margin-top: 5px; }
 
-        /* Road Map - Fixed Scrolling */
+        /* Road Map */
         .road-map {
             background: var(--card-bg);
             padding: 15px;
@@ -97,8 +105,6 @@
             min-height: 140px;
             display: flex;
             align-items: center;
-            
-            /* Key properties for scrolling ONLY this box */
             overflow-x: auto; 
             white-space: nowrap;
             width: 100%;
@@ -107,7 +113,6 @@
             flex-shrink: 0;
         }
         
-        /* Custom Scrollbar for Road Map */
         .road-map::-webkit-scrollbar { height: 8px; }
         .road-map::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .road-map::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 4px; }
@@ -119,7 +124,7 @@
             grid-auto-flow: column;
             grid-auto-columns: 30px;
             gap: 2px;
-            padding-right: 20px; /* Space at the end */
+            padding-right: 20px;
         }
         .road-cell {
             width: 28px; height: 28px;
@@ -183,6 +188,7 @@
 <div class="container">
     <div class="sidebar">
         <h2>⚙️ ตั้งค่า (Settings)</h2>
+        
         <div class="form-group">
             <label>เงินทุนเริ่มต้น (Initial Bankroll)</label>
             <input type="number" id="init_bank" value="50000">
@@ -203,6 +209,21 @@
             <label>ค่าคอม (Rebate %)</label>
             <input type="number" id="rebate_rate" value="0.00" step="0.01">
         </div>
+
+        <div class="section-title">🧪 จำลองผล (Simulation)</div>
+        <div class="form-group">
+            <label>จำนวนมือ (Hands)</label>
+            <input type="number" id="sim_hands" value="100">
+        </div>
+        <button class="btn-action btn-sim" onclick="runSimulation()">🎲 สุ่มผล (Random Sim)</button>
+
+        <div class="section-title">📥 นำเข้าข้อมูล (Import Logs)</div>
+        <div class="form-group">
+            <label>วางข้อมูล (Paste CSV/Text)</label>
+            <textarea id="import_logs" placeholder="1,B,T,P..."></textarea>
+        </div>
+        <button class="btn-action btn-sim" onclick="runImport()">🚀 รันข้อมูล (Run Import)</button>
+
         <button class="btn-reset" onclick="resetAll()">รีเซ็ตระบบ (RESET)</button>
     </div>
 
@@ -252,11 +273,10 @@
 <script>
     const SIDE_PREF = 'P';
 
-    // State เริ่มต้น
     let state = {
         history: [],
         net: 0,
-        mode: 'VIRTUAL', // VIRTUAL, REAL
+        mode: 'VIRTUAL', 
         vWins: 0,
         realStep: 0,
         baseUnit: 0,     
@@ -269,9 +289,9 @@
             unit: parseFloat(document.getElementById('unit_size').value),
             chip: parseFloat(document.getElementById('chip_size').value),
             maxBet: parseFloat(document.getElementById('stop_loss_limit').value),
-            rebate: parseFloat(document.getElementById('rebate_rate').value) / 100, // แปลง % เป็นทศนิยม
-            trigger: 5, // ค่าคงที่ภายใน
-            stopLossSteps: 4 // ค่าคงที่ภายใน
+            rebate: parseFloat(document.getElementById('rebate_rate').value) / 100,
+            trigger: 5,
+            stopLossSteps: 4
         };
     }
 
@@ -306,7 +326,6 @@
             calculatedBet = Math.max(smartBet, currentBase);
         }
 
-        // ตรวจสอบ Max Bet Limit
         if (calculatedBet > cfg.maxBet) {
             calculatedBet = cfg.maxBet;
         }
@@ -314,26 +333,31 @@
         return calculatedBet;
     }
 
-    function processResult(res) {
+    // เพิ่ม Parameter isBatch เพื่อไม่ให้ Update UI ทุกครั้งถ้าทำงานเป็นชุด
+    function processResult(res, isBatch = false) {
         const cfg = getSettings();
 
-        saveState();
+        // Save state only if not in batch mode (or save once before batch)
+        if (!isBatch) saveState();
 
         if (res === 'T') {
             state.history.push('T');
-            updateUI();
+            if (!isBatch) updateUI();
             return;
         }
 
-        let betSide = document.getElementById('rec_side').innerText.charAt(0); // P or B
+        // Logic การเลือกฝั่ง (ใน Sim/Import เราต้องรู้ว่าระบบจะแทงอะไรก่อนผลออก)
+        // ในที่นี้ระบบ Fix เป็น Player (SIDE_PREF) ตาม Logic เดิม
+        let betSide = 'P'; 
+        // ถ้าต้องการให้ระบบเลือกตาม Road Map ต้องแก้ตรงนี้ แต่ตอนนี้ใช้ Fix P
+        
         let isWin = (res === betSide);
         let betAmount = calculateNextBet(); 
 
-        // คำนวณ Rebate (ค่าคอม)
         let rebateAmount = 0;
         if (state.mode === 'REAL') {
             rebateAmount = betAmount * cfg.rebate;
-            state.net += rebateAmount; // บวกค่าคอมเข้ากำไรทันที
+            state.net += rebateAmount;
         }
 
         if (state.mode === 'VIRTUAL') {
@@ -358,7 +382,8 @@
                     state.vWins = 0;
                     state.realStep = 0;
                     state.baseUnit = 0;
-                    alert(`🎉 SESSION WIN! Net: ${state.net.toFixed(0)}`);
+                    // ใน Batch Mode เราจะไม่ Alert
+                    if (!isBatch) alert(`🎉 SESSION WIN! Net: ${state.net.toFixed(0)}`);
                 } else {
                     state.realStep = 0; 
                 }
@@ -371,13 +396,55 @@
                     state.vWins = 0;
                     state.realStep = 0;
                     state.baseUnit = 0;
-                    alert(`🛑 STOP LOSS! Net: ${state.net.toFixed(0)}`);
+                    if (!isBatch) alert(`🛑 STOP LOSS! Net: ${state.net.toFixed(0)}`);
                 }
             }
         }
 
         state.history.push(res);
+        if (!isBatch) updateUI();
+    }
+
+    // --- Import & Simulation Logic ---
+
+    function runImport() {
+        let text = document.getElementById('import_logs').value;
+        if (!text) return;
+
+        // บันทึก State ก่อนเริ่ม Batch ครั้งเดียว เพื่อให้ Undo กลับมาจุดเริ่มต้นได้
+        saveState();
+
+        // ค้นหาเฉพาะ P, B, T (Case Insensitive)
+        let matches = text.match(/[PBT]/gi);
+        
+        if (matches && matches.length > 0) {
+            matches.forEach(res => {
+                processResult(res.toUpperCase(), true); // true = Batch Mode
+            });
+            updateUI(); // Update ทีเดียวตอนจบ
+            alert(`✅ นำเข้าข้อมูลสำเร็จ ${matches.length} มือ`);
+        } else {
+            alert("❌ ไม่พบข้อมูล P, B, T ในข้อความ");
+        }
+    }
+
+    function runSimulation() {
+        let count = parseInt(document.getElementById('sim_hands').value);
+        if (isNaN(count) || count <= 0) return;
+
+        saveState(); // Save ก่อนเริ่ม
+
+        // Probabilities: P 49.32%, B 50.68% (No Tie in generation)
+        const pRate = 49.32;
+        
+        for (let i = 0; i < count; i++) {
+            let rand = Math.random() * 100;
+            let res = (rand < pRate) ? 'P' : 'B';
+            processResult(res, true);
+        }
+
         updateUI();
+        alert(`🎲 จำลองผลสำเร็จ ${count} มือ`);
     }
 
     // --- Undo System ---
@@ -437,6 +504,8 @@
 
     function renderRoadMap() {
         const grid = document.getElementById('road_grid');
+        // ใช้ DocumentFragment เพื่อความเร็วในการ render ข้อมูลจำนวนมาก
+        const fragment = document.createDocumentFragment();
         grid.innerHTML = '';
 
         let columns = [];
@@ -464,9 +533,11 @@
                     cell.classList.add(col[i]);
                     cell.innerText = col[i];
                 }
-                grid.appendChild(cell);
+                fragment.appendChild(cell);
             }
         });
+
+        grid.appendChild(fragment);
 
         // Auto scroll to right
         const roadMap = document.querySelector('.road-map');
