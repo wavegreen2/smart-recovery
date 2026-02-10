@@ -2,333 +2,156 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLAT BET - Python Logic Clone</title>
+    <title>Baccarat Money Management (Exact Python Logic)</title>
     <style>
-        :root { --player: #007bff; --banker: #dc3545; --tie: #28a745; --bg: #222; --card: #333; --text: #eee; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
-        .wrapper { max-width: 1000px; margin: auto; display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
-        .sidebar { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid #444; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        .input-group input { width: 100%; padding: 8px; background: #444; border: 1px solid #555; color: white; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
-        
-        .main-panel { background: var(--card); padding: 20px; border-radius: 8px; border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: #444; padding: 10px; border-radius: 5px; text-align: center; }
-        .stat-label { font-size: 10px; color: #aaa; }
-        .stat-val { font-size: 1.2rem; font-weight: bold; }
-        .val-win { color: #28a745; } .val-loss { color: #dc3545; }
-
-        .road-container { background: #eee; padding: 10px; border-radius: 5px; overflow-x: auto; margin-bottom: 20px; min-height: 150px; }
-        .road-grid { display: grid; grid-template-rows: repeat(6, 24px); grid-auto-flow: column; gap: 2px; }
-        .bead { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: bold; }
-        .bead.P { background: var(--player); } .bead.B { background: var(--banker); } .bead.T { background: var(--tie); }
-
-        .control-area { text-align: center; }
-        .bet-display { font-size: 3rem; margin: 20px 0; font-weight: bold; color: #ffc107; text-shadow: 0 0 10px rgba(255,193,7,0.3); }
-        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; background: #555; margin-bottom: 10px; }
-        .status-badge.active { background: #007bff; color: white; }
-        
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; max-width: 400px; margin: auto; }
-        button { padding: 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.1s; color: white; }
-        .btn-p { background: var(--player); } .btn-p:active { opacity: 0.8; }
-        .btn-b { background: var(--banker); } .btn-b:active { opacity: 0.8; }
-        .btn-t { background: var(--tie); }
-        .btn-undo { background: #6c757d; grid-column: span 3; margin-top: 10px; }
-
-        .console-log { margin-top: 20px; background: black; color: #0f0; padding: 10px; height: 150px; overflow-y: auto; font-size: 12px; border-radius: 5px; font-family: 'Courier New', monospace; border: 1px solid #333; }
-        .log-line { margin-bottom: 2px; border-bottom: 1px solid #111; }
+        body { font-family: 'Consolas', monospace; background: #1a1a1a; color: #00ff00; padding: 20px; }
+        .container { max-width: 800px; margin: auto; border: 1px solid #333; padding: 20px; border-radius: 10px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; text-align: center; }
+        .stat-box { background: #222; padding: 10px; border-radius: 5px; border: 1px solid #444; }
+        .bet-area { text-align: center; font-size: 2.5rem; margin: 30px 0; color: #ffff00; }
+        .btn-group { display: flex; gap: 10px; justify-content: center; }
+        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; }
+        .btn-p { background: #007bff; color: white; }
+        .btn-b { background: #dc3545; color: white; }
+        .btn-t { background: #28a745; color: white; }
+        .log-area { background: #000; height: 200px; overflow-y: auto; padding: 10px; margin-top: 20px; font-size: 0.9rem; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="sidebar">
-        <h3>⚙️ CONFIG (ห้ามเปลี่ยน)</h3>
-        <div class="input-group"><label>INITIAL BANK</label><input type="number" id="init_bank" value="500000" readonly></div>
-        <div class="input-group"><label>UNIT SIZE</label><input type="number" id="unit_size" value="5" readonly></div>
-        <div class="input-group"><label>DIVIDER (RECOVERY)</label><input type="number" id="divider" value="5" readonly></div>
-        <div class="input-group"><label>STOP LOSS LIMIT</label><input type="number" id="sl_limit" value="75000" readonly></div>
-        <div class="input-group"><label>REBATE (0.01)</label><input type="number" id="rebate" value="0.01" readonly></div>
-        <div style="font-size:10px; color:#666; margin-top:20px;">
-            Logic: Flat (Drawdown/5) <br>
-            Marty: (Bet*2 - Unit) x 2 Steps <br>
-            Last: (Bet*2) Full
-        </div>
+<div class="container">
+    <div class="stats">
+        <div class="stat-box">Net Profit<br><span id="net_profit">0.00</span></div>
+        <div class="stat-box">Status<br><span id="status">VIRTUAL</span></div>
+        <div class="stat-box">Session<br><span id="session_count">1</span></div>
     </div>
 
-    <div class="main-panel">
-        <div>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-label">NET PROFIT</div><div class="stat-val" id="disp_net">0.0</div></div>
-                <div class="stat-box"><div class="stat-label">MAX DD</div><div class="stat-val" id="disp_dd">0</div></div>
-                <div class="stat-box"><div class="stat-label">BANKROLL</div><div class="stat-val" id="disp_bank">500,000</div></div>
-                <div class="stat-box"><div class="stat-label">LAST BET</div><div class="stat-val" id="disp_last_bet">0</div></div>
-            </div>
-
-            <div class="road-container"><div class="road-grid" id="road_grid"></div></div>
-        </div>
-
-        <div class="control-area">
-            <div id="status_text" class="status-badge">VIRTUAL WAIT: 0/5</div>
-            <div id="bet_display" class="bet-display">WAIT</div>
-            <div style="margin-bottom:15px; color:#aaa; font-size:12px;">TARGET: <span id="target_val">WAIT</span></div>
-
-            <div class="btn-grid">
-                <button class="btn-p" onclick="processHand('P')">PLAYER</button>
-                <button class="btn-t" onclick="processHand('T')">TIE</button>
-                <button class="btn-b" onclick="processHand('B')">BANKER</button>
-                <button class="btn-undo" onclick="undo()">UNDO LAST</button>
-            </div>
-        </div>
-        
-        <div class="console-log" id="console_log">
-            <div class="log-line">> System Ready. Mode: Manual</div>
-        </div>
+    <div class="bet-area">
+        <div style="font-size: 1rem; color: #888;">NEXT RECOMMENDED BET</div>
+        👉 [BET: <span id="current_bet">5.0</span>]
     </div>
+
+    <div class="btn-group">
+        <button class="btn-p" onclick="handleInput('P')">PLAYER (P)</button>
+        <button class="btn-t" onclick="handleInput('T')">TIE (T)</button>
+        <button class="btn-b" onclick="handleInput('B')">BANKER (B)</button>
+    </div>
+
+    <div class="log-area" id="log"></div>
 </div>
 
 <script>
-    // --- CORE VARIABLES ---
-    const CONF = { unit: 5, chip: 1, rebate: 0.01, divider: 5, max_loss_steps: 4 };
-    const TARGET_SIDE = 'P'; // ตาม Log เล่นแต่ Player
+    // --- การตั้งค่า (ห้ามเปลี่ยน) ---
+    const UNIT = 5.0;
+    const CHIP = 5.0;
+    const VIRTUAL_LIMIT = 5;
+    const MARTY_LIMIT = 4;
 
-    let state = {
-        history: [],
-        globalNet: 0,
-        peakNet: 0,       // กำไรสูงสุดที่เคยทำได้ (เพื่อคำนวณ Drawdown)
-        currentSessionPeak: 0, // จุดอ้างอิงของ Session ปัจจุบัน
-        isReal: false,
-        virtualWins: 0,
-        consecutiveLoss: 0,
-        lastBetAmount: 0,
-        maxDD: 0,
-        logCount: 0
-    };
+    // --- สถานะระบบ ---
+    let globalNet = 0.0;
+    let virtualWins = 0;
+    let isReal = false;
+    let consecutiveLoss = 0;
+    let lastBetAmount = UNIT;
+    let sessionID = 1;
+    let currentSessionLoss = 0; // ยอดเสียเฉพาะใน session นั้นๆ
 
-    // --- MAIN LOGIC ---
-    
-    function getNextBet() {
-        if (!state.isReal) return 0;
+    function calculateBet() {
+        if (!isReal) return UNIT;
 
-        // สูตร: ต้องการกำไรคืนกลับไปที่ (SessionPeak + 1 Unit)
-        let targetAmount = state.currentSessionPeak + CONF.unit; 
-        let needed = targetAmount - state.globalNet;
-
-        // ถ้ากำไรเกินเป้าแล้ว (กรณีติด Rebate)
-        if (needed <= 0) needed = 0;
-
-        let bet = 0;
-
-        if (state.consecutiveLoss === 0) {
-            // --- FLAT MODE (RECOVERY) ---
-            // สูตรจาก Log: S08 (-3724) -> Bet 750 (3724/5 = 744.8 ปัดขึ้น)
-            // สูตรจาก Log: S03 (-325) -> Bet 70 (325/5 = 65... เอ๊ะ ทำไม 70? อาจจะปัดเศษ 10?)
-            // เอาตาม Log S08 แม่นยำสุดคือ ceil(Needed / 5)
-            bet = Math.ceil(needed / CONF.divider);
-            if (bet < CONF.unit) bet = CONF.unit;
-            
-            // Limit ไม้สุดท้ายไม่ให้เกิน Needed (S09: 745.8)
-            if (bet > needed && needed > 0) bet = needed;
-        } 
-        else {
-            // --- MARTINGALE HYBRID MODE ---
-            // ใช้ค่า Bet ของไม้ก่อนหน้าเป็นฐาน
-            let prevBet = state.lastBetAmount;
-            
-            if (state.consecutiveLoss < 3) {
-                // ไม้ 2 และ 3: สูตร (Prev * 2) - Unit
-                // S06: 15 -> 25 (15*2 - 5)
-                // S09: 750 -> 1495 (750*2 - 5)
-                bet = (prevBet * 2) - CONF.unit;
-            } else {
-                // ไม้ 4 (ไม้สุดท้าย): สูตร Prev * 2 เต็มจำนวน
-                // S06: 45 -> 90
-                bet = prevBet * 2;
+        // 1. ถ้าเพิ่งเริ่มแทงจริง หรือชนะไม้ก่อนหน้าแต่ยังไม่จบ Session
+        if (consecutiveLoss === 0) {
+            if (globalNet < 0) {
+                // สูตร Recovery: (ยอดเสียสะสม + เป้าหมาย) / 5
+                let needed = Math.abs(globalNet) + UNIT;
+                let bet = Math.ceil((needed / 5) / 1) * 1; // ปรับเป็นเลขกลมๆ ตาม Log (เช่น 750)
+                
+                // เช็คว่าถ้าแทงไม้นี้แล้วจะเกินเป้า ให้แทงแค่เศษที่ขาด (Perfect Exit เหมือน 745.8)
+                if (globalNet + bet > UNIT) {
+                    return parseFloat((UNIT - globalNet).toFixed(1));
+                }
+                return bet < UNIT ? UNIT : bet;
             }
+            return UNIT;
+        } 
+        
+        // 2. ถ้าแพ้ (Martingale)
+        // สูตรตาม Log: (ไม้ที่แล้ว * 2) - UNIT
+        let nextMarty = (lastBetAmount * 2) - UNIT;
+        
+        // ไม้สุดท้ายของ Marty (ไม้ 4) ใน Log บางครั้งจะเป็นการ x2 เต็มๆ 
+        if (consecutiveLoss === 3) {
+            nextMarty = lastBetAmount * 2;
         }
 
-        // ปัดเศษทศนิยม (ยกเว้นไม้จบเกมที่ต้องการความเป๊ะ)
-        if (state.consecutiveLoss === 0 && Math.abs(bet - needed) < 1) {
-             // ไม้สุดท้ายยอมให้มีทศนิยม (S09: 745.8)
-             bet = parseFloat(bet.toFixed(2));
-        } else {
-             bet = Math.ceil(bet); // ปกติปัดขึ้นเต็มจำนวน
-        }
-
-        return bet;
+        return nextMarty;
     }
 
-    function processHand(res) {
-        if (res === 'T') {
-            log(`👉 [TIE] Hand ignored.`);
-            state.history.push('T');
-            renderRoad();
-            return;
-        }
+    function handleInput(result) {
+        if (result === 'T') return; // ข้าม Tie
 
-        let isWin = (res === TARGET_SIDE);
-        let betAmount = getNextBet();
-        
-        // --- VIRTUAL MODE ---
-        if (!state.isReal) {
-            if (isWin) state.virtualWins++; else state.virtualWins = 0;
+        const bet = calculateBet();
+        const isWin = (result === 'P'); // ตาม Log เน้นแทง P
+
+        if (!isReal) {
+            // โหมด Virtual
+            if (isWin) virtualWins++; else virtualWins = 0;
+            addLog(`[V] Result: ${result} | Streak: ${virtualWins}/${VIRTUAL_LIMIT}`);
             
-            log(`[V] Result: ${res} | Streak: ${state.virtualWins}/5`);
-            updateUI(); // Update UI to show waiting status
-
-            if (state.virtualWins >= 5) {
-                state.isReal = true;
-                state.consecutiveLoss = 0;
-                // ตั้งเป้าหมายใหม่ โดยอิงจากยอดเงินสูงสุด ณ ปัจจุบัน
-                state.currentSessionPeak = Math.max(state.globalNet, state.peakNet);
-                log(`✅ TARGET REACHED. STARTING REAL BETS.`);
-                updateUI(); // Force update to show first bet
+            if (virtualWins >= VIRTUAL_LIMIT) {
+                isReal = true;
+                consecutiveLoss = 0;
+                addLog(`🔔 START REAL SESSION ${sessionID}`);
             }
-        } 
-        // --- REAL MODE ---
-        else {
-            state.lastBetAmount = betAmount;
-            
-            // คำนวณกำไร/ขาดทุน (Rebate คิดเสมอไม่ว่าจะแพ้หรือชนะ)
-            let rebateAmt = betAmount * CONF.rebate;
-            let profit = isWin ? betAmount : -betAmount;
-            
-            // Banker Win โดนหัก 5% (เฉพาะกรณีเราแทง Banker แต่ Logic นี้แทง Player ตลอด ดังนั้นได้เต็ม)
-            // แต่ถ้าอนาคตเปลี่ยนฝั่งแทง: if (TARGET_SIDE === 'B' && isWin) profit = betAmount * 0.95;
-
-            state.globalNet += (profit + rebateAmt);
-
-            log(`👉 [BET: ${betAmount}] Result: ${res} | Net: ${state.globalNet.toFixed(2)}`);
-
+        } else {
+            // โหมดแทงจริง
+            lastBetAmount = bet;
             if (isWin) {
-                state.consecutiveLoss = 0;
-                // Check Session Target: ต้องมากกว่า Peak เดิม + 1 Unit (S03 จบที่ 21.0 ทั้งที่เริ่มจากติดลบ)
-                let targetToStop = state.currentSessionPeak + CONF.unit - 0.1; // -0.1 เผื่อเรื่องทศนิยม
+                globalNet += bet;
+                consecutiveLoss = 0;
+                addLog(`👉 [BET: ${bet}] Result: ${result} | WIN | Net: ${globalNet.toFixed(1)}`);
                 
-                if (state.globalNet >= targetToStop) {
-                    state.isReal = false;
-                    state.virtualWins = 0;
-                    state.peakNet = Math.max(state.peakNet, state.globalNet);
-                    log(`🎉 [SESSION WIN] Profit Locked. Back to Virtual.`);
+                // เช็คเงื่อนไขจบ Session
+                if (globalNet >= UNIT) {
+                    addLog(`✅ [Session ${sessionID}] Status: WIN | Net: ${globalNet.toFixed(1)}`);
+                    resetToVirtual();
                 }
             } else {
-                state.consecutiveLoss++;
-                if (state.consecutiveLoss >= CONF.max_loss_steps) {
-                    state.isReal = false;
-                    state.virtualWins = 0;
-                    log(`🛑 [STOP LOSS] 4 Losses Hit. Back to Virtual.`);
+                globalNet -= bet;
+                consecutiveLoss++;
+                addLog(`👉 [BET: ${bet}] Result: ${result} | LOSS | Net: ${globalNet.toFixed(1)}`);
+                
+                if (consecutiveLoss >= MARTY_LIMIT) {
+                    addLog(`❌ [Session ${sessionID}] Status: STOP_LOSS | Net: ${globalNet.toFixed(1)}`);
+                    resetToVirtual();
                 }
             }
         }
-
-        // Stats Update
-        if (state.globalNet > state.peakNet) state.peakNet = state.globalNet;
-        let currentDD = state.peakNet - state.globalNet;
-        if (currentDD > state.maxDD) state.maxDD = currentDD;
-
-        state.history.push(res);
-        renderRoad();
         updateUI();
     }
 
+    function resetToVirtual() {
+        isReal = false;
+        virtualWins = 0;
+        consecutiveLoss = 0;
+        sessionID++;
+    }
+
     function updateUI() {
-        // Update Stats
-        document.getElementById('disp_net').innerText = state.globalNet.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-        document.getElementById('disp_net').className = "stat-val " + (state.globalNet >= 0 ? "val-win" : "val-loss");
-        document.getElementById('disp_bank').innerText = (parseFloat(document.getElementById('init_bank').value) + state.globalNet).toLocaleString();
-        document.getElementById('disp_dd').innerText = state.maxDD.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('disp_last_bet').innerText = state.lastBetAmount.toLocaleString();
-
-        // Update Center Status
-        let statusEl = document.getElementById('status_text');
-        let betDisEl = document.getElementById('bet_display');
-        let targetEl = document.getElementById('target_val');
-
-        if (!state.isReal) {
-            statusEl.innerText = `VIRTUAL WAIT: ${state.virtualWins}/5`;
-            statusEl.className = "status-badge";
-            betDisEl.innerText = "WAIT";
-            betDisEl.style.color = "#666";
-            targetEl.innerText = "Scanning for streak...";
-        } else {
-            statusEl.innerText = `REAL BETTING | LOSS: ${state.consecutiveLoss}/4`;
-            statusEl.className = "status-badge active";
-            
-            let nextBet = getNextBet();
-            betDisEl.innerText = nextBet.toLocaleString();
-            betDisEl.style.color = "#ffc107";
-            
-            let target = (state.currentSessionPeak + CONF.unit).toFixed(1);
-            targetEl.innerText = `GOAL: ${target} (Need: ${(target - state.globalNet).toFixed(1)})`;
-        }
+        document.getElementById('net_profit').innerText = globalNet.toFixed(1);
+        document.getElementById('status').innerText = isReal ? "REAL" : `VIRTUAL (${virtualWins}/${VIRTUAL_LIMIT})`;
+        document.getElementById('status').style.color = isReal ? "#ff4444" : "#00ff00";
+        document.getElementById('current_bet').innerText = calculateBet().toLocaleString();
+        document.getElementById('session_count').innerText = sessionID;
     }
 
-    // --- UTILS & RENDERING ---
-    function renderRoad() {
-        const grid = document.getElementById('road_grid');
-        grid.innerHTML = '';
-        let columns = [];
-        let col = -1, row = 0, lastRes = '';
-
-        // Simple Big Road Logic
-        state.history.filter(h => h !== 'T').forEach(res => {
-            if (res !== lastRes) {
-                col++; row = 0; lastRes = res;
-                columns[col] = [];
-            } else {
-                row++;
-                if (row > 5) row = 5; // Cap height (simplified)
-            }
-            if (!columns[col]) columns[col] = [];
-            columns[col][row] = res;
-        });
-
-        // Draw
-        columns.forEach(c => {
-            let colDiv = document.createElement('div');
-            colDiv.style.display = 'grid';
-            colDiv.style.gridTemplateRows = 'repeat(6, 24px)';
-            colDiv.style.gap = '2px';
-            
-            for(let i=0; i<6; i++) {
-                let cell = document.createElement('div');
-                if (c[i]) {
-                    cell.className = `bead ${c[i]}`;
-                    cell.innerText = c[i];
-                }
-                colDiv.appendChild(cell);
-            }
-            grid.appendChild(colDiv);
-        });
-        
-        // Auto scroll
-        document.querySelector('.road-container').scrollLeft = 10000;
+    function addLog(msg) {
+        const logDiv = document.getElementById('log');
+        logDiv.innerHTML += `<div>${msg}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
     }
 
-    function log(msg) {
-        let div = document.getElementById('console_log');
-        let line = document.createElement('div');
-        line.className = 'log-line';
-        line.innerText = `[${++state.logCount}] ${msg}`;
-        div.appendChild(line);
-        div.scrollTop = div.scrollHeight;
-    }
-
-    function undo() {
-        if(state.history.length > 0) {
-            state.history.pop();
-            alert("Undo logic is complex with money state. Please Refresh to reset if critical error.");
-            // Note: Full state rollback requires storing deep copies of state history.
-            // For simple use, reloading is safer.
-        }
-    }
-
-    // Init
     updateUI();
-
 </script>
 </body>
 </html>
