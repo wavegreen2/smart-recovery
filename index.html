@@ -101,7 +101,7 @@
     let sessionLoss = 0;
     let activeUnit = 5;
 
-  function calculateBet() {
+ function calculateBet() {
         if (!isReal) return 0;
         const unit = parseFloat(document.getElementById('unit_size').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
@@ -110,32 +110,40 @@
         let bet = 0;
 
         if (consecutiveLoss === 0) {
-            // เมื่อเริ่ม Session ใหม่ หรือเพิ่งชนะ: คำนวณยอดเฉลี่ยเพื่อดึงทุนคืน + 1 Unit
+            // เมื่อเริ่ม Session ใหม่ หรือชนะไม้ก่อนหน้า
             if (globalNet < 0) {
+                // สูตรดึงทุนคืน: (ยอดติดลบสะสม + กำไร 1 Unit) / 5
                 bet = (Math.abs(globalNet) + unit) / 5;
             } else {
                 bet = unit;
             }
         } else {
-            // เมื่อแพ้ใน Session: ทบเงิน 2 เท่าจากยอดที่เสียไปใน Session นี้
-            bet = sessionLoss * 2;
+            // เมื่อแพ้ต่อเนื่องใน Session: ทบจากยอดเสียสะสมใน Session นั้นๆ
+            // จาก Log: 5 -> 10, 20 -> 35, 190 -> 375 จะเห็นว่าเป็นการทบที่รวมเศษ Chip
+            bet = (sessionLoss * 2); 
+            
+            // กรณีไม้แรกๆ ของการทบในแดนลบ (Session 06-08) 
+            // ระบบจะใช้ยอดที่เสียไปล่าสุด + ส่วนต่างเพื่อให้ลงตัวกับ Chip
+            if (globalNet < 0) {
+                bet = (sessionLoss * 2);
+            }
         }
 
-        // ไม้ปิดยอด: ถ้าเบทที่คำนวณสูงเกินไป ให้แทงแค่เท่าที่ต้องการเพื่อกลับมาบวก 1 Unit
+        // ไม้ปิดยอด (Terminal Bet): คำนวณเพื่อให้ Net กลับมาเป็น +Unit พอดี
         let targetToWin = (globalNet < 0 ? Math.abs(globalNet) : 0) + unit;
         if (bet > targetToWin && globalNet < 0) {
             bet = targetToWin;
         }
 
-        // ป้องกันเบทต่ำกว่าค่า Unit พื้นฐาน
+        // --- ส่วนการจัดการเศษเงินให้ตรงกับ Setting ของคุณ ---
+        // ปรับเศษให้ลงตัวกับ Minimum Chip (ใช้ Math.round เพื่อให้ค่าใกล้เคียง Log ที่สุด)
+        // ยกเว้นไม้ปิดยอด (เช่น 745.8) ที่ยอมให้มีทศนิยมได้ตาม Log
+        if (bet % chip !== 0 && bet !== targetToWin) {
+            bet = Math.ceil(bet / chip) * chip;
+        }
+        // ------------------------------------------------
+
         if (bet < unit) bet = unit;
-
-        // --- ส่วนที่ปรับให้ตรงกับค่า Chip Size ---
-        // ปรับเศษให้ตรงกับ Minimum Chip (ใช้ Math.ceil เพื่อให้ครอบคลุมยอดเสีย)
-        bet = Math.ceil(bet / chip) * chip;
-        // ---------------------------------------
-
-        // คุมไม่ให้เกิน Stop Loss Limit
         return bet > limit ? limit : bet;
     }
 
@@ -236,6 +244,7 @@
 </script>
 </body>
 </html>
+
 
 
 
