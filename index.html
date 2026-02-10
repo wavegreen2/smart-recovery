@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Pro (Stats Monitor)</title>
+    <title>Baccarat AI: Pro (Limit & Stats)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -85,7 +85,7 @@
         .monitor-row:last-child { margin-bottom: 0; }
         .monitor-label { color: #7f8c8d; font-weight: 600; }
         .monitor-val { font-weight: bold; font-size: 1rem; }
-        .val-high { color: var(--banker); } /* Red for high risk/loss */
+        .val-high { color: var(--banker); } 
         .val-neutral { color: var(--primary); }
 
         .btn-action {
@@ -214,7 +214,6 @@
 
 <div class="container">
     <div class="sidebar">
-        <!-- Settings Header Removed -->
         
         <div class="form-group">
             <label>เงินทุนเริ่มต้น (Initial Bankroll)</label>
@@ -229,6 +228,12 @@
             <input type="number" id="chip_size" value="5">
         </div>
         
+        <!-- Max Bet Setting -->
+        <div class="form-group">
+            <label>ยอดเดิมพันสูงสุด (Max Bet Limit)</label>
+            <input type="number" id="max_bet_limit" value="75000.0">
+        </div>
+
         <!-- Stats Monitor Section -->
         <div class="monitor-box">
             <div class="monitor-row">
@@ -236,7 +241,7 @@
                 <span class="monitor-val val-high" id="stat_max_dd">0</span>
             </div>
             <div class="monitor-row">
-                <span class="monitor-label">Max Bet</span>
+                <span class="monitor-label">Max Bet (Record)</span>
                 <span class="monitor-val val-neutral" id="stat_max_bet">0</span>
             </div>
         </div>
@@ -318,7 +323,7 @@
         sessionStartNet: 0,
         // Stats Tracking
         maxBetRecord: 0,
-        minNetRecord: 0 // Tracks the lowest net profit (Max Drawdown)
+        minNetRecord: 0 
     };
 
     function getSettings() {
@@ -326,6 +331,7 @@
             initBank: parseFloat(document.getElementById('init_bank').value),
             unit: parseFloat(document.getElementById('unit_size').value),
             chip: parseFloat(document.getElementById('chip_size').value),
+            maxBet: parseFloat(document.getElementById('max_bet_limit').value), // อ่านค่าจากช่องตั้งค่า
             rebate: parseFloat(document.getElementById('rebate_rate').value) / 100,
             trigger: 5,
             stopLossSteps: 4
@@ -363,6 +369,11 @@
             calculatedBet = Math.max(smartBet, currentBase);
         }
 
+        // จำกัดยอดเดิมพันตามที่ตั้งค่า
+        if (calculatedBet > cfg.maxBet) {
+            calculatedBet = cfg.maxBet;
+        }
+
         return calculatedBet;
     }
 
@@ -381,7 +392,7 @@
         let isWin = (res === betSide);
         let betAmount = calculateNextBet(); 
 
-        // Track Max Bet
+        // Track Max Bet Record (สถิติ)
         if (state.mode === 'REAL' && betAmount > state.maxBetRecord) {
             state.maxBetRecord = betAmount;
         }
