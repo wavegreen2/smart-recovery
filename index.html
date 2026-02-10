@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Logic Pro - Python Synchronized</title>
+    <title>Baccarat Logic Pro - Exact Match</title>
     <style>
         :root { --player: #007bff; --banker: #dc3545; --tie: #28a745; --bg: #f0f2f5; --card: #ffffff; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
@@ -34,7 +34,6 @@
         .badge-v { background: #e9ecef; color: #495057; }
         .badge-r { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-danger { background: #f8d7da; color: #721c24; }
-        .bet-amount { font-size: 2.5rem; font-weight: bold; margin: 10px 0; color: var(--player); }
 
         .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         button { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
@@ -84,12 +83,9 @@
 </div>
 
 <script>
-    // --- Configuration จาก Python ---
     const SIDE_PREF = "PLAYER"; 
     const V_WIN_TRIGGER = 5;
     const LOSS_LIMIT = 4;
-    const RECOVERY_RATIO = 5; 
-    const MARTY_MULT = 2.0;
 
     let history = []; 
     let globalNet = 0;
@@ -98,61 +94,57 @@
     let maxDD = 0;
     let peakNet = 0;
 
-    // Session State
     let isReal = false;
     let vWins = 0;
     let consecutiveLoss = 0;
-    let current_mart_step = 0;
-    let state = "FLAT"; // FLAT, MARTY
+    let sessionLoss = 0;
+    let activeUnit = 5;
+    let state = "FLAT";
+    let martStep = 0;
+    let hasLostSincePeak = false;
+
+    function computeActiveUnit() {
+        const unit = parseFloat(document.getElementById('unit_size').value);
+        const chip = parseFloat(document.getElementById('chip_size').value);
+        const target = (globalNet >= 0) ? unit : (Math.abs(globalNet) + unit);
+        let au = unit;
+        if (globalNet < 0) au = Math.max(unit, target / 5);
+        return Math.max(au, chip);
+    }
 
     function calculateBet() {
         if (!isReal) return 0;
-        
         const unit = parseFloat(document.getElementById('unit_size').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
         const limit = parseFloat(document.getElementById('stop_loss_limit').value);
-        
-        // Target Profit สำหรับ Session นี้ (อิงตาม Python: abs(total_net) + unit)
-        let target_profit = (globalNet < 0) ? (Math.abs(globalNet) + unit) : unit;
-        
-        // 1. Determine Base Unit (active_unit ใน Python)
-        let active_unit = unit;
-        if (globalNet < 0) {
-            active_unit = Math.max(unit, target_profit / RECOVERY_RATIO);
-        }
-
-        // 2. Determine Raw Bet
-        let raw_bet = 0;
-        let current_drawdown = peakNet - globalNet;
+        const safeUnit = Math.max(activeUnit, 0.1);
+        const currentDrawdown = Math.max(0, peakNet - globalNet);
+        let rawBet = safeUnit;
 
         if (state === "FLAT") {
-            // ถ้ามีการเสียเกิดขึ้นแล้ว (has_lost_since_peak) ให้ใช้ drawdown/4
-            if (current_drawdown > 0) {
-                raw_bet = Math.ceil(current_drawdown / 4);
-                raw_bet = Math.max(raw_bet, active_unit);
+            if (currentDrawdown > 0 && hasLostSincePeak) {
+                rawBet = Math.ceil(currentDrawdown / 4);
+                rawBet = Math.max(rawBet, safeUnit);
             } else {
-                raw_bet = active_unit;
+                rawBet = safeUnit;
             }
         } else if (state === "MARTY") {
-            raw_bet = active_unit * Math.pow(MARTY_MULT, current_mart_step);
+            rawBet = safeUnit * (2 ** martStep);
         }
 
-        // 3. Betting Constraints (needed_to_recover)
-        let needed_to_recover = current_drawdown + active_unit;
-        let bet = (state !== "FLAT") ? Math.min(raw_bet, needed_to_recover) : raw_bet;
+        const neededToRecover = currentDrawdown + safeUnit;
+        let bet = (state !== "FLAT") ? Math.min(rawBet, neededToRecover) : rawBet;
+        bet = Math.ceil(bet / chip) * chip;
 
-        // 4. Remaining Target check (Session 03: 66.0)
-        let remaining = target_profit; 
-        if (globalNet >= 0) remaining = unit - globalNet; 
-        else remaining = Math.abs(globalNet) + unit;
+        const targetProfit = (globalNet >= 0) ? unit : (Math.abs(globalNet) + unit);
+        const currentProfit = globalNet;
+        const remaining = targetProfit - currentProfit;
 
         if (bet > remaining && remaining > 0) {
-            bet = Math.max(active_unit, remaining);
+            bet = Math.max(safeUnit, Math.ceil(remaining / chip) * chip);
         }
 
-        // 5. ปัดเศษและกันเบทเกิน Limit
-        bet = Math.ceil(bet / chip) * chip;
-        if (bet > limit) bet = limit;
+        if (bet >= limit) bet = limit;
 
         return bet;
     }
@@ -164,55 +156,52 @@
         const isWin = (res === side);
 
         if (!isReal) {
-            // โหมด Virtual: รอจนกว่าจะชนะติดต่อกันครบ V_WIN_TRIGGER
             if (isWin) vWins++; else vWins = 0;
             if (vWins >= V_WIN_TRIGGER) {
                 isReal = true;
                 consecutiveLoss = 0;
-                current_mart_step = 0;
+                sessionLoss = 0;
+
+                activeUnit = computeActiveUnit();
                 state = "FLAT";
+                martStep = 0;
+                hasLostSincePeak = (peakNet > globalNet);
             }
         } else {
-            // โหมด Real
             const bet = calculateBet();
             if (bet > maxBetUsed) maxBetUsed = bet;
 
             const payout = (res === 'B' && SIDE_PREF === "BANKER") ? 0.95 : 1.0;
             const winLoss = isWin ? (bet * payout) : -bet;
-            
+
             totalRebate += (bet * parseFloat(document.getElementById('rebate_rate').value));
             globalNet += winLoss;
 
             if (isWin) {
                 consecutiveLoss = 0;
-                current_mart_step = 0;
+                sessionLoss = 0;
+                if (globalNet >= peakNet) hasLostSincePeak = false;
                 state = "FLAT";
-                
-                // เช็คจบ Session เมื่อกำไรถึงเป้า (Net กลับมาเป็นบวกตาม Unit Size)
+                martStep = 0;
+
                 if (globalNet >= parseFloat(document.getElementById('unit_size').value)) {
-                    isReal = false; 
-                    vWins = 0;
-                    alert("SESSION WIN! Net: " + (globalNet + totalRebate).toFixed(1));
+                    isReal = false; vWins = 0;
+                    alert("SESSION WIN! Net: " + globalNet.toFixed(1));
                 }
             } else {
                 consecutiveLoss++;
-                if (state === "FLAT") {
-                    state = "MARTY";
-                    current_mart_step = 1;
-                } else {
-                    current_mart_step++;
-                }
+                sessionLoss += bet;
+                hasLostSincePeak = true;
+                if (state === "FLAT") { state = "MARTY"; martStep = 1; }
+                else if (state === "MARTY") { martStep += 1; }
 
-                // เช็ค Stop Loss ท้าย Session (4 ไม้)
                 if (consecutiveLoss >= LOSS_LIMIT) {
-                    isReal = false; 
-                    vWins = 0;
-                    alert("STOP LOSS! Net: " + (globalNet + totalRebate).toFixed(1));
+                    isReal = false; vWins = 0;
+                    alert("STOP LOSS! Net: " + globalNet.toFixed(1));
                 }
             }
         }
 
-        // อัปเดตสถิติ Global
         if (globalNet > peakNet) peakNet = globalNet;
         let dd = peakNet - globalNet;
         if (dd > maxDD) maxDD = dd;
@@ -224,12 +213,10 @@
 
     function updateUI() {
         const ib = parseFloat(document.getElementById('init_bank').value);
-        const netTotal = globalNet + totalRebate;
-        
-        document.getElementById('stat_profit').innerText = netTotal.toLocaleString(undefined, {minimumFractionDigits: 1});
+        document.getElementById('stat_profit').innerText = (globalNet + totalRebate).toLocaleString();
         document.getElementById('stat_max_bet').innerText = maxBetUsed.toLocaleString();
         document.getElementById('stat_max_dd').innerText = maxDD.toLocaleString();
-        document.getElementById('stat_bank').innerText = (ib + netTotal).toLocaleString();
+        document.getElementById('stat_bank').innerText = (ib + globalNet + totalRebate).toLocaleString();
 
         const mt = document.getElementById('mode_tag');
         const lt = document.getElementById('loss_tag');
@@ -247,7 +234,7 @@
             mt.className = "badge badge-r";
             lt.style.display = "block";
             lt.innerText = `LOSS: ${consecutiveLoss}/${LOSS_LIMIT}`;
-            bd.innerText = calculateBet().toLocaleString(undefined, {minimumFractionDigits: 1});
+            bd.innerText = calculateBet().toLocaleString();
             if (SIDE_PREF === "PLAYER") panel.classList.add('active-p');
         }
     }
@@ -266,7 +253,7 @@
     }
 
     function undoLast() { if (history.length > 0) { history.pop(); renderRoad(); updateUI(); } }
-    function resetSystem() { if (confirm("ต้องการรีเซ็ตข้อมูลทั้งหมด?")) location.reload(); }
+    function resetSystem() { if (confirm("Reset?")) location.reload(); }
     window.onload = updateUI;
 </script>
 </body>
