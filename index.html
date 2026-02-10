@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Pro (Final UI)</title>
+    <title>Baccarat AI: Pro (Rebate 1%)</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -130,7 +130,7 @@
             background: var(--card-bg);
             padding: 10px;
             border-radius: 10px;
-            height: 200px; /* Fixed height for 6 rows + padding */
+            height: 200px; 
             position: relative;
             overflow-x: auto; 
             overflow-y: hidden;
@@ -190,7 +190,7 @@
 
         .bet-panel.banker-mode .rec-side { color: var(--banker); }
 
-        /* Updated Controls: 3 Columns (No Tie Button) */
+        /* Controls */
         .controls { display: grid; grid-template-columns: 1fr 1fr 70px; gap: 10px; }
         .btn-ctrl {
             padding: 15px; border: none; border-radius: 8px;
@@ -281,7 +281,8 @@
 
         <div class="form-group">
             <label>ค่าคอม (Rebate %)</label>
-            <input type="number" id="rebate_rate" value="0.00" step="0.01">
+            <!-- REBATE SET TO 1.00% DEFAULT -->
+            <input type="number" id="rebate_rate" value="1.00" step="0.01">
         </div>
 
         <button class="btn-reset" onclick="resetAll()">รีเซ็ตระบบ (RESET)</button>
@@ -335,7 +336,6 @@
 
             <div class="controls">
                 <button class="btn-ctrl btn-p" onclick="processResult('P')">PLAYER</button>
-                <!-- TIE Button Removed -->
                 <button class="btn-ctrl btn-b" onclick="processResult('B')">BANKER</button>
                 <button class="btn-ctrl btn-u" onclick="undo()">↩ Undo</button>
             </div>
@@ -379,7 +379,7 @@
             unit: parseFloat(document.getElementById('unit_size').value),
             chip: parseFloat(document.getElementById('chip_size').value),
             maxBet: parseFloat(document.getElementById('max_bet_limit').value),
-            rebate: parseFloat(document.getElementById('rebate_rate').value) / 100,
+            rebate: parseFloat(document.getElementById('rebate_rate').value) / 100, // 1.00 / 100 = 0.01 (1%)
             trigger: 5, 
             stopLossSteps: 4 
         };
@@ -432,9 +432,10 @@
             state.maxBetRecord = betAmount;
         }
 
+        // --- REBATE LOGIC (Added) ---
         if (state.mode === 'REAL') {
-            let rebateAmount = betAmount * cfg.rebate;
-            state.net += rebateAmount;
+            let rebateAmount = betAmount * cfg.rebate; // 1% of Turnover
+            state.net += rebateAmount; // Add to Net Profit immediately
         }
 
         if (state.mode === 'VIRTUAL') {
@@ -450,6 +451,7 @@
             if (isWin) {
                 state.net += betAmount * (betSide === 'B' ? 0.95 : 1.0);
 
+                // Check Target (Rebate helps hit this sooner)
                 if (state.net >= cfg.unit) {
                     state.mode = 'VIRTUAL';
                     state.vWins = 0;
@@ -584,54 +586,41 @@
         renderRoadMap();
     }
 
-    // --- Improved Road Map Renderer (Standard Big Road) ---
     function renderRoadMap() {
         const container = document.getElementById('road_container');
         container.innerHTML = '';
 
-        let matrix = {}; // Store occupied cells "col,row"
+        let matrix = {}; 
         let col = 0;
         let row = 0;
         let lastRes = null;
-        const CELL_SIZE = 30; // px (28px + 2px gap)
+        const CELL_SIZE = 30; 
 
-        // Helper to check if a cell is occupied
         const isOccupied = (c, r) => {
             return matrix[`${c},${r}`] !== undefined;
         };
 
         state.history.forEach(res => {
-            if (res === 'T') return; // Skip ties for positioning
+            if (res === 'T') return; 
 
             if (lastRes === null) {
-                // First item
                 col = 0; row = 0;
             } else if (res !== lastRes) {
-                // Change Winner -> New Column
                 col++;
-                // Find first empty column at row 0 (Standard Big Road moves to next empty col)
                 while (isOccupied(col, 0)) {
                     col++;
                 }
                 row = 0;
             } else {
-                // Same Winner -> Continue Streak
                 if (row < 5 && !isOccupied(col, row + 1)) {
-                    // Go down if space exists and not at bottom
                     row++;
                 } else {
-                    // Dragon Tail: Go right
                     col++;
-                    // In standard Big Road, the tail stays at the bottom or follows the turn.
-                    // Simplified: If we turned right, we stay at the same row (crawling)
-                    // unless that spot is taken, but usually it's empty in this direction.
                 }
             }
 
-            // Register position
             matrix[`${col},${row}`] = res;
 
-            // Draw Cell
             let cell = document.createElement('div');
             cell.className = `road-cell ${res}`;
             cell.innerText = res;
@@ -642,7 +631,6 @@
             lastRes = res;
         });
 
-        // Auto scroll to right
         const roadMap = document.querySelector('.road-map');
         roadMap.scrollLeft = roadMap.scrollWidth;
     }
