@@ -108,42 +108,44 @@
         const limit = parseFloat(document.getElementById('stop_loss_limit').value);
         
         let bet = 0;
+        let baseRecovery = 0;
 
-        if (consecutiveLoss === 0) {
-            // เมื่อเริ่ม Session ใหม่ หรือชนะไม้ก่อนหน้า
-            if (globalNet < 0) {
-                // สูตรดึงทุนคืน: (ยอดติดลบสะสม + กำไร 1 Unit) / 5
-                bet = (Math.abs(globalNet) + unit) / 5;
-            } else {
-                bet = unit;
-            }
+        // คำนวณค่าเฉลี่ยดึงทุนคืนของ Session นี้ (ไม้แรกที่เริ่มแทงจริง)
+        if (globalNet < 0) {
+            baseRecovery = (Math.abs(globalNet) + unit) / 5;
         } else {
-            // เมื่อแพ้ต่อเนื่องใน Session: ทบจากยอดเสียสะสมใน Session นั้นๆ
-            // จาก Log: 5 -> 10, 20 -> 35, 190 -> 375 จะเห็นว่าเป็นการทบที่รวมเศษ Chip
-            bet = (sessionLoss * 2); 
-            
-            // กรณีไม้แรกๆ ของการทบในแดนลบ (Session 06-08) 
-            // ระบบจะใช้ยอดที่เสียไปล่าสุด + ส่วนต่างเพื่อให้ลงตัวกับ Chip
-            if (globalNet < 0) {
-                bet = (sessionLoss * 2);
-            }
+            baseRecovery = unit;
         }
 
-        // ไม้ปิดยอด (Terminal Bet): คำนวณเพื่อให้ Net กลับมาเป็น +Unit พอดี
+        if (consecutiveLoss === 0) {
+            // ไม้แรกของ Session หรือเพิ่งชนะไม้ก่อนหน้า
+            bet = baseRecovery;
+        } else {
+            // สูตรทบ: (ยอดเสียสะสมใน Session + ค่าเริ่มต้นของ Session) * 2
+            // ตัวอย่าง Session 02: (20 + 20) * 2 = 80 -> ปรับให้ตรงตาม Log คือ Double ยอดสะสม
+            bet = (sessionLoss + baseRecovery) * 1.85; // ค่าสัมประสิทธิ์ที่ทำให้ใกล้เคียง Log 20-35-65-130
+            
+            // เพื่อความแม่นยำตาม Log Session 08-09: 190 -> 375 -> 745
+            bet = (sessionLoss + baseRecovery) * 2;
+            
+            // ปรับสูตรทบให้ตรงกับ Log ที่ส่งมา: ยอดที่เสียไป + (ยอดไม้แรกของ Session * 2^n)
+            bet = sessionLoss + (baseRecovery * Math.pow(2, consecutiveLoss));
+        }
+
+        // ไม้ปิดยอด (Terminal Check): ให้กำไรกลับมาเป็น +Unit พอดี
         let targetToWin = (globalNet < 0 ? Math.abs(globalNet) : 0) + unit;
         if (bet > targetToWin && globalNet < 0) {
             bet = targetToWin;
         }
 
-        // --- ส่วนการจัดการเศษเงินให้ตรงกับ Setting ของคุณ ---
-        // ปรับเศษให้ลงตัวกับ Minimum Chip (ใช้ Math.round เพื่อให้ค่าใกล้เคียง Log ที่สุด)
-        // ยกเว้นไม้ปิดยอด (เช่น 745.8) ที่ยอมให้มีทศนิยมได้ตาม Log
-        if (bet % chip !== 0 && bet !== targetToWin) {
+        // ป้องกันเบทต่ำกว่า Unit
+        if (bet < unit) bet = unit;
+
+        // การปัดเศษ Chip: ไม้ปิดยอด (เช่น 745.8) จะไม่ปัดเศษ แต่ไม้ปกติจะปัดตาม Chip Size
+        if (bet !== targetToWin) {
             bet = Math.ceil(bet / chip) * chip;
         }
-        // ------------------------------------------------
 
-        if (bet < unit) bet = unit;
         return bet > limit ? limit : bet;
     }
 
@@ -244,6 +246,7 @@
 </script>
 </body>
 </html>
+
 
 
 
