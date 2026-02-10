@@ -1,248 +1,610 @@
-import math
-import random
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baccarat AI: Pro (Python Logic)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --player: #2980b9;
+            --banker: #c0392b;
+            --tie: #27ae60;
+            --bg: #ecf0f1;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
 
-# ==========================================================
-# ⚙️ CONFIGURATION
-# ==========================================================
-CONFIG = {
-    "initial_bankroll": 500000.0,
-    "unit_size": 5.0,
-    "chip_size": 5.0,
-    "side_preference": "PLAYER", 
-    "virtual_win_trigger": 5, 
-    "stop_after_consecutive_loss": 4,  
-    "recovery_mode": "aggressive",
-    "recovery_ratio": 5,
-    "max_unit_cap": 1,
-    "marty_mult": 2.0,
-    "marty_steps_limit": 12,
-    "fibo_mult": 1.0,
-    "stop_loss_threshold": 75000.0,
-    "show_hand_by_hand": False 
-}
+        body {
+            font-family: 'Segoe UI', 'Sarabun', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-# ==========================================================
-# 🧬 CORE FUNCTIONS
-# ==========================================================
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 15px;
+            height: 95vh;
+        }
 
-def get_fibo(n):
-    if n <= 0: return 1
-    if n == 1: return 1
-    a, b = 1, 1
-    for _ in range(2, n + 1):
-        a, b = b, a + b
-    return b
+        /* Sidebar Settings */
+        .sidebar {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+            overflow-y: auto;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-def get_next_result(data_list, current_idx, is_random=False):
-    if is_random:
-        # Banker 50.68%, Player 49.32% (Standard Baccarat excluding Tie)
-        return "B" if random.random() < 0.5068 else "P", current_idx + 1
-    
-    if current_idx < len(data_list):
-        return data_list[current_idx], current_idx + 1
-    return None, current_idx
+        /* Section Separator */
+        .section-title { 
+            font-size: 0.85rem; 
+            font-weight: bold; 
+            color: var(--accent); 
+            margin-top: 5px; 
+            border-bottom: 1px dashed #bdc3c7; 
+            padding-bottom: 3px; 
+        }
 
-def run_single_session(
-    result_list, start_idx, target_profit, unit_size, initial_bankroll, is_virtual_session=False, is_manual=False, is_random=False
-):
-    safe_unit = max(unit_size, 0.1) 
-    bankroll = initial_bankroll
-    peak_bankroll = initial_bankroll
-    max_bet_in_session = 0
-    max_dd_in_session = 0
-    
-    state = "FLAT"
-    mart_step = 0
-    fibo_idx = 0
-    consecutive_loss = 0 
-    has_lost_since_peak = False
-    current_idx = start_idx
-    hand_count = 0
+        .form-group { margin-bottom: 5px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 6px 8px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.9rem; box-sizing: border-box; transition: 0.3s; }
+        .form-group textarea { resize: vertical; height: 50px; font-family: monospace; font-size: 0.8rem; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); outline: none; }
 
-    while True:
-        current_drawdown = peak_bankroll - bankroll
-        if current_drawdown >= CONFIG["stop_loss_threshold"]:
-            state, mart_step, fibo_idx = "FLAT", 0, 0
+        /* Stats Monitor Box in Sidebar */
+        .monitor-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+        .monitor-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        .monitor-row:last-child { margin-bottom: 0; }
+        .monitor-label { color: #7f8c8d; font-weight: 600; }
+        .monitor-val { font-weight: bold; font-size: 1rem; }
+        .val-high { color: var(--banker); } 
+        .val-neutral { color: var(--primary); }
 
-        # 1. Determine Raw Bet
-        if state == "FLAT":
-            if current_drawdown > 0 and has_lost_since_peak:
-                raw_bet = math.ceil(current_drawdown / 4)
-                raw_bet = max(raw_bet, safe_unit)
-            else:
-                raw_bet = safe_unit
-        elif state == "MARTY":
-            raw_bet = safe_unit * (CONFIG["marty_mult"] ** mart_step)
-        elif state == "FIBO":
-            raw_bet = get_fibo(fibo_idx) * CONFIG["fibo_mult"]
+        .btn-action {
+            width: 100%; padding: 8px; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-top: 5px;
+        }
+        .btn-sim { background: var(--accent); }
+        .btn-sim:hover { background: #2980b9; }
+        .btn-reset { background: #95a5a6; margin-top: 10px; }
+        .btn-reset:hover { background: #7f8c8d; }
 
-        # 2. Betting Constraints
-        needed_to_recover = current_drawdown + safe_unit
-        bet = min(raw_bet, needed_to_recover) if state != "FLAT" else raw_bet
-        bet = math.ceil(bet / CONFIG["chip_size"]) * CONFIG["chip_size"]
+        /* Main Content */
+        .main-content { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            overflow-y: auto; 
+            padding-right: 5px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border-top: 4px solid transparent;
+        }
+        .stat-card.profit { border-top-color: var(--tie); }
+        .stat-card.loss { border-top-color: var(--banker); }
+        .stat-label { font-size: 0.7rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.2rem; font-weight: 800; margin-top: 3px; }
+
+        /* Road Map */
+        .road-map {
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 10px;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            overflow-x: auto; 
+            white-space: nowrap;
+            width: 100%;
+            max-width: 100%; 
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
         
-        current_profit = bankroll - initial_bankroll
-        remaining = target_profit - current_profit
+        .road-map::-webkit-scrollbar { height: 6px; }
+        .road-map::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        .road-map::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 3px; }
+
+        .road-grid {
+            display: grid;
+            grid-template-rows: repeat(6, 30px);
+            grid-auto-flow: column;
+            grid-auto-columns: 30px;
+            gap: 2px;
+            padding-right: 20px;
+        }
+        .road-cell {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold; color: white;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .road-cell.P { background-color: var(--player); }
+        .road-cell.B { background-color: var(--banker); }
+        .road-cell.T { background-color: var(--card-bg); border: 2px solid var(--tie); color: var(--tie); }
+
+        /* Betting Panel */
+        .bet-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            display: inline-block; padding: 5px 12px; border-radius: 15px;
+            font-size: 0.75rem; font-weight: bold; margin-bottom: 10px;
+            background: #ecf0f1; color: #7f8c8d;
+        }
+        .status-badge.active { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .status-badge.stoploss { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .recommendation { margin-bottom: 20px; }
+        .rec-title { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px; }
+        .rec-amount { font-size: 2.8rem; font-weight: 900; color: var(--primary); line-height: 1; }
+        .rec-side { font-size: 1.1rem; font-weight: bold; color: var(--player); margin-top: 5px; }
+
+        .bet-panel.banker-mode .rec-side { color: var(--banker); }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr 1fr 70px; gap: 8px; }
+        .btn-ctrl {
+            padding: 12px; border: none; border-radius: 8px;
+            font-size: 0.95rem; font-weight: bold; cursor: pointer; color: white;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn-ctrl:active { transform: scale(0.96); }
+        .btn-p { background: var(--player); box-shadow: 0 3px 0 #1a5276; }
+        .btn-b { background: var(--banker); box-shadow: 0 3px 0 #922b21; }
+        .btn-t { background: var(--tie); box-shadow: 0 3px 0 #1e8449; }
+        .btn-u { background: #95a5a6; box-shadow: 0 3px 0 #7f8c8d; }
+
+        @media (max-width: 768px) {
+            body { height: auto; overflow: auto; }
+            .container { grid-template-columns: 1fr; height: auto; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sidebar">
         
-        # --- FIX: Logic ไม้สุดท้าย ---
-        if bet > remaining and remaining > 0:
-            # คำนวณยอดที่ต้องลงเพื่อให้ครบ target พอดี (ปัดขึ้นตาม chip_size)
-            required_bet = math.ceil(remaining / CONFIG["chip_size"]) * CONFIG["chip_size"]
-            # ใช้ CONFIG["unit_size"] เป็นฐานต่ำสุดแทน safe_unit เพื่อให้ลงเบาได้เมื่อใกล้จบ
-            bet = max(CONFIG["unit_size"], required_bet)
+        <div class="form-group">
+            <label>เงินทุนเริ่มต้น (Initial Bankroll)</label>
+            <input type="number" id="init_bank" value="500000">
+        </div>
+        <div class="form-group">
+            <label>เดิมพันขั้นต่ำ (Min Bet / Unit)</label>
+            <input type="number" id="unit_size" value="5">
+        </div>
+        <div class="form-group">
+            <label>ชิปขั้นต่ำ (Chip Size)</label>
+            <input type="number" id="chip_size" value="5">
+        </div>
         
-        if bet >= CONFIG["stop_loss_threshold"]: bet = CONFIG["stop_loss_threshold"]
-        if bet > max_bet_in_session: max_bet_in_session = bet
+        <div class="form-group">
+            <label>ยอดเดิมพันสูงสุด (Max Bet Limit)</label>
+            <input type="number" id="max_bet_limit" value="75000.0">
+        </div>
 
-        # 3. Get Result
-        if is_manual:
-            prompt = f"👉 [BET: {bet:,.1f}] Next (P/B/T/exit): "
-            actual_result = input(prompt).upper().strip()
-            if actual_result == "EXIT": return "OUT_OF_DATA", (bankroll - initial_bankroll), max_dd_in_session, max_bet_in_session, current_idx
-            next_idx = current_idx + 1
-        else:
-            actual_result, next_idx = get_next_result(result_list, current_idx, is_random)
+        <!-- Stats Monitor Section -->
+        <div class="monitor-box">
+            <div class="monitor-row">
+                <span class="monitor-label">ขาดทุนสะสมสูงสุด Max Drawdown</span>
+                <span class="monitor-val val-high" id="stat_max_dd">0</span>
+            </div>
+            <div class="monitor-row">
+                <span class="monitor-label">ยอดที่เคยเดิมพันสูงสุด Max Bet (Record)</span>
+                <span class="monitor-val val-neutral" id="stat_max_bet">0</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>ค่าคอม (Rebate %)</label>
+            <input type="number" id="rebate_rate" value="0.00" step="0.01">
+        </div>
+
+        <button class="btn-reset" onclick="resetAll()">รีเซ็ตระบบ (RESET)</button>
+
+        <div class="section-title">🧪 จำลองผล (Simulation)</div>
+        <div class="form-group">
+            <label>จำนวนมือ (Hands)</label>
+            <input type="number" id="sim_hands" value="10000">
+        </div>
+        <button class="btn-action btn-sim" onclick="runSimulation()">🎲 สุ่มผล (Random Sim)</button>
+
+        <div class="section-title">📥 นำเข้าข้อมูล (Import Logs)</div>
+        <div class="form-group">
+            <textarea id="import_logs" placeholder="1,B,T,P..."></textarea>
+        </div>
+        <button class="btn-action btn-sim" onclick="runImport()">🚀 รันข้อมูล (Run Import)</button>
+    </div>
+
+    <div class="main-content">
+        <div class="stats-grid">
+            <div class="stat-card profit">
+                <div class="stat-label">กำไรสุทธิ (Net Profit)</div>
+                <div class="stat-value" id="disp_net">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">เดิมพันปัจจุบัน (Current Bet)</div>
+                <div class="stat-value" id="disp_bet">0</div>
+            </div>
+            <div class="stat-card loss">
+                <div class="stat-label">ไม้ที่ (Step)</div>
+                <div class="stat-value" id="disp_dd">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">เงินทุนรวม (Total Bankroll)</div>
+                <div class="stat-value" id="disp_total">500,000</div>
+            </div>
+        </div>
+
+        <div class="road-map">
+            <div class="road-grid" id="road_grid"></div>
+        </div>
+
+        <div class="bet-panel" id="bet_panel">
+            <div id="status_badge" class="status-badge">VIRTUAL WAIT: 0/5</div>
+
+            <div class="recommendation">
+                <div class="rec-title">ยอดเดิมพันถัดไป (NEXT BET)</div>
+                <div class="rec-amount" id="rec_amount">WAIT</div>
+                <div class="rec-side" id="rec_side">PLAYER</div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-ctrl btn-p" onclick="processResult('P')">PLAYER</button>
+                <button class="btn-ctrl btn-t" onclick="processResult('T')">TIE</button>
+                <button class="btn-ctrl btn-b" onclick="processResult('B')">BANKER</button>
+                <button class="btn-ctrl btn-u" onclick="undo()">↩ Undo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SIDE_PREF = 'P'; // Fixed as per Python Logic
+
+    let state = {
+        history: [],
+        net: 0,
+        mode: 'VIRTUAL', 
+        vWins: 0,
+        realStep: 0, // Counts consecutive losses in Real Mode
+        baseUnit: 0,     
+        // Stats Tracking
+        maxBetRecord: 0,
+        minNetRecord: 0 
+    };
+
+    function getSettings() {
+        return {
+            initBank: parseFloat(document.getElementById('init_bank').value),
+            unit: parseFloat(document.getElementById('unit_size').value),
+            chip: parseFloat(document.getElementById('chip_size').value),
+            maxBet: parseFloat(document.getElementById('max_bet_limit').value),
+            rebate: parseFloat(document.getElementById('rebate_rate').value) / 100,
+            trigger: 5, // Virtual Win Trigger
+            stopLossSteps: 4 // Stop after 4 consecutive losses
+        };
+    }
+
+    // --- PYTHON LOGIC MATCH: Compute Base Unit ---
+    // Python: active_unit = max(unit, target / 5)
+    // Python: active_unit = ceil(active_unit / chip) * chip
+    function computeBaseUnit(net, unit, chip) {
+        // Target is always to get back to +Unit (Global)
+        let targetRecovery = (net < 0 ? Math.abs(net) : 0) + unit;
         
-        if actual_result is None or actual_result == "":
-            return "OUT_OF_DATA", (bankroll - initial_bankroll), max_dd_in_session, max_bet_in_session, current_idx
-
-        current_idx = next_idx
-        if actual_result == "T": continue
-
-        is_win = (actual_result == "P" and CONFIG["side_preference"] == "PLAYER") or \
-                 (actual_result == "B" and CONFIG["side_preference"] == "BANKER")
+        // Recovery Ratio = 5 (Aggressive)
+        let calcBase = Math.max(unit, targetRecovery / 5);
         
-        if is_virtual_session:
-            return ("WIN" if is_win else "LOSS"), 0, 0, 0, current_idx
-
-        # 4. Update State & Bankroll
-        payout = 0.95 if CONFIG["side_preference"] == "BANKER" else 1.0
+        // Round up to nearest Chip Size
+        calcBase = Math.ceil(calcBase / chip) * chip;
         
-        if CONFIG["show_hand_by_hand"]:
-            hand_count += 1
-            print(f"   Hand {hand_count:02d}: Bet {bet:7.1f} | Result: {'WIN ' if is_win else 'LOSS'} | Net: {bankroll + (bet*payout if is_win else -bet) - initial_bankroll:,.1f}")
+        return Math.max(calcBase, chip);
+    }
 
-        if is_win:
-            bankroll += (bet * payout)
-            consecutive_loss = 0 
-            if state == "FIBO":
-                fibo_idx = max(-1, fibo_idx - 2)
-                if fibo_idx < 0: state, fibo_idx = "FLAT", 0
-            else:
-                if bankroll >= peak_bankroll: has_lost_since_peak = False
-                state, mart_step = "FLAT", 0
-        else:
-            bankroll -= bet
-            consecutive_loss += 1 
-            has_lost_since_peak = True
-            if state == "FLAT": state, mart_step = "MARTY", 1
-            elif state == "MARTY":
-                mart_step += 1
-                if mart_step > CONFIG["marty_steps_limit"]: state, fibo_idx = "FIBO", 0
-            elif state == "FIBO":
-                fibo_idx += 1
+    // --- PYTHON LOGIC MATCH: Calculate Next Bet ---
+    function calculateNextBet() {
+        const cfg = getSettings();
 
-        if bankroll > peak_bankroll: peak_bankroll = bankroll
-        drawdown = peak_bankroll - bankroll
-        if drawdown > max_dd_in_session: max_dd_in_session = drawdown
+        if (state.mode === 'VIRTUAL') return 0;
+
+        // 1. Determine Raw Bet (Martingale Logic: 2^step)
+        // Step 0: Base, Step 1: Base*2, Step 2: Base*4...
+        let rawBet = state.baseUnit * Math.pow(2, state.realStep);
+
+        // 2. Betting Constraints (The "Last Bet" Fix)
+        // Python: remaining = target - current_profit
+        // If bet > remaining, adjust bet.
         
-        if not is_virtual_session and consecutive_loss >= CONFIG["stop_after_consecutive_loss"]:
-             return "STOP_LOSS", (bankroll - initial_bankroll), max_dd_in_session, max_bet_in_session, current_idx
+        let targetGlobalNet = cfg.unit; // We want to reach at least +Unit globally
+        let remaining = targetGlobalNet - state.net;
 
-        if (bankroll - initial_bankroll) >= target_profit: 
-            return "WIN", (bankroll - initial_bankroll), max_dd_in_session, max_bet_in_session, current_idx
+        if (remaining > 0 && rawBet > remaining) {
+            // Python: required_bet = math.ceil(remaining / chip) * chip
+            let requiredBet = Math.ceil(remaining / cfg.chip) * cfg.chip;
+            // Python: bet = max(unit_size, required_bet)
+            rawBet = Math.max(cfg.unit, requiredBet);
+        }
+
+        // Cap at Max Bet
+        if (rawBet > cfg.maxBet) {
+            rawBet = cfg.maxBet;
+        }
+
+        return rawBet;
+    }
+
+    function processResult(res, isBatch = false) {
+        const cfg = getSettings();
+
+        if (!isBatch) saveState();
+
+        if (res === 'T') {
+            state.history.push('T');
+            if (!isBatch) updateUI();
+            return;
+        }
+
+        let betSide = SIDE_PREF; // Always PLAYER preference as per Python
+        let isWin = (res === betSide);
+        let betAmount = calculateNextBet(); 
+
+        // Track Max Bet Record
+        if (state.mode === 'REAL' && betAmount > state.maxBetRecord) {
+            state.maxBetRecord = betAmount;
+        }
+
+        // Rebate Logic
+        if (state.mode === 'REAL') {
+            let rebateAmount = betAmount * cfg.rebate;
+            state.net += rebateAmount;
+        }
+
+        if (state.mode === 'VIRTUAL') {
+            // Virtual Mode: Wait for consecutive wins
+            if (isWin) state.vWins++;
+            else state.vWins = 0;
+
+            if (state.vWins >= cfg.trigger) {
+                state.mode = 'REAL';
+                state.realStep = 0;
+                // Calculate Base Unit for the new session
+                state.baseUnit = computeBaseUnit(state.net, cfg.unit, cfg.chip);
+            }
+        } else if (state.mode === 'REAL') {
+            if (isWin) {
+                // WIN Logic
+                state.net += betAmount * (betSide === 'B' ? 0.95 : 1.0);
+
+                // Check Session Win Condition
+                // Python: if (bankroll - initial) >= target -> Win
+                // Target is basically getting back to positive (+Unit)
+                if (state.net >= cfg.unit) {
+                    state.mode = 'VIRTUAL';
+                    state.vWins = 0;
+                    state.realStep = 0;
+                    state.baseUnit = 0;
+                    if (!isBatch) console.log(`🎉 SESSION WIN! Net: ${state.net.toFixed(0)}`);
+                } else {
+                    // Won the hand, but haven't reached target yet?
+                    // Python script resets to FLAT after a win within a session
+                    // "if is_win: state, mart_step = FLAT, 0"
+                    state.realStep = 0; 
+                }
+            } else {
+                // LOSS Logic
+                state.net -= betAmount;
+                state.realStep++; // Increment Step
+
+                // Check Stop Loss Condition
+                // Python: if consecutive_loss >= stop_after_consecutive_loss (4)
+                if (state.realStep >= cfg.stopLossSteps) {
+                    state.mode = 'VIRTUAL';
+                    state.vWins = 0;
+                    state.realStep = 0;
+                    state.baseUnit = 0;
+                    if (!isBatch) console.log(`🛑 STOP LOSS! Net: ${state.net.toFixed(0)}`);
+                }
+            }
+        }
+
+        // Track Max Drawdown (Lowest Net)
+        if (state.net < state.minNetRecord) {
+            state.minNetRecord = state.net;
+        }
+
+        state.history.push(res);
+        if (!isBatch) updateUI();
+    }
+
+    // --- Import & Simulation Logic ---
+
+    function runImport() {
+        let text = document.getElementById('import_logs').value;
+        if (!text) return;
+
+        saveState();
+        let matches = text.match(/[PBT]/gi);
         
-        if bankroll <= -1000000: 
-            return "BUST", (bankroll - initial_bankroll), max_dd_in_session, max_bet_in_session, current_idx
+        if (matches && matches.length > 0) {
+            matches.forEach(res => {
+                processResult(res.toUpperCase(), true); 
+            });
+            updateUI(); 
+            alert(`✅ นำเข้าข้อมูลสำเร็จ ${matches.length} มือ`);
+        } else {
+            alert("❌ ไม่พบข้อมูล P, B, T ในข้อความ");
+        }
+    }
 
-def run_simulation(raw_data):
-    mode = input("Select Mode: [D]ata string, [M]anual, or [R]andom probability? ").lower()
-    is_manual = (mode == 'm')
-    is_random = (mode == 'r')
-    
-    limit_hands = 0
-    if is_random:
-        limit_hands = int(input("Enter number of hands to simulate (e.g. 1000): "))
+    function runSimulation() {
+        let count = parseInt(document.getElementById('sim_hands').value);
+        if (isNaN(count) || count <= 0) return;
 
-    full_results = []
-    if not is_manual and not is_random:
-        for line in raw_data.strip().split('\n'):
-            if line.strip():
-                full_results.extend([x.strip() for x in line.split(',')][1:])
-        print(f"--- 📂 Loaded {len(full_results)} hands ---")
+        saveState(); 
 
-    total_net_profit = 0.0
-    current_idx = 0
-    v_wins = 0
-    session_no = 0
-    global_max_bet = 0
-    global_max_drawdown = 0
-    peak_net_profit = 0
-
-    while True:
-        if not is_manual and not is_random and current_idx >= len(full_results): break
-        if is_random and current_idx >= limit_hands: break
-
-        # 🧪 Virtual Wait
-        # ถ้ายังชนะไม่ครบตาม trigger ให้เล่นลม (Virtual) ไปก่อน
-        if v_wins < CONFIG["virtual_win_trigger"]:
-            res, _, _, _, next_idx = run_single_session(
-                full_results, current_idx, 999999, CONFIG["unit_size"], 100000, 
-                is_virtual_session=True, is_manual=is_manual, is_random=is_random
-            )
-            current_idx = next_idx
-            if res == "OUT_OF_DATA": break
-            v_wins = v_wins + 1 if res == "WIN" else 0
-            continue
-
-        # 💰 Real Session
-        session_no += 1
-        current_bankroll = CONFIG["initial_bankroll"] + total_net_profit
-        target = CONFIG["unit_size"] if total_net_profit >= 0 else abs(total_net_profit) + CONFIG["unit_size"]
+        const pRate = 49.32;
         
-        active_unit = CONFIG["unit_size"]
-        if total_net_profit < 0:
-            if CONFIG["recovery_mode"] == 'aggressive':
-                active_unit = max(CONFIG["unit_size"], target / CONFIG["recovery_ratio"])
+        for (let i = 0; i < count; i++) {
+            let rand = Math.random() * 100;
+            let res = (rand < pRate) ? 'P' : 'B';
+            processResult(res, true);
+        }
+
+        updateUI();
+        alert(`🎲 จำลองผลสำเร็จ ${count} มือ`);
+    }
+
+    // --- Undo System ---
+    let undoStack = [];
+
+    function saveState() {
+        undoStack.push(JSON.parse(JSON.stringify(state)));
+        if (undoStack.length > 50) undoStack.shift();
+    }
+
+    function undo() {
+        if (undoStack.length === 0) return;
+        state = undoStack.pop();
+        updateUI();
+    }
+
+    function resetAll() {
+        if (confirm("Reset everything?")) location.reload();
+    }
+
+    function updateUI() {
+        const cfg = getSettings();
+        let nextBet = calculateNextBet();
+
+        let netElem = document.getElementById('disp_net');
+        netElem.innerText = state.net.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        netElem.style.color = state.net >= 0 ? 'var(--tie)' : 'var(--banker)';
+
+        document.getElementById('disp_bet').innerText = nextBet.toLocaleString();
+        document.getElementById('disp_total').innerText = (cfg.initBank + state.net).toLocaleString();
+        document.getElementById('disp_dd').innerText = state.mode === 'REAL' ? (state.realStep + 1) + "/4" : "-";
+
+        // Update Stats Monitor
+        document.getElementById('stat_max_dd').innerText = state.minNetRecord.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        document.getElementById('stat_max_bet').innerText = state.maxBetRecord.toLocaleString();
+
+        let badge = document.getElementById('status_badge');
+        let recAmt = document.getElementById('rec_amount');
+        let recSide = document.getElementById('rec_side');
+        let panel = document.getElementById('bet_panel');
+
+        if (state.mode === 'VIRTUAL') {
+            badge.className = 'status-badge';
+            badge.innerText = `VIRTUAL WAIT: ${state.vWins}/${cfg.trigger}`;
+            recAmt.innerText = "WAIT";
+            recAmt.style.color = "#95a5a6";
+            recSide.style.display = 'none';
+            panel.classList.remove('banker-mode');
+        } else {
+            badge.className = 'status-badge active';
+            badge.innerText = `REAL MODE | STEP: ${state.realStep + 1}`;
+            recAmt.innerText = nextBet.toLocaleString();
+            recAmt.style.color = "var(--primary)";
+            recSide.style.display = 'block';
+            recSide.innerText = "PLAYER";
+            recSide.style.color = "var(--player)";
+        }
+
+        renderRoadMap();
+    }
+
+    function renderRoadMap() {
+        const grid = document.getElementById('road_grid');
+        const fragment = document.createDocumentFragment();
+        grid.innerHTML = '';
+
+        let columns = [];
+        let colIndex = 0;
+        let lastRes = null;
+
+        state.history.forEach(res => {
+            if (res === 'T') return;
+            if (lastRes !== null && res !== lastRes) colIndex++;
+            if (!columns[colIndex]) columns[colIndex] = [];
             
-            cap_limit = max(current_bankroll, CONFIG["unit_size"]) * CONFIG["max_unit_cap"]
-            active_unit = min(active_unit, cap_limit)
-        
-        # --- FIX: ปัดเศษ active_unit ให้ลงตัวกับ chip_size เสมอ ---
-        active_unit = math.ceil(active_unit / CONFIG["chip_size"]) * CONFIG["chip_size"]
-        active_unit = max(active_unit, CONFIG["chip_size"])
-        
-        if CONFIG["show_hand_by_hand"]:
-            print(f"\n🔔 Session {session_no} | Target: {target:.1f} | Base Unit: {active_unit:.1f} | Current Net: {total_net_profit:.1f}")
+            if (columns[colIndex].length < 6) columns[colIndex].push(res);
+            else {
+                colIndex++;
+                columns[colIndex] = [res];
+            }
+            lastRes = res;
+        });
 
-        status, profit, mdd, mbet, next_idx = run_single_session(
-            full_results, current_idx, target, active_unit, current_bankroll, 
-            is_manual=is_manual, is_random=is_random
-        )
-        
-        current_idx = next_idx
-        total_net_profit += profit
-        
-        # เมื่อจบ Session จริง ให้รีเซ็ต v_wins เป็น 0 เพื่อกลับไปรอ Virtual Win ใหม่
-        v_wins = 0 
-        
-        if mbet > global_max_bet: global_max_bet = mbet
-        if total_net_profit > peak_net_profit: peak_net_profit = total_net_profit
-        current_global_dd = peak_net_profit - total_net_profit
-        if current_global_dd > global_max_drawdown: global_max_drawdown = current_global_dd
+        columns.forEach(col => {
+            for (let i = 0; i < 6; i++) {
+                let cell = document.createElement('div');
+                cell.className = 'road-cell';
+                if (col[i]) {
+                    cell.classList.add(col[i]);
+                    cell.innerText = col[i];
+                }
+                fragment.appendChild(cell);
+            }
+        });
 
-        print(f"[Session {session_no:02d}] Status: {status:9s} | Net: {total_net_profit:8.1f}")
-        if status == "OUT_OF_DATA": break
+        grid.appendChild(fragment);
 
-    print(f"\n{'═'*40}\n🏁 SIMULATION COMPLETED\n{'═'*40}")
-    print(f"💰 Final Net Profit: {total_net_profit:,.2f}")
-    print(f"🔥 Global Max Bet:   {global_max_bet:,.2f}")
-    print(f"📉 Global Max DD:    {global_max_drawdown:,.2f}\n{'═'*40}")
+        const roadMap = document.querySelector('.road-map');
+        roadMap.scrollLeft = roadMap.scrollWidth;
+    }
 
-if __name__ == "__main__":
-    raw_input_data = """
-   1,P,B,B,B,P,B,P,P,T,P,P,T,P,B,B,B,P,P,P,B,P,B,P,B,B,P,B,B,P,T,P,B,B,B,B,B,P,P,T,T,P,P,P,B,B,P,B,B,T,P,B,P,B,P,P,P,P,T,B,P,P,B,T,T,P,P,P,B,P,P,B,B,P,B,P,P,B,B,P,P,B,B,B
-2,P,B,B,P,P,P,B,P,P,T,B,B,B,B,B,P,B,T,P,P,T,B,P,B,B,P,P,B,B,B,B,P,B,B,T,B,P,T,P,P,P,P,P,B,P,B,P,P,P,P,B,P,B,P,P,T,B,P,B,P,B,B,P,P,T,P,P,B,P,T,B,B,P,P,P,P,B,P,B,P
-3,B,B,P,P,B,P,B,B,B,P,B,B,B,B,B,P,P,P,P,P,B,T,P,B,T,B,T,B,B,P,B,P,P,P,B,B,P,B,B,P,P,B,P,B,T,B,P,P,B,P,P,B,T,B,P,B,P,B,P,B,B,B,B,P,T,T,P,T,B,B,B,B,P,B,P,B,P,B,P,P,P
-    """
-    run_simulation(raw_input_data)
+    window.onload = () => updateUI();
+</script>
+</body>
+</html>
