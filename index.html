@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Logic Fix - Exact Log Matching</title>
+    <title>Baccarat Logic Pro - Exact Match</title>
     <style>
         :root { --player: #007bff; --banker: #dc3545; --tie: #28a745; --bg: #f0f2f5; --card: #ffffff; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
@@ -17,22 +17,25 @@
         .stat-item.profit { border-bottom-color: var(--player); }
         .stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
         .stat-value { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
+        
         .road-map-box { background: white; padding: 15px; border-radius: 10px; overflow-x: auto; margin-bottom: 20px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
         .road-grid { display: grid; grid-template-rows: repeat(6, 28px); grid-auto-columns: 28px; grid-auto-flow: column; gap: 2px; }
         .cell { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
         .cell.P { background: var(--player); }
         .cell.B { background: var(--banker); }
         .cell.T { color: var(--tie); border: 2px solid var(--tie); background: white; border-radius: 3px; }
-        
+
+        /* ปรับสีแถบพื้นหลังเมื่อวาง PLAYER */
         .bet-area { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
-        .bet-area.bet-p { background: var(--player); color: white !important; }
-        .bet-area.bet-p .bet-title, .bet-area.bet-p .bet-amount { color: white !important; }
-        
+        .bet-area.active-p { background: var(--player); color: white; }
+        .bet-area.active-p .bet-title, .bet-area.active-p .bet-amount { color: white; }
+
         .status-info { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
         .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
         .badge-v { background: #e9ecef; color: #495057; }
         .badge-r { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-danger { background: #f8d7da; color: #721c24; }
+
         .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         button { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
         .btn-p { background: var(--player); color: white; flex: 1; }
@@ -46,21 +49,21 @@
 
 <div class="wrapper">
     <div class="sidebar">
-        <h3 style="margin-top:0">⚙️ Settings</h3>
+        <h3>⚙️ Settings</h3>
         <div class="input-field"><label>Initial Bankroll</label><input type="number" id="init_bank" value="500000"></div>
         <div class="input-field"><label>Min Bet (Unit Size)</label><input type="number" id="unit_size" value="5"></div>
         <div class="input-field"><label>Minimum Chip</label><input type="number" id="chip_size" value="5"></div>
-        <div class="input-field"><label>ยอดที่สามารถเดิมพันได้สูงสุด</label><input type="number" id="stop_loss_limit" value="75000"></div>
-        <div class="input-field"><label>Rebate Rate (0.01 = 1%)</label><input type="number" id="rebate_rate" step="0.001" value="0.01"></div>
-        <button class="btn-reset" onclick="resetSystem()">Reset All Data</button>
+        <div class="input-field"><label>Max Bet Limit</label><input type="number" id="stop_loss_limit" value="75000"></div>
+        <div class="input-field"><label>Rebate Rate</label><input type="number" id="rebate_rate" step="0.001" value="0.01"></div>
+        <button class="btn-reset" onclick="resetSystem()">Reset Data</button>
     </div>
 
     <div class="main">
         <div class="stats-container">
-            <div class="stat-item profit"><div class="stat-label">Net Profit (Total)</div><div class="stat-value" id="stat_profit">0</div></div>
+            <div class="stat-item profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="stat_profit">0</div></div>
             <div class="stat-item"><div class="stat-label">Max Bet</div><div class="stat-value" id="stat_max_bet">0</div></div>
             <div class="stat-item"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="stat_max_dd">0</div></div>
-            <div class="stat-item"><div class="stat-label">Current Bankroll</div><div class="stat-value" id="stat_bank">0</div></div>
+            <div class="stat-item"><div class="stat-label">Bankroll</div><div class="stat-value" id="stat_bank">0</div></div>
         </div>
         <div class="road-map-box"><div class="road-grid" id="road_grid"></div></div>
         <div class="bet-area" id="bet_panel">
@@ -81,29 +84,22 @@
 </div>
 
 <script>
-    // --- Constant Config ---
     const SIDE_PREF = "PLAYER"; 
     const V_WIN_TRIGGER = 5;
-    const CONSECUTIVE_LOSS_LIMIT = 4;
+    const LOSS_LIMIT = 4;
 
     let history = []; 
-    let globalNetProfit = 0;
+    let globalNet = 0;
     let totalRebate = 0;
     let maxBetUsed = 0;
-    let peakNet = 0;
     let maxDD = 0;
+    let peakNet = 0;
 
-    // Session State
     let isReal = false;
     let vWins = 0;
     let consecutiveLoss = 0;
-    let sessionStartProfit = 0;
-    let currentSessionLoss = 0; // ยอดเสียที่เกิดขึ้นเฉพาะใน Session จริงนี้
-    let activeBaseUnit = 5;
-
-    function init() {
-        updateUI();
-    }
+    let sessionLoss = 0;
+    let activeUnit = 5;
 
     function calculateBet() {
         if (!isReal) return 0;
@@ -112,38 +108,36 @@
         const limit = parseFloat(document.getElementById('stop_loss_limit').value);
         
         let bet = 0;
-        // เป้าหมายของ Session คือการเอาทุนคืนทั้งหมด + unit
-        let totalNeeded = (activeBaseUnit) + currentSessionLoss;
+        let targetToPositive = Math.abs(globalNet) + unit;
 
         if (consecutiveLoss === 0) {
-            // ถ้าพึ่งเริ่ม หรือ พึ่งชนะมา: ใช้ยอดเฉลี่ยเพื่อดึงทุนคืน (หาร 4 ตาม Log)
-            bet = Math.ceil(totalNeeded / 4);
+            // คำนวณเบทเริ่มต้นของ Session จาก Drawdown (สัดส่วน /4 ตาม Log)
+            if (globalNet < 0) {
+                bet = Math.ceil(targetToPositive / 4);
+            } else {
+                bet = unit;
+            }
         } else {
-            // ถ้าแพ้สะสม (Martingale ในโหมดดึงทุน): ทบตามยอดเสียที่เกิดขึ้น + unit
-            // จาก Log: 20 -> 35 -> 65 -> 130 (เป็นการทบยอดที่ต้องดึงคืน)
-            bet = Math.ceil(totalNeeded * 1.8); 
+            // ทบเงินตามยอดที่เสียไปใน Session นี้ + กำไรที่ต้องการ
+            bet = Math.ceil((sessionLoss + unit) * 1.8); 
         }
 
-        // ป้องกันเบทต่ำกว่าขั้นต่ำ
-        if (bet < activeBaseUnit) bet = activeBaseUnit;
-
-        // จุดสำคัญ: ถ้าเบทที่จะลง "เกิน" ยอดที่ต้องการเพื่อให้กำไรกลับมาเป็นบวก (แบบ Session 03 ที่เบทสุดท้ายคือ 66)
-        // ให้ปรับเบทให้พอดีกับยอดที่ต้องการ
-        let remainingToTarget = (sessionStartProfit + activeBaseUnit) - globalNetProfit;
-        if (remainingToTarget > 0 && bet > remainingToTarget + 5) {
-            bet = remainingToTarget;
+        // เช็คไม้ปิดยอด (Session 03: 66.0)
+        let remainingToWin = (Math.abs(globalNet < 0 ? globalNet : 0)) + unit;
+        if (bet > remainingToWin && consecutiveLoss === 0 && globalNet < 0) {
+            bet = remainingToWin;
         }
 
-        // Rounding
+        // ป้องกันเบทต่ำกว่า Unit พื้นฐาน หรือ Chip Size
+        if (bet < unit) bet = unit;
         bet = Math.ceil(bet / chip) * chip;
-        if (bet > limit) bet = limit;
-        return bet;
+
+        return bet > limit ? limit : bet;
     }
 
     function addHand(res) {
         if (res === 'T') { history.push('T'); renderRoad(); return; }
 
-        const unitSetting = parseFloat(document.getElementById('unit_size').value);
         const side = (SIDE_PREF === "PLAYER") ? "P" : "B";
         const isWin = (res === side);
 
@@ -152,15 +146,7 @@
             if (vWins >= V_WIN_TRIGGER) {
                 isReal = true;
                 consecutiveLoss = 0;
-                currentSessionLoss = 0;
-                sessionStartProfit = globalNetProfit;
-                
-                // คำนวณเบทเริ่มต้นของรอบนี้จาก Drawdown (ตาม Log)
-                if (globalNetProfit < 0) {
-                    activeBaseUnit = Math.ceil((Math.abs(globalNetProfit) + unitSetting) / 4);
-                } else {
-                    activeBaseUnit = unitSetting;
-                }
+                sessionLoss = 0;
             }
         } else {
             const bet = calculateBet();
@@ -170,32 +156,29 @@
             const winLoss = isWin ? (bet * payout) : -bet;
             
             totalRebate += (bet * parseFloat(document.getElementById('rebate_rate').value));
-            globalNetProfit += winLoss;
+            globalNet += winLoss;
 
             if (isWin) {
                 consecutiveLoss = 0;
-                // ไม่รีเซ็ต currentSessionLoss ทันที แต่จะลดลงตามกำไรที่ได้
-                currentSessionLoss = Math.max(0, currentSessionLoss - winLoss);
-
-                // ถ้ากำไรกลับมามากกว่าจุดเริ่ม + unit แล้ว ให้จบ Session
-                if (globalNetProfit >= sessionStartProfit + unitSetting - 1) {
+                sessionLoss = 0;
+                // ถ้ากำไรกลับมาเป็นบวกแล้ว ให้จบ Session ทันที
+                if (globalNet >= parseFloat(document.getElementById('unit_size').value)) {
                     isReal = false; vWins = 0;
-                    alert("✅ SESSION WIN: Target Reached");
+                    alert("SESSION WIN! Net: " + globalNet.toFixed(1));
                 }
             } else {
                 consecutiveLoss++;
-                currentSessionLoss += bet;
-
-                if (consecutiveLoss >= CONSECUTIVE_LOSS_LIMIT) {
+                sessionLoss += bet;
+                if (consecutiveLoss >= LOSS_LIMIT) {
                     isReal = false; vWins = 0;
-                    alert(`⚠️ STOP LOSS: แพ้ติดกัน ${CONSECUTIVE_LOSS_LIMIT} ครั้ง`);
+                    alert("STOP LOSS! Net: " + globalNet.toFixed(1));
                 }
             }
         }
 
-        if (globalNetProfit > peakNet) peakNet = globalNetProfit;
-        let d = peakNet - globalNetProfit;
-        if (d > maxDD) maxDD = d;
+        if (globalNet > peakNet) peakNet = globalNet;
+        let dd = peakNet - globalNet;
+        if (dd > maxDD) maxDD = dd;
 
         history.push(res);
         renderRoad();
@@ -204,10 +187,10 @@
 
     function updateUI() {
         const ib = parseFloat(document.getElementById('init_bank').value);
-        document.getElementById('stat_profit').innerText = (globalNetProfit + totalRebate).toLocaleString(undefined, {minimumFractionDigits:1});
+        document.getElementById('stat_profit').innerText = (globalNet + totalRebate).toLocaleString();
         document.getElementById('stat_max_bet').innerText = maxBetUsed.toLocaleString();
         document.getElementById('stat_max_dd').innerText = maxDD.toLocaleString();
-        document.getElementById('stat_bank').innerText = (ib + globalNetProfit + totalRebate).toLocaleString();
+        document.getElementById('stat_bank').innerText = (ib + globalNet + totalRebate).toLocaleString();
 
         const mt = document.getElementById('mode_tag');
         const lt = document.getElementById('loss_tag');
@@ -219,21 +202,14 @@
             mt.className = "badge badge-v";
             lt.style.display = "none";
             bd.innerText = "WAIT";
-            panel.classList.remove('bet-p');
+            panel.classList.remove('active-p');
         } else {
-            mt.innerText = "REAL MODE ACTIVE";
+            mt.innerText = "REAL MODE";
             mt.className = "badge badge-r";
             lt.style.display = "block";
-            lt.innerText = `LOSS: ${consecutiveLoss}/${CONSECUTIVE_LOSS_LIMIT}`;
-            
-            const nextBet = calculateBet();
-            bd.innerText = nextBet.toLocaleString();
-            
-            if (SIDE_PREF === "PLAYER") {
-                panel.classList.add('bet-p');
-            } else {
-                panel.classList.remove('bet-p');
-            }
+            lt.innerText = `LOSS: ${consecutiveLoss}/${LOSS_LIMIT}`;
+            bd.innerText = calculateBet().toLocaleString();
+            if (SIDE_PREF === "PLAYER") panel.classList.add('active-p');
         }
     }
 
@@ -251,9 +227,8 @@
     }
 
     function undoLast() { if (history.length > 0) { history.pop(); renderRoad(); updateUI(); } }
-    function resetSystem() { if (confirm("ต้องการ Reset?")) location.reload(); }
-    window.onload = init;
+    function resetSystem() { if (confirm("Reset?")) location.reload(); }
+    window.onload = updateUI;
 </script>
-
 </body>
 </html>
