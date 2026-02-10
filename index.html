@@ -2,235 +2,103 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Adaptive System - Gemini v3</title>
+    <title>Baccarat Simulator - Python Logic Sync</title>
     <style>
-        /* --- CSS STYLES --- */
         :root {
-            --bg-main: #000000;
-            --bg-sidebar: #121212;
-            --bg-card: #1a1a1a;
-            --border-color: #333333;
-            --accent-blue: #007bff;
-            --accent-red: #dc3545;
-            --accent-green: #28a745;
-            --text-main: #ffffff;
-            --text-muted: #888888;
+            --bg: #000; --card: #1a1a1a; --border: #333;
+            --blue: #007bff; --red: #dc3545; --green: #28a745;
         }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 10px; font-size: 14px; }
+        
+        /* Stats Header */
+        .top-stats { display: flex; gap: 5px; margin-bottom: 10px; }
+        .stat-box { flex: 1; background: var(--card); border: 1px solid var(--border); padding: 10px; text-align: center; }
+        .stat-box label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; }
+        .stat-box span { font-size: 20px; font-weight: bold; }
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            overflow-x: hidden;
-        }
+        .container { display: flex; gap: 10px; }
+        
+        /* Sidebar Controls */
+        .sidebar { width: 250px; background: #111; padding: 15px; border-radius: 4px; box-sizing: border-box; }
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+        .input-group input, select { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 6px; box-sizing: border-box; }
 
-        /* Top Statistics */
-        .top-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-            margin-bottom: 10px;
-        }
+        .btn-start { width: 100%; background: var(--green); border: none; color: #fff; padding: 10px; font-weight: bold; cursor: pointer; margin: 10px 0; }
+        .pad { display: flex; gap: 5px; margin-top: 15px; }
+        .pad button { flex: 1; height: 50px; border: none; color: #fff; font-weight: bold; cursor: pointer; font-size: 18px; border-radius: 4px; }
+        .btn-p { background: var(--blue); } .btn-b { background: var(--red); } .btn-t { background: var(--green); }
+        
+        /* Main Display */
+        .main { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .bet-banner { background: var(--blue); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; }
+        .bet-banner div { font-size: 24px; font-weight: bold; }
+        .status-badge { background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; font-size: 12px; }
 
-        .stat-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            text-align: center;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--text-muted);
+        /* Road Display */
+        .road-container { background: #fff; height: 162px; overflow-x: auto; border: 1px solid #444; }
+        .road-grid { 
+            display: grid; grid-template-rows: repeat(6, 26px); grid-auto-columns: 26px; 
+            grid-auto-flow: column; gap: 1px; background: #ddd; width: max-content;
         }
+        .cell { background: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
 
-        .stat-box span {
-            display: block;
-            font-size: 20px;
-            color: #fff;
-            margin-top: 5px;
-        }
-
-        /* Layout Container */
-        .wrapper {
-            display: flex;
-            gap: 10px;
-            height: calc(100vh - 100px);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: var(--bg-sidebar);
-            padding: 15px;
-            border-radius: 4px;
-            font-size: 13px;
-            flex-shrink: 0;
-            overflow-y: auto;
-        }
-
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; margin-bottom: 4px; color: var(--text-muted); }
-        .input-group input, .input-group select {
-            width: 100%;
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 7px;
-            border-radius: 3px;
-            box-sizing: border-box;
-        }
-
-        .btn-start {
-            width: 100%;
-            background: var(--accent-green);
-            border: none;
-            color: white;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
-
-        .pad-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
-        .button-pad { display: flex; gap: 5px; margin-bottom: 15px; }
-        .button-pad button {
-            flex: 1; height: 45px; border: none; color: white;
-            font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 16px;
-        }
-        .btn-p { background: var(--accent-blue); }
-        .btn-b { background: var(--accent-red); }
-        .btn-t { background: var(--accent-green); }
-
-        .control-btns { display: flex; gap: 5px; }
-        .btn-action {
-            flex: 1; background: #333; color: white; border: none;
-            padding: 10px; cursor: pointer; border-radius: 4px; font-size: 12px;
-        }
-
-        /* Main Content */
-        .main-content { flex: 1; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
-
-        .bet-info-banner {
-            background: var(--accent-blue);
-            padding: 12px 20px;
-            font-size: 22px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            border-radius: 4px;
-        }
-        .state-tag {
-            background: rgba(0,0,0,0.3);
-            font-size: 11px;
-            padding: 3px 10px;
-            border-radius: 10px;
-            margin-left: 15px;
-            text-transform: uppercase;
-        }
-        .bet-val { margin-left: auto; }
-
-        /* Big Road Display */
-        .road-container {
-            background: white;
-            height: 180px;
-            overflow-x: auto;
-            border-radius: 4px;
-            padding: 2px;
-        }
-        .road-grid {
-            display: grid;
-            grid-template-rows: repeat(6, 26px);
-            grid-auto-columns: 26px;
-            grid-auto-flow: column;
-            gap: 1px;
-            background: #e0e0e0;
-            width: max-content;
-        }
-        .cell {
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 13px;
-        }
-        .p-text { color: var(--accent-blue); }
-        .b-text { color: var(--accent-red); }
-
-        /* Table */
-        .table-area {
-            flex: 1;
-            background: var(--bg-card);
-            border-radius: 4px;
-            overflow-y: auto;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-        th { background: #252525; color: var(--text-muted); padding: 12px; position: sticky; top: 0; font-weight: normal; }
-        td { padding: 10px; border-bottom: 1px solid #222; }
-        .win-row { color: var(--accent-green); }
-        .loss-row { color: var(--accent-red); }
+        /* Table Area */
+        .table-area { flex: 1; background: var(--card); overflow-y: auto; height: 350px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: #222; position: sticky; top: 0; padding: 10px; text-align: left; color: #888; }
+        td { padding: 8px 10px; border-bottom: 1px solid #222; }
+        .win { color: var(--green); } .loss { color: var(--red); }
     </style>
 </head>
 <body>
 
     <div class="top-stats">
-        <div class="stat-box">NET PROFIT<br><span id="stat-net">0.00</span></div>
-        <div class="stat-box">COMMISSION<br><span id="stat-comm">0.00</span></div>
-        <div class="stat-box">MAX BET<br><span id="stat-max">0</span></div>
-        <div class="stat-box">SESSION<br><span id="stat-session">1</span></div>
+        <div class="stat-box"><label>NET PROFIT</label><span id="net-profit">0.00</span></div>
+        <div class="stat-box"><label>V-WINS COUNT</label><span id="v-wins">0</span></div>
+        <div class="stat-box"><label>MAX BET</label><span id="max-bet">0</span></div>
+        <div class="stat-box"><label>SESSION</label><span id="session-no">0</span></div>
     </div>
 
-    <div class="wrapper">
+    <div class="container">
         <aside class="sidebar">
             <div class="input-group">
-                <label>โหมด (Mode)</label>
-                <select id="mode-sel"><option>Manual Input (กดมือ)</option></select>
+                <label>Side Preference</label>
+                <select id="side-pref"><option value="PLAYER">PLAYER</option><option value="BANKER">BANKER</option></select>
             </div>
             <div class="input-group">
                 <label>Initial Bankroll</label>
                 <input type="number" id="init-br" value="500000">
             </div>
             <div class="input-group">
-                <label>Min Unit Size</label>
-                <input type="number" id="unit-size" value="5">
+                <label>Unit Size / Chip Size</label>
+                <input type="number" id="unit-size" value="5.0">
             </div>
             <div class="input-group">
-                <label>Recovery Ratio</label>
-                <input type="number" id="recovery-ratio" value="5">
+                <label>V-Win Trigger</label>
+                <input type="number" id="v-trigger" value="5">
             </div>
             <div class="input-group">
-                <label>Stop Loss Threshold</label>
+                <label>Stop Loss (Threshold)</label>
                 <input type="number" id="stop-loss" value="75000">
             </div>
-            <div class="input-group">
-                <label>Commission %</label>
-                <input type="number" id="comm-pct" value="1.0" step="0.1">
-            </div>
-
-            <button class="btn-start" onclick="initSystem()">START SYSTEM</button>
-
-            <p class="pad-label">บันทึกผลมือต่อมือ</p>
-            <div class="button-pad">
-                <button class="btn-p" onclick="recordResult('P')">P</button>
-                <button class="btn-b" onclick="recordResult('B')">B</button>
-                <button class="btn-t" onclick="recordResult('T')">T</button>
-            </div>
+            <button class="btn-start" onclick="startSystem()">START SYSTEM</button>
             
-            <div class="control-btns">
-                <button class="btn-action" onclick="undo()">↶ Undo</button>
-                <button class="btn-action" style="background:#500" onclick="resetAll()">🔄 Reset</button>
+            <div class="pad">
+                <button class="btn-p" onclick="handleInput('P')">P</button>
+                <button class="btn-b" onclick="handleInput('B')">B</button>
+                <button class="btn-t" onclick="handleInput('T')">T</button>
             </div>
+            <button onclick="location.reload()" style="width:100%; margin-top:10px; background:#444; border:none; color:#fff; cursor:pointer; padding:5px;">Reset All</button>
         </aside>
 
-        <main class="main-content">
-            <div class="bet-info-banner" id="banner-bg">
-                <span id="bet-display-text">WAITING...</span>
-                <span class="state-tag" id="state-tag">IDLE</span>
-                <span class="bet-val" id="bet-val">0</span>
+        <main class="main">
+            <div id="banner" class="bet-banner" style="background: #444;">
+                <div>
+                    <span id="banner-text">WAITING SYSTEM</span>
+                    <span id="banner-mode" class="status-badge">VIRTUAL</span>
+                </div>
+                <div id="banner-bet">0</div>
             </div>
 
             <div class="road-container">
@@ -241,13 +109,13 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Hand #</th>
-                            <th>Type</th>
+                            <th>Hand</th>
+                            <th>Mode</th>
                             <th>State</th>
                             <th>Result</th>
                             <th>Bet</th>
                             <th>Outcome</th>
-                            <th>Net Profit</th>
+                            <th>Net</th>
                         </tr>
                     </thead>
                     <tbody id="log-body"></tbody>
@@ -257,179 +125,227 @@
     </div>
 
     <script>
-        /* --- JAVASCRIPT LOGIC --- */
-        let settings = {};
-        let engine = {
-            isRunning: false,
-            netProfit: 0,
-            commission: 0,
-            maxBet: 0,
-            vWinCount: 0, // สำหรับ Virtual Win Wait
-            history: [],
+        // Config & State Sync with Python
+        let CONFIG = {};
+        let sys = {
+            totalNetProfit: 0,
+            vWins: 0,
+            sessionNo: 0,
+            globalMaxBet: 0,
+            peakNetProfit: 0,
             road: [],
+            isStarted: false,
             
-            // Betting State
-            currentMode: 'FLAT',
-            martyStep: 0,
-            isRealBetting: false
+            // Session specific
+            isRealSession: false,
+            sessionBankroll: 0,
+            sessionPeak: 0,
+            sessionState: "FLAT",
+            martStep: 0,
+            hasLostSincePeak: false,
+            consecutiveLoss: 0,
+            activeUnit: 0,
+            targetProfit: 0
         };
 
-        const VIRTUAL_WIN_TRIGGER = 5; // ตั้งค่ารอชนะทิพย์ 5 ครั้งตามรูป
-
-        function initSystem() {
-            settings = {
-                initialBR: parseFloat(document.getElementById('init-br').value),
-                unit: parseFloat(document.getElementById('unit-size').value),
-                recoveryRatio: parseFloat(document.getElementById('recovery-ratio').value),
-                stopLoss: parseFloat(document.getElementById('stop-loss').value),
-                commPct: parseFloat(document.getElementById('comm-pct').value)
+        function startSystem() {
+            CONFIG = {
+                initial_bankroll: parseFloat(document.getElementById('init-br').value),
+                unit_size: parseFloat(document.getElementById('unit-size').value),
+                chip_size: parseFloat(document.getElementById('unit-size').value),
+                side_preference: document.getElementById('side-pref').value,
+                virtual_win_trigger: parseInt(document.getElementById('v-trigger').value),
+                stop_loss_threshold: parseFloat(document.getElementById('stop-loss').value),
+                marty_mult: 2.0,
+                recovery_ratio: 5,
+                max_unit_cap: 1
             };
-            engine.isRunning = true;
+            sys.isStarted = true;
+            sys.totalNetProfit = 0;
+            prepareNextMode();
             updateUI();
-            alert("System Started: Waiting for Virtual Wins...");
+            alert("System Started");
+        }
+
+        function prepareNextMode() {
+            if (sys.vWins < CONFIG.virtual_win_trigger) {
+                sys.isRealSession = false;
+                sys.sessionBankroll = 100000; // Virtual bankroll 
+                sys.sessionPeak = 100000;
+                sys.sessionState = "FLAT";
+                sys.martStep = 0;
+                sys.hasLostSincePeak = false;
+                sys.consecutiveLoss = 0;
+                sys.activeUnit = CONFIG.unit_size;
+            } else {
+                sys.isRealSession = true;
+                sys.sessionNo++;
+                sys.sessionBankroll = CONFIG.initial_bankroll + sys.totalNetProfit;
+                sys.sessionPeak = sys.sessionBankroll;
+                sys.targetProfit = sys.totalNetProfit >= 0 ? CONFIG.unit_size : Math.abs(sys.totalNetProfit) + CONFIG.unit_size;
+                
+                // active_unit recovery logic from Python
+                let activeUnit = CONFIG.unit_size;
+                if (sys.totalNetProfit < 0) {
+                    activeUnit = Math.max(CONFIG.unit_size, sys.targetProfit / CONFIG.recovery_ratio);
+                    let cap = Math.max(sys.sessionBankroll, CONFIG.unit_size) * CONFIG.max_unit_cap;
+                    activeUnit = Math.min(activeUnit, cap);
+                }
+                sys.activeUnit = Math.max(activeUnit, CONFIG.unit_size);
+                sys.sessionState = "FLAT";
+                sys.martStep = 0;
+                sys.hasLostSincePeak = false;
+                sys.consecutiveLoss = 0;
+            }
         }
 
         function calculateBet() {
-            if (!engine.isRunning) return 0;
+            if (!sys.isStarted) return 0;
             
-            let bet = settings.unit;
-            if (engine.currentMode === 'MARTY') {
-                bet = settings.unit * Math.pow(2, engine.martyStep);
+            let current_drawdown = sys.sessionPeak - sys.sessionBankroll;
+            if (current_drawdown >= CONFIG.stop_loss_threshold) {
+                sys.sessionState = "FLAT"; sys.martStep = 0;
+            }
+
+            let rawBet = sys.activeUnit;
+            if (sys.sessionState === "FLAT") {
+                if (current_drawdown > 0 && sys.hasLostSincePeak) {
+                    rawBet = Math.ceil(current_drawdown / 4);
+                    rawBet = Math.max(rawBet, sys.activeUnit);
+                }
+            } else if (sys.sessionState === "MARTY") {
+                rawBet = sys.activeUnit * Math.pow(CONFIG.marty_mult, sys.martStep);
             }
 
             // Constraints
-            bet = Math.min(bet, settings.stopLoss);
-            return Math.ceil(bet / 5) * 5; // Round to nearest 5
-        }
-
-        function recordResult(res) {
-            if (!engine.isRunning) { alert("Please click START SYSTEM first"); return; }
-            if (res === 'T') return; // Skip Ties
-
-            const bet = calculateBet();
-            const isWin = (res === 'P'); // Side Preference: Player
+            let needed = current_drawdown + sys.activeUnit;
+            let bet = (sys.sessionState !== "FLAT") ? Math.min(rawBet, needed) : rawBet;
             
-            // Logic สำหรับระบบ Virtual/Real
-            if (!engine.isRealBetting) {
-                // โหมดเล่นทิพย์ (Virtual Mode)
-                if (isWin) engine.vWinCount++;
-                else engine.vWinCount = 0;
-
-                if (engine.vWinCount >= VIRTUAL_WIN_TRIGGER) {
-                    engine.isRealBetting = true;
+            // Remaining Target Logic
+            if (sys.isRealSession) {
+                let current_profit = sys.sessionBankroll - (CONFIG.initial_bankroll + (sys.totalNetProfit - 0)); // Temp diff
+                let remaining = sys.targetProfit - (sys.sessionBankroll - (CONFIG.initial_bankroll + (sys.totalNetProfit)));
+                // Simplified for JS
+                if (bet > remaining && remaining > 0) {
+                    bet = Math.max(sys.activeUnit, Math.ceil(remaining / CONFIG.chip_size) * CONFIG.chip_size);
                 }
-                
-                addHistory('VIRTUAL', 'WAIT', res, 0, 0);
-            } else {
-                // โหมดเล่นจริง (Real Mode)
-                if (bet > engine.maxBet) engine.maxBet = bet;
-                
-                let outcome = isWin ? bet : -bet;
-                let comm = 0;
-                if (res === 'B' && isWin === false) { 
-                    // กรณีเสียให้ Banker ไม่เสียคอม แต่ถ้าแทง Banker แล้วชนะถึงเสีย (ปรับตามสูตรคุณ)
-                }
-
-                engine.netProfit += outcome;
-                
-                // Update Martingale State
-                if (isWin) {
-                    engine.currentMode = 'FLAT';
-                    engine.martyStep = 0;
-                    // เมื่อชนะจริงแล้ว กลับไปโหมด Virtual เพื่อรอจังหวะใหม่ (ตามหลักการล้างพอร์ตยาก)
-                    engine.isRealBetting = false; 
-                    engine.vWinCount = 0;
-                } else {
-                    engine.currentMode = 'MARTY';
-                    engine.martyStep++;
-                }
-
-                addHistory('REAL', engine.currentMode, res, bet, outcome);
             }
 
-            engine.road.push(res);
+            bet = Math.ceil(bet / CONFIG.chip_size) * CONFIG.chip_size;
+            if (bet >= CONFIG.stop_loss_threshold) bet = CONFIG.stop_loss_threshold;
+            
+            return bet;
+        }
+
+        function handleInput(res) {
+            if (!sys.isStarted) return;
+            if (res === 'T') { sys.road.push('T'); updateUI(); return; }
+
+            const bet = calculateBet();
+            const isWin = (res === CONFIG.side_preference[0]);
+            
+            if (!sys.isRealSession) {
+                // VIRTUAL LOGIC
+                sys.vWins = isWin ? sys.vWins + 1 : 0;
+                addLog("VIRTUAL", sys.sessionState, res, 0, 0);
+                if (sys.vWins >= CONFIG.virtual_win_trigger) prepareNextMode();
+            } else {
+                // REAL LOGIC
+                if (bet > sys.globalMaxBet) sys.globalMaxBet = bet;
+                let outcome = isWin ? bet : -bet;
+                
+                sys.sessionBankroll += outcome;
+                sys.totalNetProfit += outcome;
+                
+                if (isWin) {
+                    sys.consecutiveLoss = 0;
+                    if (sys.sessionBankroll >= sys.sessionPeak) sys.hasLostSincePeak = false;
+                    sys.sessionState = "FLAT"; sys.martStep = 0;
+                } else {
+                    sys.consecutiveLoss++;
+                    sys.hasLostSincePeak = true;
+                    if (sys.sessionState === "FLAT") { sys.sessionState = "MARTY"; sys.martStep = 1; }
+                    else if (sys.sessionState === "MARTY") sys.martStep++;
+                }
+
+                if (sys.sessionBankroll > sys.sessionPeak) sys.sessionPeak = sys.sessionBankroll;
+                
+                addLog("REAL", sys.sessionState, res, bet, outcome);
+
+                // Session End Conditions
+                let sessionProfit = sys.sessionBankroll - (CONFIG.initial_bankroll + (sys.totalNetProfit - outcome)); 
+                let isTargetMet = (sys.totalNetProfit >= sys.peakNetProfit) || (outcome > 0 && sys.sessionState === "FLAT");
+                
+                // If profit >= target or stop loss
+                if ((sys.sessionBankroll - (sys.sessionPeak - currentDrawdownFromPythonLogic)) >= sys.targetProfit || isWin && sys.sessionState === "FLAT" || sys.consecutiveLoss >= 4) {
+                    // Logic to match run_simulation: v_wins = 0, prepare next
+                    sys.vWins = 0;
+                    prepareNextMode();
+                }
+            }
+
+            sys.road.push(res);
             updateUI();
         }
 
-        function addHistory(type, state, res, bet, outcome) {
-            engine.history.unshift({
-                hand: engine.history.length + 1,
-                type: type,
-                state: state,
-                result: res,
-                bet: bet,
-                outcome: (outcome > 0 ? '+' : '') + outcome,
-                net: engine.netProfit.toFixed(2)
-            });
+        function addLog(mode, state, res, bet, outcome) {
+            const body = document.getElementById('log-body');
+            const row = document.createElement('tr');
+            row.className = outcome > 0 ? 'win' : (outcome < 0 ? 'loss' : '');
+            row.innerHTML = `
+                <td>${sys.road.length + 1}</td>
+                <td>${mode}</td>
+                <td>${state}</td>
+                <td style="font-weight:bold; color:${res==='P'?'#007bff':'#dc3545'}">${res}</td>
+                <td>${bet.toLocaleString()}</td>
+                <td>${outcome > 0 ? '+' : ''}${outcome.toLocaleString()}</td>
+                <td>${sys.totalNetProfit.toLocaleString()}</td>
+            `;
+            body.prepend(row);
         }
 
         function updateUI() {
-            document.getElementById('stat-net').innerText = engine.netProfit.toFixed(2);
-            document.getElementById('stat-max').innerText = engine.maxBet;
+            document.getElementById('net-profit').innerText = sys.totalNetProfit.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('v-wins').innerText = sys.vWins;
+            document.getElementById('max-bet').innerText = sys.globalMaxBet.toLocaleString();
+            document.getElementById('session-no').innerText = sys.sessionNo;
             
-            const betVal = calculateBet();
-            document.getElementById('bet-val').innerText = engine.isRealBetting ? betVal : 0;
-            document.getElementById('bet-display-text').innerText = engine.isRealBetting ? "BET PLAYER" : "WAITING V-WIN...";
-            document.getElementById('state-tag').innerText = engine.isRealBetting ? engine.currentMode : `V-COUNT: ${engine.vWinCount}`;
-            document.getElementById('banner-bg').style.background = engine.isRealBetting ? "#007bff" : "#444";
+            const nextBet = calculateBet();
+            const banner = document.getElementById('banner');
+            document.getElementById('banner-bet').innerText = sys.isRealSession ? nextBet.toLocaleString() : "0";
+            document.getElementById('banner-text').innerText = sys.isRealSession ? `BET ${CONFIG.side_preference}` : "WAITING V-WINS";
+            document.getElementById('banner-mode').innerText = sys.isRealSession ? "REAL SESSION" : `V-COUNT: ${sys.vWins}/${CONFIG.virtual_win_trigger}`;
+            banner.style.background = sys.isRealSession ? "var(--blue)" : "#444";
 
-            // Render History Table
-            const logBody = document.getElementById('log-body');
-            logBody.innerHTML = engine.history.map(h => `
-                <tr class="${parseFloat(h.outcome) > 0 ? 'win-row' : (parseFloat(h.outcome) < 0 ? 'loss-row' : '')}">
-                    <td>${h.hand}</td>
-                    <td>${h.type}</td>
-                    <td>${h.state}</td>
-                    <td style="font-weight:bold; color:${h.result==='P'?'#007bff':'#dc3545'}">${h.result}</td>
-                    <td>${h.bet}</td>
-                    <td>${h.outcome}</td>
-                    <td>${h.net}</td>
-                </tr>
-            `).join('');
-
-            renderBigRoad();
+            renderRoad();
         }
 
-        function renderBigRoad() {
+        function renderRoad() {
             const grid = document.getElementById('big-road');
             grid.innerHTML = '';
+            let columns = [[]];
+            let colIdx = 0;
             
-            let cols = [[]];
-            let cIdx = 0;
-
-            engine.road.forEach((res, i) => {
-                const last = engine.road[i-1];
-                if (last && res !== last) {
-                    cIdx++;
-                    cols[cIdx] = [];
+            let filteredRoad = sys.road.filter(r => r !== 'T');
+            filteredRoad.forEach((res, i) => {
+                if (i > 0 && res !== filteredRoad[i-1]) {
+                    colIdx++;
+                    columns[colIdx] = [];
                 }
-                if (cols[cIdx].length < 6) cols[cIdx].push(res);
-                else { cIdx++; cols[cIdx] = [res]; }
+                if (columns[colIdx].length < 6) columns[colIdx].push(res);
+                else { colIdx++; columns[colIdx] = [res]; }
             });
 
-            // Fill Grid (min 50 columns)
-            const displayCols = Math.max(45, cols.length + 5);
-            for (let c = 0; c < displayCols; c++) {
+            for (let c = 0; c < Math.max(40, columns.length + 5); c++) {
                 for (let r = 0; r < 6; r++) {
-                    const div = document.createElement('div');
-                    div.className = 'cell';
-                    if (cols[c] && cols[c][r]) {
-                        div.innerHTML = `<span class="${cols[c][r] === 'P' ? 'p-text' : 'b-text'}">${cols[c][r]}</span>`;
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (columns[c] && columns[c][r]) {
+                        cell.innerHTML = `<span style="color:${columns[c][r]==='P'?'blue':'red'}">${columns[c][r]}</span>`;
                     }
-                    grid.appendChild(div);
+                    grid.appendChild(cell);
                 }
             }
-        }
-
-        function undo() {
-            engine.history.shift();
-            engine.road.pop();
-            // Note: Simplistic undo (doesn't fully revert complex states, but works for mistakes)
-            updateUI();
-        }
-
-        function resetAll() {
-            if (confirm("Reset everything?")) location.reload();
         }
     </script>
 </body>
