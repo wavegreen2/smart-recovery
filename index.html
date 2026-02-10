@@ -24,22 +24,28 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            height: 100vh; /* Fix height to viewport */
+            overflow: hidden; /* Prevent body scroll if not needed */
         }
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             display: grid;
             grid-template-columns: 320px 1fr;
             gap: 20px;
+            height: 95vh; /* Contain within screen */
         }
 
+        /* Sidebar Settings */
         .sidebar {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             height: fit-content;
+            overflow-y: auto; /* Scroll sidebar if too tall */
+            max-height: 100%;
         }
 
         .sidebar h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
@@ -54,12 +60,21 @@
         }
         .btn-reset:hover { background: #7f8c8d; }
 
-        .main-content { display: flex; flex-direction: column; gap: 20px; }
+        /* Main Content */
+        .main-content { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            overflow-y: auto; /* Allow main content to scroll vertically if needed */
+            padding-right: 5px;
+        }
 
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
+            flex-shrink: 0; /* Prevent shrinking */
         }
         .stat-card {
             background: var(--card-bg);
@@ -74,21 +89,37 @@
         .stat-label { font-size: 0.75rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-value { font-size: 1.3rem; font-weight: 800; margin-top: 5px; }
 
+        /* Road Map - Fixed Scrolling */
         .road-map {
             background: var(--card-bg);
             padding: 15px;
             border-radius: 12px;
-            overflow-x: auto;
             min-height: 140px;
             display: flex;
             align-items: center;
+            
+            /* Key properties for scrolling ONLY this box */
+            overflow-x: auto; 
+            white-space: nowrap;
+            width: 100%;
+            max-width: 100%; 
+            box-sizing: border-box;
+            flex-shrink: 0;
         }
+        
+        /* Custom Scrollbar for Road Map */
+        .road-map::-webkit-scrollbar { height: 8px; }
+        .road-map::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .road-map::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 4px; }
+        .road-map::-webkit-scrollbar-thumb:hover { background: #95a5a6; }
+
         .road-grid {
             display: grid;
             grid-template-rows: repeat(6, 30px);
             grid-auto-flow: column;
             grid-auto-columns: 30px;
             gap: 2px;
+            padding-right: 20px; /* Space at the end */
         }
         .road-cell {
             width: 28px; height: 28px;
@@ -101,6 +132,7 @@
         .road-cell.B { background-color: var(--banker); }
         .road-cell.T { background-color: var(--card-bg); border: 2px solid var(--tie); color: var(--tie); }
 
+        /* Betting Panel */
         .bet-panel {
             background: var(--card-bg);
             padding: 30px;
@@ -109,6 +141,7 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .status-badge {
@@ -139,7 +172,8 @@
         .btn-u { background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d; }
 
         @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
+            body { height: auto; overflow: auto; }
+            .container { grid-template-columns: 1fr; height: auto; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
@@ -434,7 +468,9 @@
             }
         });
 
-        document.querySelector('.road-map').scrollLeft = grid.scrollWidth;
+        // Auto scroll to right
+        const roadMap = document.querySelector('.road-map');
+        roadMap.scrollLeft = roadMap.scrollWidth;
     }
 
     window.onload = () => updateUI();
