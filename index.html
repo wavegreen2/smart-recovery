@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Logic Fix - Continuous Betting</title>
+    <title>Baccarat Logic Pro - Exact Match</title>
     <style>
         :root { --player: #007bff; --banker: #dc3545; --tie: #28a745; --bg: #f0f2f5; --card: #ffffff; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
@@ -24,7 +24,6 @@
         .cell.B { background: var(--banker); }
         .cell.T { color: var(--tie); border: 2px solid var(--tie); background: white; border-radius: 3px; }
         
-        /* แก้ไขส่วนสีของ Bet Display */
         .bet-area { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: background 0.3s; }
         .bet-area.bet-p { background: var(--player); color: white; }
         .bet-area.bet-p .bet-title, .bet-area.bet-p .bet-amount { color: white; }
@@ -66,7 +65,7 @@
         <div class="road-map-box"><div class="road-grid" id="road_grid"></div></div>
         <div class="bet-area" id="bet_panel">
             <div class="status-info">
-                <div id="mode_tag" class="badge badge-v">VIRTUAL MODE</div>
+                <div id="mode_tag" class="badge badge-v">VIRTUAL WAIT</div>
                 <div id="loss_tag" class="badge badge-danger" style="display:none;">LOSS: 0/4</div>
             </div>
             <div class="bet-title">NEXT RECOMMENDED BET</div>
@@ -82,97 +81,94 @@
 </div>
 
 <script>
-    // --- Config ---
+    // --- Config Constant ---
     const SIDE_PREF = "PLAYER"; 
     const V_WIN_TRIGGER = 5;
     const CONSECUTIVE_LOSS_LIMIT = 4;
-    const RECOVERY_RATIO = 5;
-    const MARTY_LIMIT = 12;
+    const RECOVERY_RATIO = 4; // เปลี่ยนเป็น 4 ตามตรรกะ ceil(drawdown / 4)
+    const MARTY_MULT = 2.0;
 
     let history = []; 
-    let globalNetProfit = 0;
+    let globalNetProfit = 0; // ยอดกำไรขาดทุนสะสมจริง
     let totalRebate = 0;
     let maxBetUsed = 0;
-    let peakNet = -9999999;
+    let peakNet = 0;
     let maxDD = 0;
 
     // Session State
     let isReal = false;
     let vWins = 0;
-    let activeUnit = 5; 
-    let sessionStartProfit = 0; 
-    let sessionTargetProfit = 0;
+    let sessionPeakBankroll = 0;
+    let sessionBankroll = 0;
+    let hasLostSincePeak = false;
     let consecutiveLoss = 0;
-    let state = "FLAT";
+    let state = "FLAT"; // FLAT, MARTY
     let martStep = 0;
-    let fiboIdx = 0;
-    const fibo = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987];
 
     function init() {
-        globalNetProfit = 0;
+        const ib = parseFloat(document.getElementById('init_bank').value);
+        sessionBankroll = ib;
+        sessionPeakBankroll = ib;
         updateUI();
     }
 
     function calculateBet() {
         if (!isReal) return 0;
+        const unit = parseFloat(document.getElementById('unit_size').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
         const limit = parseFloat(document.getElementById('stop_loss_limit').value);
         
-        let currentDrawdown = (sessionStartProfit + sessionTargetProfit) - globalNetProfit;
-        let bet = activeUnit;
+        let currentDrawdown = sessionPeakBankroll - sessionBankroll;
+        let rawBet = unit;
 
+        // 1. Determine Raw Bet ตาม Logic Python
         if (state === "FLAT") {
-            if (currentDrawdown > 0) {
-                bet = Math.ceil(currentDrawdown / 4);
-                if (bet < activeUnit) bet = activeUnit;
+            if (currentDrawdown > 0 && hasLostSincePeak) {
+                rawBet = Math.ceil(currentDrawdown / RECOVERY_RATIO);
+                if (rawBet < unit) rawBet = unit;
+            } else {
+                rawBet = unit;
             }
         } else if (state === "MARTY") {
-            bet = activeUnit * Math.pow(2, martStep);
-        } else if (state === "FIBO") {
-            bet = activeUnit * fibo[fiboIdx];
+            rawBet = unit * Math.pow(MARTY_MULT, martStep);
         }
 
+        // 2. Betting Constraints
+        let bet = rawBet;
         if (state !== "FLAT") {
-            let needed = currentDrawdown + (activeUnit * 0.1); 
-            if (bet > needed) bet = needed;
+            let neededToRecover = currentDrawdown + unit;
+            bet = Math.min(rawBet, neededToRecover);
         }
 
-        // Cap by Remaining Target to prevent over-betting on last hand
-        if (currentDrawdown > 0 && bet > currentDrawdown && state === "FLAT") {
-            bet = currentDrawdown;
-        }
-
+        // Rounding to chip size
         bet = Math.ceil(bet / chip) * chip;
-        return bet > limit ? limit : bet;
+
+        // Final Cap
+        if (bet > limit) bet = limit;
+        return bet;
     }
 
     function addHand(res) {
         if (res === 'T') { history.push('T'); renderRoad(); return; }
 
-        const unitSizeSetting = parseFloat(document.getElementById('unit_size').value);
         const side = (SIDE_PREF === "PLAYER") ? "P" : "B";
         const isWin = (res === side);
+        const ib = parseFloat(document.getElementById('init_bank').value);
 
         if (!isReal) {
+            // โหมดทางผ่าน (Virtual)
             if (isWin) vWins++; else vWins = 0;
             if (vWins >= V_WIN_TRIGGER) {
                 isReal = true;
                 consecutiveLoss = 0;
-                state = "FLAT"; martStep = 0; fiboIdx = 0;
-                
-                // คำนวณ Base Unit และ Target ตาม Python
-                sessionTargetProfit = unitSizeSetting;
-                if (globalNetProfit < 0) {
-                    let recoveryTotal = unitSizeSetting + Math.abs(globalNetProfit);
-                    activeUnit = recoveryTotal / RECOVERY_RATIO;
-                    sessionTargetProfit = recoveryTotal;
-                } else {
-                    activeUnit = unitSizeSetting;
-                }
-                activeUnit = Math.max(activeUnit, parseFloat(document.getElementById('chip_size').value));
-                sessionStartProfit = globalNetProfit;
+                state = "FLAT";
+                martStep = 0;
+                // ตั้งค่าจุดสูงสุดของ session ปัจจุบัน
+                sessionPeakBankroll = ib + globalNetProfit;
+                sessionBankroll = sessionPeakBankroll;
             }
         } else {
+            // โหมดแทงจริง
             const bet = calculateBet();
             if (bet > maxBetUsed) maxBetUsed = bet;
 
@@ -181,39 +177,37 @@
             
             totalRebate += (bet * parseFloat(document.getElementById('rebate_rate').value));
             globalNetProfit += winLoss;
+            sessionBankroll += winLoss;
 
             if (isWin) {
                 consecutiveLoss = 0;
-                if (state === "FIBO") {
-                    fiboIdx = Math.max(0, fiboIdx - 2);
-                    if (fiboIdx === 0) state = "FLAT";
-                } else {
-                    state = "FLAT"; martStep = 0;
+                if (sessionBankroll >= sessionPeakBankroll) {
+                    hasLostSincePeak = false;
+                    // ถ้าดึงทุนคืนได้ครบและกำไรถึงเป้าของ session นี้ (unit_size)
+                    if (globalNetProfit >= (sessionPeakBankroll - ib + parseFloat(document.getElementById('unit_size').value))) {
+                        isReal = false; vWins = 0;
+                        alert("WIN SESSION: คืนทุนและกำไรตามเป้า");
+                    }
                 }
-                
-                // ตรวจสอบเป้าหมาย: ถ้ากำไรถึง Target แล้วจึงค่อยหยุด (ไม่หยุดทันทีที่ชนะ 1 ตา)
-                if (globalNetProfit >= (sessionStartProfit + sessionTargetProfit)) {
-                    isReal = false; vWins = 0;
-                    alert(`✅ Session WIN!\nProfit: ${(globalNetProfit - sessionStartProfit).toFixed(1)}`);
-                }
+                state = "FLAT"; martStep = 0;
             } else {
                 consecutiveLoss++;
+                hasLostSincePeak = true;
                 if (state === "FLAT") { state = "MARTY"; martStep = 1; }
-                else if (state === "MARTY") {
-                    martStep++;
-                    if (martStep > MARTY_LIMIT) { state = "FIBO"; fiboIdx = 0; }
-                } else { fiboIdx++; }
+                else if (state === "MARTY") { martStep++; }
 
                 if (consecutiveLoss >= CONSECUTIVE_LOSS_LIMIT) {
                     isReal = false; vWins = 0;
-                    alert(`❌ Session STOP LOSS (Consecutive Loss ${CONSECUTIVE_LOSS_LIMIT})`);
+                    alert("STOP LOSS SESSION");
                 }
             }
+            if (sessionBankroll > sessionPeakBankroll) sessionPeakBankroll = sessionBankroll;
         }
 
+        // Stats Global
         if (globalNetProfit > peakNet) peakNet = globalNetProfit;
-        let currentDD = peakNet - globalNetProfit;
-        if (currentDD > maxDD) maxDD = currentDD;
+        let d = peakNet - globalNetProfit;
+        if (d > maxDD) maxDD = d;
 
         history.push(res);
         renderRoad();
@@ -240,13 +234,14 @@
             bd.style.color = "#ccc";
             panel.classList.remove('bet-p');
         } else {
-            mt.innerText = "REAL MODE ACTIVE";
+            mt.innerText = "REAL BETTING";
             mt.className = "badge badge-r";
             lt.style.display = "block";
             lt.innerText = `LOSS: ${consecutiveLoss}/${CONSECUTIVE_LOSS_LIMIT}`;
-            bd.innerText = calculateBet().toLocaleString();
             
-            // เปลี่ยนสีพื้นหลังเป็นน้ำเงินถ้า SIDE_PREF คือ PLAYER
+            const currentBet = calculateBet();
+            bd.innerText = currentBet.toLocaleString();
+            
             if (SIDE_PREF === "PLAYER") {
                 panel.classList.add('bet-p');
             } else {
@@ -270,7 +265,7 @@
     }
 
     function undoLast() { if (history.length > 0) { history.pop(); renderRoad(); updateUI(); } }
-    function resetSystem() { if (confirm("Reset?")) { history = []; globalNetProfit = 0; totalRebate = 0; maxBetUsed = 0; peakNet = -9999999; maxDD = 0; isReal = false; vWins = 0; init(); renderRoad(); } }
+    function resetSystem() { if (confirm("ต้องการ Reset ข้อมูลทั้งหมด?")) { location.reload(); } }
     window.onload = init;
 </script>
 </body>
