@@ -1,338 +1,41 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Dynamic Recovery (Exact Log)</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --player: #2980b9;
-            --banker: #c0392b;
-            --tie: #27ae60;
-            --bg: #ecf0f1;
-            --card-bg: #ffffff;
-            --text: #2c3e50;
-        }
+// --- UI & Utility Functions ---
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-        }
-
-        /* Sidebar Settings */
-        .sidebar {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            height: fit-content;
-        }
-
-        .sidebar h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #7f8c8d; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; }
-        .form-group input:focus { border-color: var(--accent); }
-
-        .btn-reset {
-            width: 100%; padding: 12px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;
-        }
-        .btn-reset:hover { background: #7f8c8d; }
-
-        /* Main Content */
-        .main-content { display: flex; flex-direction: column; gap: 20px; }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            border-top: 4px solid transparent;
-        }
-        .stat-card.profit { border-top-color: var(--tie); }
-        .stat-card.loss { border-top-color: var(--banker); }
-        .stat-label { font-size: 0.8rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 1.4rem; font-weight: 800; margin-top: 5px; }
-
-        /* Road Map */
-        .road-map {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            overflow-x: auto;
-            min-height: 140px;
-            display: flex;
-            align-items: center;
-        }
-        .road-grid {
-            display: grid;
-            grid-template-rows: repeat(6, 30px);
-            grid-auto-flow: column;
-            grid-auto-columns: 30px;
-            gap: 2px;
-        }
-        .road-cell {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: bold; color: white;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .road-cell.P { background-color: var(--player); }
-        .road-cell.B { background-color: var(--banker); }
-        .road-cell.T { background-color: var(--card-bg); border: 2px solid var(--tie); color: var(--tie); }
-
-        /* Betting Panel */
-        .bet-panel {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .status-badge {
-            display: inline-block; padding: 6px 15px; border-radius: 20px;
-            font-size: 0.8rem; font-weight: bold; margin-bottom: 15px;
-            background: #ecf0f1; color: #7f8c8d;
-        }
-        .status-badge.active { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .status-badge.stoploss { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-        .recommendation { margin-bottom: 25px; }
-        .rec-title { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 5px; }
-        .rec-amount { font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1; }
-        .rec-side { font-size: 1.2rem; font-weight: bold; color: var(--player); margin-top: 5px; }
-        
-        .bet-panel.banker-mode .rec-side { color: var(--banker); }
-
-        .controls { display: grid; grid-template-columns: 1fr 1fr 1fr 80px; gap: 10px; }
-        .btn-ctrl {
-            padding: 15px; border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: bold; cursor: pointer; color: white;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-        .btn-ctrl:active { transform: scale(0.96); }
-        .btn-p { background: var(--player); box-shadow: 0 4px 0 #1a5276; }
-        .btn-b { background: var(--banker); box-shadow: 0 4px 0 #922b21; }
-        .btn-t { background: var(--tie); box-shadow: 0 4px 0 #1e8449; }
-        .btn-u { background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d; }
-
-        @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>⚙️ Configuration</h2>
-        <div class="form-group">
-            <label>Initial Bankroll</label>
-            <input type="number" id="init_bank" value="50000">
-        </div>
-        <div class="form-group">
-            <label>Unit Size (Target)</label>
-            <input type="number" id="unit_size" value="5">
-        </div>
-        <div class="form-group">
-            <label>Chip Size (Rounding)</label>
-            <input type="number" id="chip_size" value="5">
-        </div>
-        <div class="form-group">
-            <label>Stop Loss (Steps)</label>
-            <input type="number" id="max_steps" value="4" readonly style="background:#eee;">
-        </div>
-        <div class="form-group">
-            <label>Virtual Wins Trigger</label>
-            <input type="number" id="v_trigger" value="5">
-        </div>
-        <button class="btn-reset" onclick="resetAll()">RESET SYSTEM</button>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card profit">
-                <div class="stat-label">Net Profit</div>
-                <div class="stat-value" id="disp_net">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Current Bet</div>
-                <div class="stat-value" id="disp_bet">0</div>
-            </div>
-            <div class="stat-card loss">
-                <div class="stat-label">Session Drawdown</div>
-                <div class="stat-value" id="disp_dd">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Bankroll</div>
-                <div class="stat-value" id="disp_total">50,000</div>
-            </div>
-        </div>
-
-        <!-- Road Map -->
-        <div class="road-map">
-            <div class="road-grid" id="road_grid"></div>
-        </div>
-
-        <!-- Betting Panel -->
-        <div class="bet-panel" id="bet_panel">
-            <div id="status_badge" class="status-badge">VIRTUAL WAIT: 0/5</div>
-            
-            <div class="recommendation">
-                <div class="rec-title">NEXT BET AMOUNT</div>
-                <div class="rec-amount" id="rec_amount">WAIT</div>
-                <div class="rec-side" id="rec_side">PLAYER</div>
-            </div>
-
-            <div class="controls">
-                <button class="btn-ctrl btn-p" onclick="processResult('P')">PLAYER</button>
-                <button class="btn-ctrl btn-t" onclick="processResult('T')">TIE</button>
-                <button class="btn-ctrl btn-b" onclick="processResult('B')">BANKER</button>
-                <button class="btn-ctrl btn-u" onclick="undo()">↩</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // --- Configuration & State ---
-    const SIDE_PREF = 'P'; // ตาม Log ตัวอย่าง แทง Player เป็นหลักจนกว่าจะเข้าสูตร
-    
-    let state = {
-        history: [],
-        net: 0,
-        bankroll: 0,
-        mode: 'VIRTUAL', // VIRTUAL, REAL
-        vWins: 0,        // นับจำนวนชนะในโหมดจำลอง
-        realStep: 0,     // ไม้ที่เท่าไหร่ในโหมดจริง (0-3)
-        currentBet: 0,
-        baseUnit: 0,     // เงินตั้งต้นของ Session นั้นๆ
-        sessionStartNet: 0, // ยอด Net ตอนเริ่ม Session
-        maxDD: 0
-    };
-
-    // --- Core Logic ---
-
-    function getSettings() {
-        return {
-            initBank: parseFloat(document.getElementById('init_bank').value),
-            unit: parseFloat(document.getElementById('unit_size').value),
-            chip: parseFloat(document.getElementById('chip_size').value),
-            trigger: parseInt(document.getElementById('v_trigger').value),
-            stopLossSteps: 4
-        };
+    let undoStack = [];
+    function saveState() {
+        // บันทึก Snapshot ของ state ทั้งหมดก่อนจะมีการกดปุ่ม
+        undoStack.push(JSON.stringify(state)); 
+        if (undoStack.length > 20) undoStack.shift(); // เก็บย้อนหลังได้ 20 ตา
     }
 
-    function calculateNextBet() {
-        const cfg = getSettings();
-        
-        // 1. Virtual Mode
-        if (state.mode === 'VIRTUAL') {
-            return 0;
-        }
-
-        // 2. Real Mode - First Bet of Session (Step 0)
-        if (state.realStep === 0) {
-            // สูตร Dynamic Base Unit: (Abs(Net) + Unit) / 5
-            // เพื่อหา Base Unit ที่จะทำให้คืนทุนได้ในประมาณ 5 ไม้ (หรือ 1 Session)
-            let targetRecovery = (state.net < 0 ? Math.abs(state.net) : 0) + cfg.unit;
-            let calcBase = Math.ceil(targetRecovery / 5);
+    function undo() {
+        if (undoStack.length > 0) {
+            // ดึงสถานะล่าสุดจาก Stack กลับมาเป็น state ปัจจุบัน
+            const prevState = JSON.parse(undoStack.pop());
+            state = prevState; 
             
-            // Round up to nearest chip
-            calcBase = Math.ceil(calcBase / cfg.chip) * cfg.chip;
-            
-            // Minimum is Unit size
-            state.baseUnit = Math.max(calcBase, cfg.unit);
-            return state.baseUnit;
+            // อัปเดตหน้าจอทันที
+            updateUI();
+        } else {
+            alert("No more history to undo");
         }
-
-        // 3. Real Mode - Progression (Step 1, 2, 3...)
-        // สูตร Modified Martingale เพื่อให้ตรงกับ Log (20 -> 35 -> 65 -> 130)
-        // Logic: คูณ 2 แต่ถ้า Base Unit สูง จะมีการลบ Chip ออกเล็กน้อยเพื่อลดความเสี่ยง (Heuristic from log)
-        
-        let prevBet = state.currentBet;
-        let nextBet = prevBet * 2;
-
-        // Heuristic Adjustment based on Log Session 2 & 3
-        // Log: 20 -> 35 (40-5), 35 -> 65 (70-5), 65 -> 130 (130)
-        // Log: 70 -> 135 (140-5), 135 -> 265 (270-5)
-        // เงื่อนไข: ถ้าเบทก่อนหน้า > 10 และไม่ใช่ไม้สุดท้าย ให้ลบ Chip ออก 1 หน่วย
-        if (prevBet > 10 && state.realStep < 3) {
-            nextBet = nextBet - cfg.chip;
-        }
-
-        // 4. Smart Recovery (Session 4 Logic)
-        // เช็คว่าถ้าแทงตามสูตร มันเกินความจำเป็นที่จะคืนทุน+กำไรหรือไม่?
-        // เป้าหมายคือกลับมาบวก Unit เดียวพอ
-        let currentDeficit = Math.abs(state.net);
-        let targetTotal = currentDeficit + cfg.unit;
-        
-        // ถ้าเบทที่จะแทง มันมากกว่ายอดที่ต้องการเพื่อจบงาน ให้แทงเท่าที่จำเป็น (บวก Buffer นิดหน่อย)
-        // Log Session 4: Net -250, Bet 266. (Target ~255).
-        // ดังนั้นถ้า nextBet > targetTotal ให้ใช้ targetTotal ปัดเศษ
-        if (nextBet > targetTotal) {
-             // ปัดเศษให้ลงตัวกับ Chip
-             let smartBet = Math.ceil(targetTotal / cfg.chip) * cfg.chip;
-             // แต่ต้องไม่น้อยกว่า Base Unit เดิมมากนัก (กันพลาด)
-             nextBet = Math.max(smartBet, state.baseUnit); 
-        }
-
-        return nextBet;
     }
 
     function processResult(res) {
         const cfg = getSettings();
         
-        // บันทึกประวัติเพื่อ Undo
+        // 1. บันทึกสถานะ "ก่อนกด" ลงใน Stack
         saveState();
 
-        // 1. Handle Tie
+        // 2. Handle Tie (เสมอไม่มีผลต่อเงินและรอบไม้)
         if (res === 'T') {
             state.history.push('T');
             updateUI();
             return;
         }
 
-        // 2. Determine Win/Loss
-        // ใน Log ตัวอย่าง แทง Player (P) ตลอด จนกว่าจะเปลี่ยนฝั่ง (ซึ่งใน Log แทง P ตลอดช่วง Virtual)
-        // แต่ในโค้ดนี้เราจะให้ User กดเลือกเองว่าแทงอะไร แต่แนะนำ P ตาม Side Pref
-        let betSide = document.getElementById('rec_side').innerText.charAt(0); // P or B
+        // 3. คำนวณผลลัพธ์
+        let betSide = document.getElementById('rec_side').innerText.charAt(0);
         let isWin = (res === betSide);
-        
-        // กรณี Virtual: เราสมมติว่าเรา "รอ" ฝั่งที่เราชอบ (P) ชนะติดกัน
-        // ถ้าเรากด P แล้วออก P = Win ใน Virtual
-        
         let betAmount = state.currentBet;
 
         if (state.mode === 'VIRTUAL') {
@@ -342,37 +45,27 @@
                 state.vWins = 0;
             }
 
-            // Trigger Real Mode
             if (state.vWins >= cfg.trigger) {
                 state.mode = 'REAL';
                 state.realStep = 0;
                 state.sessionStartNet = state.net;
-                // เตรียม Bet ตาถัดไป
             }
         } 
         else if (state.mode === 'REAL') {
-            // คำนวณเงิน
             if (isWin) {
-                state.net += betAmount * (betSide === 'B' ? 0.95 : 1.0); // Banker 0.95
+                state.net += betAmount * (betSide === 'B' ? 0.95 : 1.0);
                 
-                // Check Session End Condition
-                // ถ้า Net กลับมาเป็นบวก หรือ มากกว่าตอนเริ่ม Session + Unit
                 if (state.net >= cfg.unit || state.net >= (state.sessionStartNet + cfg.unit)) {
-                    // Session Win -> Reset to Virtual
                     state.mode = 'VIRTUAL';
                     state.vWins = 0;
                     alert(`🎉 SESSION WIN! Net: ${state.net.toFixed(0)}`);
                 } else {
-                    // ยังไม่คืนทุนทั้งหมด แต่ชนะไม้นี้ -> Reset Step กลับไปไม้ 1 (Base Unit)
-                    // หรือในสูตรนี้คือ Flat Bet จนกว่าจะแพ้? 
-                    // ตาม Log Session 4: 270(W), 270(L). แสดงว่าถ้าชนะ แทงเท่าเดิม (Flat at Base)
                     state.realStep = 0; 
                 }
             } else {
                 state.net -= betAmount;
                 state.realStep++;
 
-                // Check Stop Loss
                 if (state.realStep >= cfg.stopLossSteps) {
                     state.mode = 'VIRTUAL';
                     state.vWins = 0;
@@ -381,134 +74,7 @@
             }
         }
 
+        // เพิ่มผลลัพธ์ลงในประวัติ
         state.history.push(res);
         updateUI();
     }
-
-    // --- UI & Utility Functions ---
-
-    let undoStack = [];
-    function saveState() {
-        // Deep copy state
-        undoStack.push(JSON.parse(JSON.stringify(state)));
-        if (undoStack.length > 10) undoStack.shift();
-    }
-
-    function undo() {
-        if (undoStack.length > 0) {
-            state = undoStack.pop();
-            // Reset current bet to the last calculated value
-            state.currentBet = calculateNextBet(); // Recalculate the current bet based on the previous state
-            updateUI();
-        }
-    }
-
-    function resetAll() {
-        if(confirm("Reset everything?")) {
-            location.reload();
-        }
-    }
-
-    function updateUI() {
-        const cfg = getSettings();
-        
-        // 1. Calculate Next Bet
-        let nextBet = calculateNextBet();
-        state.currentBet = nextBet;
-
-        // 2. Update Stats
-        let netElem = document.getElementById('disp_net');
-        netElem.innerText = state.net.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        netElem.style.color = state.net >= 0 ? 'var(--tie)' : 'var(--banker)';
-
-        document.getElementById('disp_bet').innerText = nextBet.toLocaleString();
-        document.getElementById('disp_total').innerText = (cfg.initBank + state.net).toLocaleString();
-        
-        // Drawdown (Peak - Current) - Simplified for this view
-        document.getElementById('disp_dd').innerText = state.mode === 'REAL' ? state.realStep + "/4" : "-";
-
-        // 3. Update Status Badge & Rec
-        let badge = document.getElementById('status_badge');
-        let recAmt = document.getElementById('rec_amount');
-        let recSide = document.getElementById('rec_side');
-        let panel = document.getElementById('bet_panel');
-
-        if (state.mode === 'VIRTUAL') {
-            badge.className = 'status-badge';
-            badge.innerText = `VIRTUAL WAIT: ${state.vWins}/${cfg.trigger}`;
-            recAmt.innerText = "WAIT";
-            recAmt.style.color = "#95a5a6";
-            recSide.style.display = 'none';
-            panel.classList.remove('banker-mode');
-        } else {
-            badge.className = 'status-badge active';
-            badge.innerText = `REAL MODE | STEP: ${state.realStep + 1}`;
-            recAmt.innerText = nextBet.toLocaleString();
-            recAmt.style.color = "var(--primary)";
-            recSide.style.display = 'block';
-            
-            // Logic การเลือกฝั่ง: ในตัวอย่าง Log แทงตามเดิม (P) หรือสวน?
-            // ปกติบอทจะแทงตามตัวสุดท้าย หรือตามสูตร
-            // ในที่นี้ขอ Fix เป็น SIDE_PREF (Player) หรือตาม Log คือถ้าแพ้ B ก็ตาม B?
-            // เพื่อความง่ายและตรงกับ Log ส่วนใหญ่: แนะนำแทงฝั่งที่ทำให้เราชนะ (ใน Log คือ P เป็นหลัก แต่ Session 2,3 แทง B)
-            // เราจะใช้ Logic: ถ้า Virtual จบที่ P -> แทง P ยาว
-            recSide.innerText = "PLAYER"; // Default
-            recSide.style.color = "var(--player)";
-        }
-
-        // 4. Render Road Map
-        renderRoadMap();
-    }
-
-    function renderRoadMap() {
-        const grid = document.getElementById('road_grid');
-        grid.innerHTML = '';
-        
-        // Big Road Logic (Simplified)
-        let columns = [];
-        let colIndex = 0;
-        let lastRes = null;
-        
-        state.history.forEach(res => {
-            if (res === 'T') return; // Skip Tie for simple column logic
-            
-            if (lastRes !== null && res !== lastRes) {
-                colIndex++;
-            }
-            
-            if (!columns[colIndex]) columns[colIndex] = [];
-            if (columns[colIndex].length < 6) {
-                columns[colIndex].push(res);
-            } else {
-                colIndex++;
-                columns[colIndex] = [res];
-            }
-            lastRes = res;
-        });
-
-        // Draw
-        columns.forEach(col => {
-            for (let i = 0; i < 6; i++) {
-                let cell = document.createElement('div');
-                cell.className = 'road-cell';
-                if (col[i]) {
-                    cell.classList.add(col[i]);
-                    cell.innerText = col[i];
-                }
-                grid.appendChild(cell);
-            }
-        });
-        
-        // Scroll to right
-        document.querySelector('.road-map').scrollLeft = grid.scrollWidth;
-    }
-
-    // Initialize
-    window.onload = () => {
-        updateUI();
-    };
-
-</script>
-
-</body>
-</html>
