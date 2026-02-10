@@ -3,64 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Full Logic Dashboard</title>
+    <title>Baccarat Recovery Dashboard v2</title>
     <style>
         :root { --p-color: #007bff; --b-color: #dc3545; --t-color: #28a745; --bg-dark: #121212; --card-bg: #1e1e1e; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-dark); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Layout Structure */
-        .header-stats { display: flex; gap: 15px; padding: 15px; background: #000; border-bottom: 1px solid #333; }
-        .stat-item { flex: 1; background: var(--card-bg); padding: 10px; border-radius: 5px; text-align: center; border: 1px solid #444; }
-        .stat-label { font-size: 0.75rem; color: #888; display: block; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; }
+        .header-stats { display: flex; gap: 10px; padding: 10px; background: #000; border-bottom: 1px solid #333; }
+        .stat-item { flex: 1; background: var(--card-bg); padding: 8px; border-radius: 5px; text-align: center; border: 1px solid #444; }
+        .stat-label { font-size: 0.7rem; color: #888; display: block; }
+        .stat-value { font-size: 1.1rem; font-weight: bold; }
 
         .main-content { display: grid; grid-template-columns: 280px 1fr; flex: 1; overflow: hidden; }
         
-        /* Sidebar */
         .sidebar { background: #181818; padding: 15px; border-right: 1px solid #333; overflow-y: auto; }
         .control-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85rem; color: #bbb; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        label { display: block; font-size: 0.8rem; color: #bbb; margin-bottom: 3px; }
+        input, select, textarea { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; margin-bottom: 8px; }
+        textarea { height: 60px; font-size: 10px; font-family: monospace; resize: none; }
+        
+        .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
         .btn-start { background: #28a745; color: white; }
-        .btn-manual { flex: 1; height: 50px; color: white; border-radius: 4px; }
+        .btn-undo { background: #6c757d; color: white; font-size: 0.8rem; }
+        .btn-manual { flex: 1; height: 45px; color: white; border-radius: 4px; font-size: 1.1rem; }
 
-        /* Big Road Area */
-        .road-section { background: #000; border-bottom: 1px solid #333; padding: 10px; overflow-x: auto; scroll-behavior: smooth; }
-        .road-container { display: grid; grid-template-columns: repeat(100, 22px); grid-template-rows: repeat(6, 22px); gap: 1px; background: #333; width: fit-content; }
+        .road-section { background: #000; border-bottom: 1px solid #333; padding: 10px; overflow-x: auto; }
+        .road-container { display: grid; grid-template-columns: repeat(120, 22px); grid-template-rows: repeat(6, 22px); gap: 1px; background: #333; width: fit-content; }
         .road-cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
         .cell-P { color: var(--p-color); } .cell-B { color: var(--b-color); } 
         .cell-T { color: var(--t-color); border: 1px solid var(--t-color); border-radius: 50%; width: 16px; height: 16px; }
 
-        /* Table Area */
         .table-area { flex: 1; overflow-y: auto; padding: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th { background: #252525; position: sticky; top: 0; padding: 10px; text-align: left; color: #888; border-bottom: 2px solid #333; }
-        td { padding: 10px; border-bottom: 1px solid #2a2a2a; }
-        .win-row { color: #2ecc71; } .loss-row { color: #e74c3c; }
-        
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #252525; position: sticky; top: 0; padding: 8px; text-align: left; color: #888; border-bottom: 2px solid #333; }
+        td { padding: 8px; border-bottom: 1px solid #2a2a2a; }
+        .win-row { background: rgba(46, 204, 113, 0.05); color: #2ecc71; }
+        .loss-row { background: rgba(231, 76, 60, 0.05); color: #e74c3c; }
         .profit-plus { color: #2ecc71; } .profit-minus { color: #ff4444; }
     </style>
 </head>
 <body>
 
 <div class="header-stats">
-    <div class="stat-item">
-        <span class="stat-label">REAL NET PROFIT</span>
-        <span id="stat_profit" class="stat-value profit-plus">0.00</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">COMMISSION (1%)</span>
-        <span id="stat_comm" class="stat-value">0.00</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">MAX BET</span>
-        <span id="stat_max_bet" class="stat-value">0</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">CURRENT SESSION</span>
-        <span id="stat_session" class="stat-value">1</span>
-    </div>
+    <div class="stat-item"><span class="stat-label">REAL NET PROFIT</span><span id="stat_profit" class="stat-value">0.00</span></div>
+    <div class="stat-item"><span class="stat-label">COMMISSION (1%)</span><span id="stat_comm" class="stat-value">0.00</span></div>
+    <div class="stat-item"><span class="stat-label">MAX BET</span><span id="stat_max_bet" class="stat-value">0</span></div>
+    <div class="stat-item"><span class="stat-label">SESSION</span><span id="stat_session" class="stat-value">1</span></div>
 </div>
 
 <div class="main-content">
@@ -69,10 +56,16 @@
             <label>โหมด (Mode)</label>
             <select id="mode" onchange="toggleMode()">
                 <option value="m">Manual Input (กดมือ)</option>
-                <option value="r">Random (สุ่มวนไป)</option>
+                <option value="r">Random (สุ่ม)</option>
+                <option value="s">Data String (ข้อมูลดิบ)</option>
             </select>
         </div>
         
+        <div id="string_box" class="control-group" style="display:none;">
+            <label>Data String (P,B,T...)</label>
+            <textarea id="data_string" placeholder="P,B,B,P,T,P..."></textarea>
+        </div>
+
         <div class="control-group">
             <label>เดิมพันขั้นต่ำ (Min Bet)</label>
             <input type="number" id="unit_size" value="5.0">
@@ -83,9 +76,10 @@
         </div>
 
         <button class="btn btn-start" onclick="startSystem()">START SYSTEM</button>
+        <button class="btn btn-undo" onclick="undoLastHand()">↩ ย้อนกลับ (Undo)</button>
 
-        <div id="manual_ctrl" style="margin-top: 20px;">
-            <label>ปุ่มบันทึกผล (Manual)</label>
+        <div id="manual_ctrl" style="margin-top: 15px;">
+            <label>บันทึกผลมือต่อมือ</label>
             <div style="display:flex; gap:5px;">
                 <button class="btn btn-manual" style="background:var(--p-color)" onclick="inputResult('P')">P</button>
                 <button class="btn btn-manual" style="background:var(--b-color)" onclick="inputResult('B')">B</button>
@@ -128,9 +122,9 @@
         maxBet: 0,
         handCount: 0,
         sessionIdx: 1,
-        history: [],
+        fullHistory: [], // Full log for Undo
+        roadHistory: [], // Result history for Road
         
-        // Strategy Logic
         state: "FLAT",
         martyStep: 0,
         peak: 500000.0,
@@ -144,10 +138,18 @@
         app.active = true;
         app.netProfit = 0;
         app.totalComm = 0;
-        app.history = [];
+        app.fullHistory = [];
+        app.roadHistory = [];
         app.handCount = 0;
+        app.sessionIdx = 1;
         document.getElementById('history_body').innerHTML = "";
         resetSession();
+        
+        if (document.getElementById('mode').value === 's') {
+            processDataString();
+        } else if (document.getElementById('mode').value === 'r') {
+            runRandomLoop();
+        }
         updateUI();
     }
 
@@ -184,11 +186,20 @@
         if (!app.active) return;
         
         const bet = calculateBet();
-        const sidePref = "PLAYER"; // Fixed per your config
+        const sidePref = "PLAYER"; // Fixed side
         const win = (res === 'P' && sidePref === 'PLAYER') || (res === 'B' && sidePref === 'BANKER');
         const comm = bet * 0.01;
-        const vTrigger = 5; // virtual_win_trigger
+        const vTrigger = 5; 
         const isVirtual = app.vLossCount < vTrigger;
+
+        // Store snapshot for Undo
+        const snapshot = JSON.parse(JSON.stringify({
+            br: app.br, netProfit: app.netProfit, totalComm: app.totalComm,
+            handCount: app.handCount, state: app.state, martyStep: app.martyStep,
+            peak: app.peak, lossSincePeak: app.lossSincePeak, vLossCount: app.vLossCount,
+            accumulatedLoss: app.accumulatedLoss, targetProfit: app.targetProfit,
+            sessionIdx: app.sessionIdx
+        }));
 
         app.handCount++;
         app.totalComm += comm;
@@ -211,16 +222,16 @@
                 if (app.state === "FLAT") { app.state = "MARTY"; app.martyStep = 1; }
                 else { app.martyStep++; }
             }
-            app.history.push(res);
+            app.roadHistory.push(res);
         }
 
         if (app.br > app.peak) app.peak = app.br;
         if (bet > app.maxBet) app.maxBet = bet;
 
-        // Add to Table
+        app.fullHistory.push({ snapshot, res, bet, outcome, isVirtual });
         addTableRow(app.handCount, isVirtual ? "VIRTUAL" : "REAL", res, bet, outcome, app.br, app.netProfit);
 
-        // Session Check
+        // Session Control
         let sessionP = app.br - 500000.0;
         let stopLossLimit = parseFloat(document.getElementById('stop_loss').value);
 
@@ -243,6 +254,21 @@
         updateUI();
     }
 
+    function undoLastHand() {
+        if (app.fullHistory.length === 0) return;
+        const last = app.fullHistory.pop();
+        
+        // Restore snapshot
+        Object.assign(app, last.snapshot);
+        if (last.res !== 'T') app.roadHistory.pop();
+        
+        // Update Table
+        document.getElementById('history_body').deleteRow(0);
+        
+        renderRoad();
+        updateUI();
+    }
+
     function addTableRow(id, type, res, bet, outcome, balance, net) {
         const body = document.getElementById('history_body');
         const row = body.insertRow(0);
@@ -261,10 +287,10 @@
     function renderRoad() {
         const container = document.getElementById('big_road');
         container.innerHTML = '';
-        let matrix = Array(6).fill().map(() => Array(100).fill(null));
+        let matrix = Array(6).fill().map(() => Array(120).fill(null));
         let col = 0, row = 0, lastRes = '';
 
-        app.history.filter(r => r !== 'T').forEach(res => {
+        app.roadHistory.forEach(res => {
             if (res !== lastRes && lastRes !== '') {
                 col++; row = 0;
                 while(matrix[0][col] !== null) col++;
@@ -283,7 +309,7 @@
         });
 
         for (let r = 0; r < 6; r++) {
-            for (let c = 0; c < 100; c++) {
+            for (let c = 0; c < 120; c++) {
                 const cell = document.createElement('div');
                 cell.className = 'road-cell';
                 if (matrix[r][c]) {
@@ -293,7 +319,10 @@
                 container.appendChild(cell);
             }
         }
-        document.getElementById('road_wrapper').scrollLeft = 99999;
+        // Auto-scroll only when data exists
+        if(app.roadHistory.length > 0) {
+            document.getElementById('road_wrapper').scrollLeft = (col - 10) * 22;
+        }
     }
 
     function updateUI() {
@@ -307,6 +336,13 @@
     function toggleMode() {
         const m = document.getElementById('mode').value;
         document.getElementById('manual_ctrl').style.display = (m === 'm' ? 'block' : 'none');
+        document.getElementById('string_box').style.display = (m === 's' ? 'block' : 'none');
+    }
+
+    function processDataString() {
+        const str = document.getElementById('data_string').value;
+        const arr = str.split(/[, \n]+/).map(s => s.trim().toUpperCase()).filter(s => ['P','B','T'].includes(s));
+        arr.forEach(res => inputResult(res));
     }
 
     async function runRandomLoop() {
