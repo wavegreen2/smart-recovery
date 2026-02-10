@@ -1,258 +1,51 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Logic Pro - Exact Match</title>
-    <style>
-        :root { --player: #007bff; --banker: #dc3545; --tie: #28a745; --bg: #f0f2f5; --card: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .wrapper { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-        .sidebar { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .input-field { margin-bottom: 15px; }
-        .input-field label { display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px; }
-        .input-field input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .stats-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-item { background: var(--card); padding: 15px; border-radius: 10px; text-align: center; border-bottom: 4px solid #ddd; }
-        .stat-item.profit { border-bottom-color: var(--player); }
-        .stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
-        .stat-value { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
-        
-        .road-map-box { background: white; padding: 15px; border-radius: 10px; overflow-x: auto; margin-bottom: 20px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
-        .road-grid { display: grid; grid-template-rows: repeat(6, 28px); grid-auto-columns: 28px; grid-auto-flow: column; gap: 2px; }
-        .cell { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
-        .cell.P { background: var(--player); }
-        .cell.B { background: var(--banker); }
-        .cell.T { color: var(--tie); border: 2px solid var(--tie); background: white; border-radius: 3px; }
-
-        /* ปรับสีแถบพื้นหลังเมื่อวาง PLAYER */
-        .bet-area { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
-        .bet-area.active-p { background: var(--player); color: white; }
-        .bet-area.active-p .bet-title, .bet-area.active-p .bet-amount { color: white; }
-
-        .status-info { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
-        .badge-v { background: #e9ecef; color: #495057; }
-        .badge-r { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-
-        .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
-        button { padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        .btn-p { background: var(--player); color: white; flex: 1; }
-        .btn-b { background: var(--banker); color: white; flex: 1; }
-        .btn-t { background: var(--tie); color: white; }
-        .btn-undo { background: #6c757d; color: white; }
-        .btn-reset { background: #343a40; color: white; width: 100%; margin-top: 15px; }
-    </style>
-</head>
-<body>
-
-<div class="wrapper">
-    <div class="sidebar">
-        <h3>⚙️ Settings</h3>
-        <div class="input-field"><label>Initial Bankroll</label><input type="number" id="init_bank" value="500000"></div>
-        <div class="input-field"><label>Min Bet (Unit Size)</label><input type="number" id="unit_size" value="5"></div>
-        <div class="input-field"><label>Minimum Chip</label><input type="number" id="chip_size" value="5"></div>
-        <div class="input-field"><label>Max Bet Limit</label><input type="number" id="stop_loss_limit" value="75000"></div>
-        <div class="input-field"><label>Rebate Rate</label><input type="number" id="rebate_rate" step="0.001" value="0.01"></div>
-        <button class="btn-reset" onclick="resetSystem()">Reset Data</button>
-    </div>
-
-    <div class="main">
-        <div class="stats-container">
-            <div class="stat-item profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="stat_profit">0</div></div>
-            <div class="stat-item"><div class="stat-label">Max Bet</div><div class="stat-value" id="stat_max_bet">0</div></div>
-            <div class="stat-item"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="stat_max_dd">0</div></div>
-            <div class="stat-item"><div class="stat-label">Bankroll</div><div class="stat-value" id="stat_bank">0</div></div>
-        </div>
-        <div class="road-map-box"><div class="road-grid" id="road_grid"></div></div>
-        <div class="bet-area" id="bet_panel">
-            <div class="status-info">
-                <div id="mode_tag" class="badge badge-v">VIRTUAL WAIT</div>
-                <div id="loss_tag" class="badge badge-danger" style="display:none;">LOSS: 0/4</div>
-            </div>
-            <div class="bet-title">NEXT RECOMMENDED BET</div>
-            <div id="next_bet_display" class="bet-amount">WAIT</div>
-            <div class="btn-row">
-                <button class="btn-p" onclick="addHand('P')">PLAYER</button>
-                <button class="btn-t" onclick="addHand('T')">TIE</button>
-                <button class="btn-b" onclick="addHand('B')">BANKER</button>
-                <button class="btn-undo" onclick="undoLast()">UNDO</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const SIDE_PREF = "PLAYER"; 
-    const V_WIN_TRIGGER = 5;
-    const LOSS_LIMIT = 4;
-
-    let history = []; 
-    let globalNet = 0;
-    let totalRebate = 0;
-    let maxBetUsed = 0;
-    let maxDD = 0;
-    let peakNet = 0;
-
-    let isReal = false;
-    let vWins = 0;
-    let consecutiveLoss = 0;
-    let sessionLoss = 0;
-    let activeUnit = 5;
-
 function calculateBet() {
-    const unitSize = parseFloat(document.getElementById('unit-size').value);
-    const stopLoss = parseFloat(document.getElementById('stop-loss').value);
-    let rawBet = unitSize;
+        if (!isReal) return 0;
+        const unit = parseFloat(document.getElementById('unit_size').value);
+        const chip = parseFloat(document.getElementById('chip_size').value);
+        const limit = parseFloat(document.getElementById('stop_loss_limit').value);
+        
+        let bet = 0;
+        let baseRecovery = 0;
 
-    state.currentDrawdown = state.peakBankroll - state.bankroll;
-
-    if (state.betState === "FLAT") {
-        if (state.currentDrawdown > 0 && state.hasLostSincePeak) {
-            rawBet = Math.ceil(state.currentDrawdown / 4);
-            rawBet = Math.max(rawBet, unitSize);
-        }
-    } else if (state.betState === "MARTY") {
-        rawBet = unitSize * Math.pow(2, state.martyStep);
-    }
-
-    let bet = Math.min(rawBet, stopLoss);
-    // ปัดเศษตาม Chip Size (สมมติ 5)
-    bet = Math.ceil(bet / 5) * 5;
-
-    document.getElementById('bet-amount').innerText = bet;
-    document.getElementById('bet-target').innerText = `BET PLAYER (${state.betState})`;
-    return bet;
-}
-
-function handleInput(result) {
-    if (result === 'T') return; // ข้าม Tie ตามตรรกะเดิม
-
-    const bet = calculateBet();
-    const isWin = (result === 'P'); // Side Preference: Player ตาม Config เดิม
-    const commPct = parseFloat(document.getElementById('comm-pct').value) / 100;
-    
-    let outcome = isWin ? bet : -bet;
-    let commValue = isWin ? 0 : 0; // ใน Baccarat ปกติคอมมิชชั่นหักที่ Banker
-
-    state.bankroll += outcome;
-    if (state.bankroll > state.peakBankroll) state.peakBankroll = state.bankroll;
-
-    // Update States
-    if (isWin) {
-        state.betState = "FLAT";
-        state.martyStep = 0;
-        if (state.bankroll >= state.peakBankroll) state.hasLostSincePeak = false;
-    } else {
-        state.hasLostSincePeak = true;
-        state.betState = "MARTY";
-        state.martyStep++;
-    }
-    function addHand(res) {
-        if (res === 'T') { history.push('T'); renderRoad(); return; }
-
-        const side = (SIDE_PREF === "PLAYER") ? "P" : "B";
-        const isWin = (res === side);
-
-        if (!isReal) {
-            if (isWin) vWins++; else vWins = 0;
-            if (vWins >= V_WIN_TRIGGER) {
-                isReal = true;
-                consecutiveLoss = 0;
-                sessionLoss = 0;
-            }
+        // 1. คำนวณหาค่าเฉลี่ยดึงทุนคืน (ไม้แรกของ Session)
+        if (globalNet < 0) {
+            // สูตร: (ยอดติดลบสะสม + Unit) / 5
+            baseRecovery = (Math.abs(globalNet) + unit) / 5;
         } else {
-            const bet = calculateBet();
-            if (bet > maxBetUsed) maxBetUsed = bet;
+            baseRecovery = unit;
+        }
 
-            const payout = (res === 'B' && SIDE_PREF === "BANKER") ? 0.95 : 1.0;
-            const winLoss = isWin ? (bet * payout) : -bet;
+        // 2. ตรรกะการเดินเงินใน Session
+        if (consecutiveLoss === 0) {
+            // ไม้แรกของ Session หรือเพิ่งชนะไม้ก่อนหน้ามา
+            bet = baseRecovery;
+        } else {
+            // สูตรทบตาม Log: (ยอดเสียสะสมในรอบนี้ + ยอดไม้แรกของรอบ) * 2
+            // แล้วหักออกด้วยค่า Unit เพื่อให้ตัวเลขตรง 20->35, 190->375
+            bet = (sessionLoss + baseRecovery) * 2 - baseRecovery;
             
-            totalRebate += (bet * parseFloat(document.getElementById('rebate_rate').value));
-            globalNet += winLoss;
-
-            if (isWin) {
-                consecutiveLoss = 0;
-                sessionLoss = 0;
-                // ถ้ากำไรกลับมาเป็นบวกแล้ว ให้จบ Session ทันที
-                if (globalNet >= parseFloat(document.getElementById('unit_size').value)) {
-                    isReal = false; vWins = 0;
-                    alert("SESSION WIN! Net: " + globalNet.toFixed(1));
-                }
-            } else {
-                consecutiveLoss++;
-                sessionLoss += bet;
-                if (consecutiveLoss >= LOSS_LIMIT) {
-                    isReal = false; vWins = 0;
-                    alert("STOP LOSS! Net: " + globalNet.toFixed(1));
-                }
+            // กรณีไม้ 5-10-20-40 (Double ปกติเมื่อกำไรเป็นบวก)
+            if (globalNet >= 0) {
+                bet = baseRecovery * Math.pow(2, consecutiveLoss);
             }
         }
 
-        if (globalNet > peakNet) peakNet = globalNet;
-        let dd = peakNet - globalNet;
-        if (dd > maxDD) maxDD = dd;
-
-        history.push(res);
-        renderRoad();
-        updateUI();
-    }
-
-    function updateUI() {
-        const ib = parseFloat(document.getElementById('init_bank').value);
-        document.getElementById('stat_profit').innerText = (globalNet + totalRebate).toLocaleString();
-        document.getElementById('stat_max_bet').innerText = maxBetUsed.toLocaleString();
-        document.getElementById('stat_max_dd').innerText = maxDD.toLocaleString();
-        document.getElementById('stat_bank').innerText = (ib + globalNet + totalRebate).toLocaleString();
-
-        const mt = document.getElementById('mode_tag');
-        const lt = document.getElementById('loss_tag');
-        const bd = document.getElementById('next_bet_display');
-        const panel = document.getElementById('bet_panel');
-
-        if (!isReal) {
-            mt.innerText = `VIRTUAL WAIT: ${vWins}/${V_WIN_TRIGGER}`;
-            mt.className = "badge badge-v";
-            lt.style.display = "none";
-            bd.innerText = "WAIT";
-            panel.classList.remove('active-p');
-        } else {
-            mt.innerText = "REAL MODE";
-            mt.className = "badge badge-r";
-            lt.style.display = "block";
-            lt.innerText = `LOSS: ${consecutiveLoss}/${LOSS_LIMIT}`;
-            bd.innerText = calculateBet().toLocaleString();
-            if (SIDE_PREF === "PLAYER") panel.classList.add('active-p');
+        // 3. เช็คไม้ปิดยอด (TargetToWin)
+        let targetToWin = (globalNet < 0 ? Math.abs(globalNet) : 0) + unit;
+        
+        // ถ้าเบทที่คำนวณได้สูงกว่ายอดที่ต้องการเพื่อกลับมาบวก Unit ให้ลดลงมาพอดี
+        if (bet > targetToWin && globalNet < 0) {
+            bet = targetToWin;
         }
+
+        // 4. การจัดการเศษชิป (สำคัญมาก)
+        // ถ้าเป็นไม้ปิดยอด (มีทศนิยม เช่น 745.8) ห้ามปัดเศษตาม Log เป๊ะๆ
+        // ถ้าไม่ใช่ไม้ปิดยอด ให้ปัดเศษขึ้นตามค่า Chip Size
+        if (bet !== targetToWin) {
+            bet = Math.ceil(bet / chip) * chip;
+        }
+
+        // คุมยอดไม่ให้ต่ำกว่า Unit และไม่เกิน Max Limit
+        if (bet < unit) bet = unit;
+        return bet > limit ? limit : bet;
     }
-
-    function renderRoad() {
-        const grid = document.getElementById('road_grid'); grid.innerHTML = '';
-        let cols = [[]], cIdx = 0, last = '';
-        history.filter(x => x !== 'T').forEach(r => {
-            if (last && r !== last) { cIdx++; cols[cIdx] = []; }
-            cols[cIdx].push(r); last = r;
-        });
-        cols.forEach(col => { for (let i = 0; i < 6; i++) {
-            const c = document.createElement('div'); c.className = 'cell ' + (col[i] || '');
-            c.innerText = col[i] || ''; grid.appendChild(c);
-        }});
-    }
-
-    function undoLast() { if (history.length > 0) { history.pop(); renderRoad(); updateUI(); } }
-    function resetSystem() { if (confirm("Reset?")) location.reload(); }
-    window.onload = updateUI;
-</script>
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
