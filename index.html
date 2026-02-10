@@ -3,42 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Recovery System Pro</title>
+    <title>Baccarat Fixed Strategy System</title>
     <style>
-        :root { --p-color: #007bff; --b-color: #dc3545; --t-color: #28a745; }
-        body { font-family: 'Inter', sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 20px; }
+        :root { --p-color: #007bff; --b-color: #dc3545; --t-color: #28a745; --bg-dark: #1a1a1a; --card-bg: #2d2d2d; }
+        body { font-family: 'Inter', 'Sarabun', sans-serif; background: var(--bg-dark); color: #fff; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: auto; }
-        .grid-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .grid-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
         
-        /* Dashboard & Config */
-        .card { background: #2d2d2d; border-radius: 10px; padding: 20px; margin-bottom: 20px; border: 1px solid #444; }
-        h3 { margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; font-size: 1.1em; color: #ffca28; }
+        .card { background: var(--card-bg); border-radius: 10px; padding: 20px; margin-bottom: 20px; border: 1px solid #444; }
+        h3 { margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; color: #ffca28; font-size: 1rem; }
         
-        /* Big Road */
-        .road-container { background: #fff; border: 2px solid #555; height: 180px; display: grid; 
-            grid-template-columns: repeat(40, 1fr); grid-template-rows: repeat(6, 1fr); 
-            gap: 1px; overflow-x: auto; margin-bottom: 20px; }
-        .road-cell { background: #fff; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
-        .cell-P { color: var(--p-color); } .cell-B { color: var(--b-color); } .cell-T { color: var(--t-color); }
+        /* Big Road Corrected */
+        .road-wrapper { background: #fff; padding: 5px; border-radius: 4px; overflow-x: auto; margin-bottom: 20px; }
+        .road-container { 
+            display: grid; 
+            grid-template-columns: repeat(100, 25px); 
+            grid-template-rows: repeat(6, 25px); 
+            gap: 1px; 
+            background: #ccc;
+            width: fit-content;
+        }
+        .road-cell { background: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; position: relative; }
+        .cell-P { color: var(--p-color); } .cell-B { color: var(--b-color); } .cell-T { color: var(--t-color); border: 1px solid var(--t-color); border-radius: 50%; width: 20px; height: 20px; }
 
-        /* Betting Banner */
-        .bet-banner { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-radius: 8px; margin-bottom: 20px; font-size: 1.5em; font-weight: bold; border: 2px solid #fff; }
-        .bet-P { background: var(--p-color); } .bet-B { background: var(--b-color); } .bet-WAIT { background: #555; }
+        /* Betting Advice */
+        .bet-banner { display: flex; justify-content: space-between; align-items: center; padding: 25px; border-radius: 8px; margin-bottom: 20px; font-size: 1.8em; font-weight: 800; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .bet-P { background: var(--p-color); } .bet-B { background: var(--b-color); } .bet-WAIT { background: #444; }
 
-        /* Form Controls */
-        label { display: block; margin: 8px 0 4px; font-size: 0.85em; color: #bbb; }
-        input, select { width: 100%; padding: 8px; background: #3d3d3d; border: 1px solid #555; color: #fff; border-radius: 4px; margin-bottom: 10px; }
-        .btn { cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.2s; padding: 10px; }
-        .btn-start { background: #28a745; color: white; width: 100%; font-size: 1.1em; }
-        .btn-manual { flex: 1; height: 60px; font-size: 1.2em; color: white; }
-        
-        /* Stats Table */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: #3d3d3d; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-val { font-size: 1.4em; font-weight: bold; display: block; }
-        .profit-plus { color: #28a745; } .profit-minus { color: #ff4444; }
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: #3d3d3d; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #555; }
+        .stat-val { font-size: 1.2em; font-weight: bold; display: block; margin-top: 5px; }
+        .profit-plus { color: #2ecc71; } .profit-minus { color: #e74c3c; }
 
-        .logs { background: #000; height: 250px; overflow-y: auto; font-family: monospace; padding: 10px; border-radius: 5px; font-size: 12px; color: #0f0; }
+        /* Hidden Controls per request */
+        .hidden-menu { display: none; }
+
+        .btn { cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.2s; padding: 12px; }
+        .btn-start { background: #28a745; color: white; width: 100%; font-size: 1.1em; margin-bottom: 10px; }
+        .btn-manual { flex: 1; height: 70px; font-size: 1.3em; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .logs { background: #000; height: 200px; overflow-y: auto; font-family: 'Courier New', monospace; padding: 10px; border-radius: 5px; font-size: 12px; color: #0f0; border: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -47,319 +51,319 @@
     <div class="grid-layout">
         <div class="sidebar">
             <div class="card">
-                <h3>⚙️ ตั้งค่าระบบ (Settings)</h3>
-                <label>โหมด (Mode):</label>
-                <select id="mode" onchange="toggleManualBox()">
+                <h3>⚙️ การตั้งค่าระบบ (Config)</h3>
+                <p style="font-size: 0.8em; color: #888;">*ระบบถูกตั้งค่าตาม CONFIG คงที่</p>
+                
+                <label style="font-size: 0.85em;">โหมด (Mode):</label>
+                <select id="mode" onchange="toggleMode()">
                     <option value="m">Manual Input (กดมือ)</option>
                     <option value="r">Random Simulation (สุ่ม)</option>
-                    <option value="a">Auto Data (ข้อมูลดิบ)</option>
                 </select>
 
-                <label>เดิมพันฝั่ง (Side Preference):</label>
-                <select id="side_preference">
-                    <option value="PLAYER">PLAYER</option>
-                    <option value="BANKER">BANKER</option>
-                </select>
+                <div class="hidden-menu">
+                    <input type="number" id="virtual_loss_trigger" value="5">
+                    <input type="number" id="marty_mult" value="2.0">
+                    <input type="number" id="fibo_mult" value="1.0">
+                </div>
 
-                <label>เดิมพันขั้นต่ำ (Min Bet):</label>
-                <input type="number" id="unit_size" value="10">
+                <div style="margin-top: 15px;">
+                    <div style="display:flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px;">
+                        <span>เดิมพันขั้นต่ำ (Min Bet):</span> <span>5.0</span>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px;">
+                        <span>ชิปขั้นต่ำ (Min Chip):</span> <span>5.0</span>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px;">
+                        <span>Stop Loss:</span> <span style="color:#e74c3c;">75,000</span>
+                    </div>
+                </div>
 
-                <label>ชิปขั้นต่ำ (Min Chip):</label>
-                <input type="number" id="min_chip" value="5">
+                <button class="btn btn-start" onclick="startSystem()" style="margin-top: 20px;">เริ่มทำงาน (START)</button>
+            </div>
 
-                <label>ค่าคอมมิชชั่น % (Commission 1%):</label>
-                <input type="number" id="rebate_rate" value="1" step="0.1">
-
-                <label>ยอดเสียสูงสุด (Stop Loss):</label>
-                <input type="number" id="stop_loss_threshold" value="300000">
-
-                <label>รอผลเสียหลอก (Virtual Loss Trigger):</label>
-                <input type="number" id="virtual_loss_trigger" value="2">
-
-                <hr style="border:0.5px solid #444">
-                <label>Marty Multiplier:</label>
-                <input type="number" id="marty_mult" value="2">
-                <label>Fibo Multiplier:</label>
-                <input type="number" id="fibo_mult" value="10">
-
-                <button class="btn btn-start" onclick="startSimulation()">เริ่มระบบ (START)</button>
+            <div class="card">
+                <h3>📈 สถิติ (Stats)</h3>
+                <div class="stat-box" style="margin-bottom: 10px;">
+                    <span style="font-size: 0.8em;">กำไรสุทธิ (Real Net Profit)</span>
+                    <span id="stat_net_profit" class="stat-val">0.00</span>
+                </div>
+                <div class="stat-box">
+                    <span style="font-size: 0.8em;">ค่าคอมฯ (Commission 1%)</span>
+                    <span id="stat_commission" class="stat-val" style="color:#aaa;">0.00</span>
+                </div>
             </div>
         </div>
 
         <div class="main-panel">
-            <div class="road-container" id="big_road"></div>
+            <div class="road-wrapper">
+                <div class="road-container" id="big_road"></div>
+            </div>
 
             <div id="bet_banner" class="bet-banner bet-WAIT">
-                <span id="next_side">รอระบบ (WAITING)</span>
+                <span id="next_side">READY</span>
                 <span id="next_amount">0.00</span>
             </div>
 
             <div class="stats-grid">
-                <div class="stat-box">
-                    <span style="color:#bbb">กำไรสุทธิ (Net Profit)</span>
-                    <span id="stat_net_profit" class="stat-val profit-plus">0.00</span>
-                </div>
-                <div class="stat-box">
-                    <span style="color:#bbb">ค่าคอมมิชชั่นสะสม (Total Commission)</span>
-                    <span id="stat_commission" class="stat-val" style="color:#2ecc71">0.00</span>
-                </div>
-                <div class="stat-box">
-                    <span style="color:#bbb">เดิมพันสูงสุด (Max Bet)</span>
-                    <span id="stat_max_bet" class="stat-val">0.00</span>
-                </div>
-                <div class="stat-box">
-                    <span style="color:#bbb">Session ปัจจุบัน</span>
-                    <span id="stat_session" class="stat-val">0</span>
-                </div>
+                <div class="stat-box"><span>Max Bet</span><span id="stat_max_bet" class="stat-val">0</span></div>
+                <div class="stat-box"><span>Drawdown</span><span id="stat_mdd" class="stat-val" style="color:#ff4444;">0</span></div>
+                <div class="stat-box"><span>Session</span><span id="stat_session" class="stat-val">0</span></div>
             </div>
 
-            <div class="card" id="manual_input_box">
-                <h3>🎮 บันทึกผลมือ (Manual Input)</h3>
+            <div class="card" id="manual_ctrl">
+                <h3>🎮 บันทึกผล (Manual Result)</h3>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn btn-manual" style="background:var(--p-color)" onclick="handleManual('P')">PLAYER (P)</button>
-                    <button class="btn btn-manual" style="background:var(--b-color)" onclick="handleManual('B')">BANKER (B)</button>
-                    <button class="btn btn-manual" style="background:var(--t-color)" onclick="handleManual('T')">TIE (T)</button>
+                    <button class="btn btn-manual" style="background:var(--p-color)" onclick="inputResult('P')">PLAYER</button>
+                    <button class="btn btn-manual" style="background:var(--b-color)" onclick="inputResult('B')">BANKER</button>
+                    <button class="btn btn-manual" style="background:var(--t-color)" onclick="inputResult('T')">TIE</button>
                 </div>
             </div>
 
-            <div class="logs" id="log_output">LOG: ระบบพร้อมทำงาน...</div>
+            <div class="logs" id="logs">รอกด START เพื่อเริ่ม...</div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Logic Variables (Same as Python Original) ---
-    let state = {
-        total_net_profit: 0,
-        total_commission: 0,
-        total_real_sessions: 0,
-        consecutive_virtual_losses: 0,
-        total_loss_accumulated: 0,
-        current_target: 0.01,
-        base_bankroll: 1000000, // Dummy high BR for simulation
-        
-        // Session State
-        session_active: false,
-        s_bankroll: 0,
-        s_peak: 0,
-        s_state: "FLAT",
-        s_marty_step: 0,
-        s_fibo_idx: 0,
-        s_has_lost: false,
-        max_bet: 0,
-        
-        road_data: []
+    const CONFIG = {
+        initial_bankroll: 500000.0,
+        unit_size: 5.0,
+        chip_size: 5.0,
+        side_preference: "PLAYER",
+        virtual_win_trigger: 5,
+        stop_after_consecutive_loss: 4,
+        recovery_mode: "aggressive",
+        recovery_ratio: 5,
+        max_unit_cap: 1,
+        marty_mult: 2.0,
+        marty_steps_limit: 12,
+        fibo_mult: 1.0,
+        stop_loss_threshold: 75000.0
     };
 
-    function getFibo(n) {
-        if (n <= 0) return 1;
-        if (n === 1) return 1;
-        let a = 1, b = 1;
-        for (let i = 2; i <= n; i++) { let tmp = a + b; a = b; b = tmp; }
-        return b;
-    }
-
-    function toggleManualBox() {
-        const m = document.getElementById('mode').value;
-        document.getElementById('manual_input_box').style.visibility = (m === 'm' ? 'visible' : 'hidden');
-    }
-
-    function updateUI() {
-        document.getElementById('stat_net_profit').innerText = state.total_net_profit.toLocaleString(undefined, {minimumFractionDigits: 2});
-        document.getElementById('stat_net_profit').className = 'stat-val ' + (state.total_net_profit >= 0 ? 'profit-plus' : 'profit-minus');
-        document.getElementById('stat_commission').innerText = state.total_commission.toLocaleString(undefined, {minimumFractionDigits: 2});
-        document.getElementById('stat_max_bet').innerText = state.max_bet.toLocaleString();
-        document.getElementById('stat_session').innerText = state.total_real_sessions;
+    let app = {
+        isRunning: false,
+        netProfit: 0,
+        totalComm: 0,
+        maxBet: 0,
+        maxDD: 0,
+        sessionCount: 0,
+        history: [],
         
-        // Update Advice Banner
-        if (state.session_active) {
-            const bet = calculateBet();
-            const trigger = parseInt(document.getElementById('virtual_loss_trigger').value);
-            const isVirtual = state.consecutive_virtual_losses < trigger;
+        // Internal Session Logic
+        br: CONFIG.initial_bankroll,
+        peak: CONFIG.initial_bankroll,
+        state: "FLAT",
+        martyStep: 0,
+        fiboIdx: 0,
+        lossSincePeak: false,
+        targetProfit: 0.01,
+        accumulatedLoss: 0,
+        vLossCount: 0
+    };
 
-            if (isVirtual) {
-                document.getElementById('bet_banner').className = "bet-banner bet-WAIT";
-                document.getElementById('next_side').innerText = "VIRTUAL WAIT (รอเสียหลอก)";
-                document.getElementById('next_amount').innerText = bet.toFixed(2);
-            } else {
-                const side = document.getElementById('side_preference').value;
-                document.getElementById('bet_banner').className = "bet-banner " + (side === 'PLAYER' ? 'bet-P' : 'bet-B');
-                document.getElementById('next_side').innerText = "BET " + side;
-                document.getElementById('next_amount').innerText = bet.toFixed(2);
-            }
+    function startSystem() {
+        app.isRunning = true;
+        app.netProfit = 0;
+        app.totalComm = 0;
+        app.history = [];
+        app.sessionCount = 1;
+        document.getElementById('logs').innerHTML = "SYSTEM ONLINE...";
+        resetSession();
+        updateUI();
+        
+        if(document.getElementById('mode').value === 'r') {
+            runRandomLoop();
         }
     }
 
-    function drawRoad() {
-        const road = document.getElementById('big_road');
-        road.innerHTML = '';
-        // Simple Big Road Logic (Vertical Stack)
-        let columns = [];
-        let currentCol = [];
-        let lastRes = '';
-        
-        state.road_data.forEach(res => {
-            if (res === 'T') return;
-            if (res !== lastRes && lastRes !== '') {
-                columns.push(currentCol);
-                currentCol = [];
-            }
-            currentCol.push(res);
-            lastRes = res;
-        });
-        columns.push(currentCol);
-
-        // Render 40 columns
-        for (let i = 0; i < 40 * 6; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'road-cell';
-            const colIdx = Math.floor(i / 6);
-            const rowIdx = i % 6;
-            if (columns[colIdx] && columns[colIdx][rowIdx]) {
-                cell.innerText = columns[colIdx][rowIdx];
-                cell.className += ' cell-' + columns[colIdx][rowIdx];
-            }
-            road.appendChild(cell);
-        }
+    function resetSession() {
+        app.br = CONFIG.initial_bankroll;
+        app.peak = CONFIG.initial_bankroll;
+        app.state = "FLAT";
+        app.martyStep = 0;
+        app.fiboIdx = 0;
+        app.lossSincePeak = false;
+        renderRoad();
     }
 
     function calculateBet() {
-        const unit_size = parseFloat(document.getElementById('unit_size').value);
-        const marty_mult = parseFloat(document.getElementById('marty_mult').value);
-        const fibo_mult = parseFloat(document.getElementById('fibo_mult').value);
-        const min_chip = parseFloat(document.getElementById('min_chip').value);
-        const stop_loss = parseFloat(document.getElementById('stop_loss_threshold').value);
-        
-        let raw_bet = unit_size;
-        let drawdown = state.s_peak - state.s_bankroll;
+        let drawdown = app.peak - app.br;
+        let bet = CONFIG.unit_size;
 
-        if (state.s_state === "FLAT") {
-            raw_bet = (drawdown > 0 && state.s_has_lost) ? Math.max(Math.ceil(drawdown / 4), unit_size) : unit_size;
-        } else if (state.s_state === "MARTY") {
-            raw_bet = unit_size * Math.pow(marty_mult, state.s_marty_step);
-        } else if (state.s_state === "FIBO") {
-            raw_bet = getFibo(state.s_fibo_idx) * fibo_mult;
+        if (drawdown >= CONFIG.stop_loss_threshold) {
+            app.state = "FLAT"; app.martyStep = 0;
         }
 
-        let bet = (state.s_state !== "FLAT") ? Math.min(raw_bet, drawdown + unit_size) : raw_bet;
-        if (bet >= stop_loss) bet = stop_loss;
-        
-        // Target Adjust
-        let cur_profit = state.s_bankroll - state.base_bankroll;
-        let rem = state.current_target - cur_profit;
-        if (bet > rem && rem > 0) bet = Math.max(unit_size, rem);
+        if (app.state === "FLAT") {
+            bet = (drawdown > 0 && app.lossSincePeak) ? Math.max(Math.ceil(drawdown / 4), CONFIG.unit_size) : CONFIG.unit_size;
+        } else if (app.state === "MARTY") {
+            bet = CONFIG.unit_size * Math.pow(CONFIG.marty_mult, app.martyStep);
+        }
 
-        // Chip size rounding
-        return Math.ceil(bet / min_chip) * min_chip;
+        // Apply Config constraints
+        let needed = drawdown + CONFIG.unit_size;
+        if (app.state !== "FLAT") bet = Math.min(bet, needed);
+        if (bet > CONFIG.stop_loss_threshold) bet = CONFIG.stop_loss_threshold;
+
+        // Round to chip size
+        return Math.ceil(bet / CONFIG.chip_size) * CONFIG.chip_size;
     }
 
-    function startSimulation() {
-        state.total_net_profit = 0;
-        state.total_commission = 0;
-        state.total_real_sessions = 0;
-        state.total_loss_accumulated = 0;
-        state.current_target = 0.01;
-        state.consecutive_virtual_losses = 0;
-        state.road_data = [];
-        document.getElementById('log_output').innerHTML = "SYSTEM STARTED...";
-        startNewSession();
-    }
-
-    function startNewSession() {
-        state.session_active = true;
-        state.s_bankroll = state.base_bankroll;
-        state.s_peak = state.base_bankroll;
-        state.s_state = "FLAT";
-        state.s_marty_step = 0;
-        state.s_fibo_idx = 0;
-        state.s_has_lost = false;
-        updateUI();
-    }
-
-    function handleManual(res) {
-        if (!state.session_active) return;
+    function inputResult(res) {
+        if (!app.isRunning) return;
         
         const bet = calculateBet();
-        const side_pref = document.getElementById('side_preference').value;
-        const comm_rate = parseFloat(document.getElementById('rebate_rate').value) / 100;
-        const trigger = parseInt(document.getElementById('virtual_loss_trigger').value);
-        const stop_loss = parseFloat(document.getElementById('stop_loss_threshold').value);
+        const isVirtual = app.vLossCount < CONFIG.virtual_win_trigger;
+        const win = (res === 'P' && CONFIG.side_preference === 'PLAYER') || (res === 'B' && CONFIG.side_preference === 'BANKER');
+
+        if (res !== 'T') {
+            app.history.push(res);
+            // Commission
+            let comm = bet * 0.01;
+            app.totalComm += comm;
+            app.br += comm;
+            if(!isVirtual) app.netProfit += comm;
+
+            if (win) {
+                let payout = (CONFIG.side_preference === 'BANKER') ? 0.95 : 1.0;
+                let profit = bet * payout;
+                app.br += profit;
+                if(!isVirtual) app.netProfit += profit;
+                
+                app.state = "FLAT"; app.martyStep = 0;
+                if (app.br >= app.peak) app.lossSincePeak = false;
+            } else {
+                app.br -= bet;
+                if(!isVirtual) app.netProfit -= bet;
+                app.lossSincePeak = true;
+                
+                if (app.state === "FLAT") { app.state = "MARTY"; app.martyStep = 1; }
+                else { 
+                    app.martyStep++;
+                    if (app.martyStep > CONFIG.marty_steps_limit) { app.state = "FLAT"; app.martyStep = 0; }
+                }
+            }
+
+            if (app.br > app.peak) app.peak = app.br;
+            if (bet > app.maxBet) app.maxBet = bet;
+            let currentDD = app.peak - app.br;
+            if (currentDD > app.maxDD) app.maxDD = currentDD;
+
+            // Session Logic
+            let sessionProfit = app.br - CONFIG.initial_bankroll;
+            if (app.br <= 0 || sessionProfit >= app.targetProfit || currentDD >= CONFIG.stop_loss_threshold) {
+                if (isVirtual) {
+                    if (sessionProfit < 0) app.vLossCount++;
+                    else app.vLossCount = 0;
+                } else {
+                    app.sessionCount++;
+                    if (sessionProfit >= app.targetProfit) {
+                        app.accumulatedLoss = 0; app.targetProfit = 0.01; app.vLossCount = 0;
+                    } else {
+                        app.accumulatedLoss += Math.abs(sessionProfit);
+                        app.targetProfit = app.accumulatedLoss + 0.01;
+                    }
+                }
+                resetSession();
+            }
+        }
         
-        const isVirtual = state.consecutive_virtual_losses < trigger;
-        const isWin = (res === 'P' && side_pref === 'PLAYER') || (res === 'B' && side_pref === 'BANKER');
-
-        state.road_data.push(res);
-        drawRoad();
-
-        if (res === 'T') return;
-
-        // Calc Commission & Win/Loss
-        const comm_val = bet * comm_rate;
-        state.total_commission += comm_val;
-        state.s_bankroll += comm_val;
-        if (!isVirtual) state.total_net_profit += comm_val;
-
-        if (isWin) {
-            const payout = (side_pref === 'BANKER') ? 0.95 : 1.0;
-            const win_amt = bet * payout;
-            state.s_bankroll += win_amt;
-            if (!isVirtual) state.total_net_profit += win_amt;
-            
-            if (state.s_state === "FIBO") {
-                state.s_fibo_idx = Math.max(-1, state.s_fibo_idx - 2);
-                if (state.s_fibo_idx < 0) { state.s_state = "FLAT"; state.s_fibo_idx = 0; }
-            } else {
-                if (state.s_bankroll >= state.s_peak) state.s_has_lost = false;
-                state.s_state = "FLAT"; state.s_marty_step = 0;
-            }
-        } else {
-            state.s_bankroll -= bet;
-            if (!isVirtual) state.total_net_profit -= bet;
-            state.s_has_lost = true;
-
-            if (bet >= stop_loss) {
-                state.s_state = "FLAT"; state.s_marty_step = 0;
-            } else {
-                if (state.s_state === "FLAT") { state.s_state = "MARTY"; state.s_marty_step = 1; }
-                else if (state.s_state === "MARTY") {
-                    state.s_marty_step++;
-                    if (state.s_marty_step > 12) { state.s_state = "FIBO"; state.s_fibo_idx = 0; }
-                } else if (state.s_state === "FIBO") { state.s_fibo_idx++; }
-            }
-        }
-
-        if (state.s_bankroll > state.s_peak) state.s_peak = state.s_bankroll;
-        if (bet > state.max_bet) state.max_bet = bet;
-
-        // Session Over Check
-        let current_p = state.s_bankroll - state.base_bankroll;
-        if (state.s_bankroll <= (state.base_bankroll - stop_loss) || current_p >= state.current_target) {
-            finalizeSession(current_p >= state.current_target ? "WIN" : "BUST", current_p);
-        } else {
-            updateUI();
-        }
+        renderRoad();
+        updateUI();
+        logHand(res, bet, win, isVirtual);
     }
 
-    function finalizeSession(status, profit) {
-        state.session_active = false;
-        const trigger = parseInt(document.getElementById('virtual_loss_trigger').value);
-        const isVirtual = state.consecutive_virtual_losses < trigger;
+    function renderRoad() {
+        const container = document.getElementById('big_road');
+        container.innerHTML = '';
+        
+        let matrix = Array(6).fill().map(() => Array(100).fill(null));
+        let col = 0, row = 0;
+        let lastRes = '';
 
-        if (isVirtual) {
-            if (status === "BUST") state.consecutive_virtual_losses++;
-            else state.consecutive_virtual_losses = 0;
-        } else {
-            state.total_real_sessions++;
-            if (status === "WIN") {
-                state.total_loss_accumulated = 0;
-                state.current_target = 0.01;
-                state.consecutive_virtual_losses = 0;
+        app.history.filter(r => r !== 'T').forEach(res => {
+            if (res !== lastRes && lastRes !== '') {
+                // Find next empty column's first row
+                col++; row = 0;
+                while(matrix[0][col] !== null) col++;
+            }
+
+            // Dragon Tail Logic
+            let targetRow = row;
+            let targetCol = col;
+            
+            if (targetRow >= 6 || matrix[targetRow][targetCol] !== null) {
+                // Lean right
+                targetRow = row - 1;
+                targetCol = col + 1;
+                while(matrix[targetRow][targetCol] !== null) targetCol++;
+                // Note: Keep updating row/col for next item in same streak
+                matrix[targetRow][targetCol] = res;
+                col = targetCol; // Move virtual col
             } else {
-                state.total_loss_accumulated += Math.abs(profit);
-                state.current_target = state.total_loss_accumulated + 0.01;
+                matrix[targetRow][targetCol] = res;
+                row++;
+            }
+            lastRes = res;
+        });
+
+        // Fill Grid
+        for (let r = 0; r < 6; r++) {
+            for (let c = 0; c < 100; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'road-cell';
+                if (matrix[r][c]) {
+                    cell.innerText = matrix[r][c];
+                    cell.className += ' cell-' + matrix[r][c];
+                }
+                container.appendChild(cell);
             }
         }
-        startNewSession();
+        container.parentElement.scrollLeft = container.parentElement.scrollWidth;
+    }
+
+    function updateUI() {
+        document.getElementById('stat_net_profit').innerText = app.netProfit.toLocaleString(undefined, {minimumFractionDigits:2});
+        document.getElementById('stat_net_profit').className = 'stat-val ' + (app.netProfit >= 0 ? 'profit-plus' : 'profit-minus');
+        document.getElementById('stat_commission').innerText = app.totalComm.toLocaleString(undefined, {minimumFractionDigits:2});
+        document.getElementById('stat_max_bet').innerText = app.maxBet.toLocaleString();
+        document.getElementById('stat_mdd').innerText = app.maxDD.toLocaleString();
+        document.getElementById('stat_session').innerText = app.sessionCount;
+
+        const bet = calculateBet();
+        const trigger = CONFIG.virtual_win_trigger;
+        const isVirtual = app.vLossCount < trigger;
+
+        if (isVirtual) {
+            document.getElementById('bet_banner').className = "bet-banner bet-WAIT";
+            document.getElementById('next_side').innerText = `VIRTUAL (${app.vLossCount}/${trigger})`;
+        } else {
+            document.getElementById('bet_banner').className = "bet-banner " + (CONFIG.side_preference === 'PLAYER' ? 'bet-P' : 'bet-B');
+            document.getElementById('next_side').innerText = "BET " + CONFIG.side_preference;
+        }
+        document.getElementById('next_amount').innerText = bet.toLocaleString();
+    }
+
+    function logHand(res, bet, win, isV) {
+        const log = document.getElementById('logs');
+        const time = new Date().toLocaleTimeString();
+        const type = isV ? "[V]" : "[R]";
+        const status = win ? "✅" : "❌";
+        log.innerHTML = `<div>${time} ${type} Bet: ${bet} | Res: ${res} ${status}</div>` + log.innerHTML;
+    }
+
+    function toggleMode() {
+        const m = document.getElementById('mode').value;
+        document.getElementById('manual_ctrl').style.display = (m === 'm' ? 'block' : 'none');
+    }
+
+    async function runRandomLoop() {
+        while(app.isRunning && document.getElementById('mode').value === 'r') {
+            const res = Math.random() > 0.5 ? 'P' : 'B';
+            inputResult(res);
+            await new Promise(r => setTimeout(r, 500));
+        }
     }
 </script>
 </body>
