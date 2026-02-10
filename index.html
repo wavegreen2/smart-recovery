@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baccarat Recovery Dashboard v2</title>
+    <title>Baccarat Pro Dashboard v3</title>
     <style>
         :root { --p-color: #007bff; --b-color: #dc3545; --t-color: #28a745; --bg-dark: #121212; --card-bg: #1e1e1e; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-dark); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -15,26 +15,35 @@
 
         .main-content { display: grid; grid-template-columns: 280px 1fr; flex: 1; overflow: hidden; }
         
+        /* Sidebar */
         .sidebar { background: #181818; padding: 15px; border-right: 1px solid #333; overflow-y: auto; }
         .control-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.8rem; color: #bbb; margin-bottom: 3px; }
         input, select, textarea { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; margin-bottom: 8px; }
-        textarea { height: 60px; font-size: 10px; font-family: monospace; resize: none; }
         
         .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
-        .btn-start { background: #28a745; color: white; }
-        .btn-undo { background: #6c757d; color: white; font-size: 0.8rem; }
-        .btn-manual { flex: 1; height: 45px; color: white; border-radius: 4px; font-size: 1.1rem; }
+        .btn-start { background: #28a745; color: white; margin-bottom: 15px; }
+        .btn-undo { background: #555; color: white; font-size: 0.9rem; margin-top: 10px; border: 1px solid #777; }
+        .btn-undo:hover { background: #777; }
+        .btn-manual { flex: 1; height: 50px; color: white; border-radius: 4px; font-size: 1.2rem; }
 
+        /* Advice Banner */
+        .advice-banner { padding: 15px; border-radius: 5px; margin-bottom: 10px; text-align: center; font-weight: 800; font-size: 1.4rem; border: 2px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .advice-P { background: var(--p-color); box-shadow: 0 0 15px rgba(0,123,255,0.4); }
+        .advice-B { background: var(--b-color); box-shadow: 0 0 15px rgba(220,53,69,0.4); }
+        .advice-WAIT { background: #333; color: #aaa; }
+
+        /* Big Road */
         .road-section { background: #000; border-bottom: 1px solid #333; padding: 10px; overflow-x: auto; }
         .road-container { display: grid; grid-template-columns: repeat(120, 22px); grid-template-rows: repeat(6, 22px); gap: 1px; background: #333; width: fit-content; }
         .road-cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
         .cell-P { color: var(--p-color); } .cell-B { color: var(--b-color); } 
         .cell-T { color: var(--t-color); border: 1px solid var(--t-color); border-radius: 50%; width: 16px; height: 16px; }
 
+        /* Table */
         .table-area { flex: 1; overflow-y: auto; padding: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #252525; position: sticky; top: 0; padding: 8px; text-align: left; color: #888; border-bottom: 2px solid #333; }
+        th { background: #252525; position: sticky; top: 0; padding: 8px; text-align: left; color: #888; border-bottom: 2px solid #333; z-index: 10; }
         td { padding: 8px; border-bottom: 1px solid #2a2a2a; }
         .win-row { background: rgba(46, 204, 113, 0.05); color: #2ecc71; }
         .loss-row { background: rgba(231, 76, 60, 0.05); color: #e74c3c; }
@@ -62,8 +71,8 @@
         </div>
         
         <div id="string_box" class="control-group" style="display:none;">
-            <label>Data String (P,B,T...)</label>
-            <textarea id="data_string" placeholder="P,B,B,P,T,P..."></textarea>
+            <label>Data String</label>
+            <textarea id="data_string" placeholder="P,B,T,P..."></textarea>
         </div>
 
         <div class="control-group">
@@ -76,19 +85,24 @@
         </div>
 
         <button class="btn btn-start" onclick="startSystem()">START SYSTEM</button>
-        <button class="btn btn-undo" onclick="undoLastHand()">↩ ย้อนกลับ (Undo)</button>
 
-        <div id="manual_ctrl" style="margin-top: 15px;">
+        <div id="manual_ctrl" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
             <label>บันทึกผลมือต่อมือ</label>
             <div style="display:flex; gap:5px;">
                 <button class="btn btn-manual" style="background:var(--p-color)" onclick="inputResult('P')">P</button>
                 <button class="btn btn-manual" style="background:var(--b-color)" onclick="inputResult('B')">B</button>
                 <button class="btn btn-manual" style="background:var(--t-color)" onclick="inputResult('T')">T</button>
             </div>
+            <button class="btn btn-undo" onclick="undoLastHand()">↩ ย้อนกลับ (Undo)</button>
         </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; overflow: hidden;">
+    <div style="display: flex; flex-direction: column; overflow: hidden; padding: 10px;">
+        <div id="advice_banner" class="advice-banner advice-WAIT">
+            <span id="advice_side">READY</span>
+            <span id="advice_bet">0.00</span>
+        </div>
+
         <div class="road-section" id="road_wrapper">
             <div class="road-container" id="big_road"></div>
         </div>
@@ -122,8 +136,8 @@
         maxBet: 0,
         handCount: 0,
         sessionIdx: 1,
-        fullHistory: [], // Full log for Undo
-        roadHistory: [], // Result history for Road
+        fullHistory: [], 
+        roadHistory: [], 
         
         state: "FLAT",
         martyStep: 0,
@@ -186,13 +200,12 @@
         if (!app.active) return;
         
         const bet = calculateBet();
-        const sidePref = "PLAYER"; // Fixed side
+        const sidePref = "PLAYER"; 
         const win = (res === 'P' && sidePref === 'PLAYER') || (res === 'B' && sidePref === 'BANKER');
         const comm = bet * 0.01;
         const vTrigger = 5; 
         const isVirtual = app.vLossCount < vTrigger;
 
-        // Store snapshot for Undo
         const snapshot = JSON.parse(JSON.stringify({
             br: app.br, netProfit: app.netProfit, totalComm: app.totalComm,
             handCount: app.handCount, state: app.state, martyStep: app.martyStep,
@@ -217,7 +230,7 @@
             } else {
                 outcome = -bet;
                 app.br += outcome;
-                if(!isVirtual) app.netProfit += outcome;
+                if(!isVirtual) app.netProfit -= bet;
                 app.lossSincePeak = true;
                 if (app.state === "FLAT") { app.state = "MARTY"; app.martyStep = 1; }
                 else { app.martyStep++; }
@@ -231,7 +244,6 @@
         app.fullHistory.push({ snapshot, res, bet, outcome, isVirtual });
         addTableRow(app.handCount, isVirtual ? "VIRTUAL" : "REAL", res, bet, outcome, app.br, app.netProfit);
 
-        // Session Control
         let sessionP = app.br - 500000.0;
         let stopLossLimit = parseFloat(document.getElementById('stop_loss').value);
 
@@ -257,14 +269,9 @@
     function undoLastHand() {
         if (app.fullHistory.length === 0) return;
         const last = app.fullHistory.pop();
-        
-        // Restore snapshot
         Object.assign(app, last.snapshot);
         if (last.res !== 'T') app.roadHistory.pop();
-        
-        // Update Table
         document.getElementById('history_body').deleteRow(0);
-        
         renderRoad();
         updateUI();
     }
@@ -319,7 +326,6 @@
                 container.appendChild(cell);
             }
         }
-        // Auto-scroll only when data exists
         if(app.roadHistory.length > 0) {
             document.getElementById('road_wrapper').scrollLeft = (col - 10) * 22;
         }
@@ -331,6 +337,30 @@
         document.getElementById('stat_comm').innerText = app.totalComm.toLocaleString(undefined, {minimumFractionDigits: 2});
         document.getElementById('stat_max_bet').innerText = app.maxBet.toLocaleString();
         document.getElementById('stat_session').innerText = app.sessionIdx;
+
+        // Update Advice Banner
+        const banner = document.getElementById('advice_banner');
+        const sideTxt = document.getElementById('advice_side');
+        const betTxt = document.getElementById('advice_bet');
+        
+        if (!app.active) {
+            banner.className = "advice-banner advice-WAIT";
+            sideTxt.innerText = "READY";
+            betTxt.innerText = "0.00";
+            return;
+        }
+
+        const bet = calculateBet();
+        const vTrigger = 5;
+        if (app.vLossCount < vTrigger) {
+            banner.className = "advice-banner advice-WAIT";
+            sideTxt.innerText = `VIRTUAL (WAIT ${app.vLossCount}/${vTrigger})`;
+            betTxt.innerText = bet.toLocaleString();
+        } else {
+            banner.className = "advice-banner advice-P"; // Config side_preference = PLAYER
+            sideTxt.innerText = "BET PLAYER";
+            betTxt.innerText = bet.toLocaleString();
+        }
     }
 
     function toggleMode() {
