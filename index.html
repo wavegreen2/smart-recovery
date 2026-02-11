@@ -250,7 +250,7 @@
     <div class="sidebar">
         
         <div class="form-group">
-            <label>เงินทุนเริ่มต้น (Initial Bankroll) MINBET1x100000</label>
+            <label>เงินทุนเริ่มต้น (Initial Bankroll) MINBET 1-5 UNIT = 400000</label>
             <input type="number" id="init_bank" value="10000000">
         </div>
         <div class="form-group">
@@ -326,7 +326,7 @@
         </div>
 
         <div class="bet-panel" id="bet_panel">
-            <div id="status_badge" class="status-badge">VIRTUAL WAIT: 0/5</div>
+            <div id="status_badge" class="status-badge">VIRTUAL WAIT: 0/2</div>
 
             <div class="recommendation">
                 <div class="rec-title">ยอดเดิมพันถัดไป (NEXT BET)</div>
@@ -381,13 +381,13 @@
             maxBet: parseFloat(document.getElementById('max_bet_limit').value),
             rebate: parseFloat(document.getElementById('rebate_rate').value) / 100, // 1.00 / 100 = 0.01 (1%)
             trigger: 2, 
-            stopLossSteps: 2
+            stopLossSteps: 3
         };
     }
 
     function computeBaseUnit(net, unit, chip) {
         let targetRecovery = (net < 0 ? Math.abs(net) : 0) + unit;
-        let calcBase = Math.max(unit, targetRecovery / 5);
+        let calcBase = Math.max(unit, targetRecovery / 1);
         calcBase = Math.ceil(calcBase / chip) * chip;
         return Math.max(calcBase, chip);
     }
@@ -639,6 +639,7 @@
 </script>
 </body>
 </html>
+
 
 
 
