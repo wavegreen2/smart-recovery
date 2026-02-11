@@ -478,7 +478,7 @@
 
     function computeBaseUnit(net, unit, chip) {
         let targetRecovery = (net < 0 ? Math.abs(net) : 0) + unit;
-        let calcBase = Math.max(unit, targetRecovery / 1.4);
+        let calcBase = Math.max(unit, targetRecovery / 1.5);
         calcBase = Math.ceil(calcBase / chip) * chip;
         return Math.max(calcBase, chip);
     }
@@ -488,7 +488,7 @@
 
         if (state.mode === 'VIRTUAL') return 0;
 
-        let rawBet = state.baseUnit * Math.pow(1.6, state.realStep);
+        let rawBet = state.baseUnit * Math.pow(1.0, state.realStep);
         let targetGlobalNet = cfg.unit; 
         let remaining = targetGlobalNet - state.net;
 
@@ -742,6 +742,7 @@
 </script>
 </body>
 </html>
+
 
 
 
