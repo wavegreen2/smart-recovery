@@ -387,7 +387,7 @@
 
     function computeBaseUnit(net, unit, chip) {
         let targetRecovery = (net < 0 ? Math.abs(net) : 0) + unit;
-        let calcBase = Math.max(unit, targetRecovery / 2);
+        let calcBase = Math.max(unit, targetRecovery / 1);
         calcBase = Math.ceil(calcBase / chip) * chip;
         return Math.max(calcBase, chip);
     }
@@ -639,6 +639,7 @@
 </script>
 </body>
 </html>
+
 
 
 
