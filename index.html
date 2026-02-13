@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baccarat AI: Full Target Logic (Red Alert)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Baccarat AI: Mobile Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -18,7 +18,7 @@
             --gray-light: #f8f9fa;
             --success: #2ecc71;
             --warning: #f39c12;
-            --danger: #e74c3c; /* Red for alert */
+            --danger: #e74c3c;
         }
 
         body {
@@ -26,11 +26,11 @@
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             display: flex;
             justify-content: center;
             height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* Default for Desktop */
         }
 
         .container {
@@ -52,6 +52,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            height: 100%; /* Ensure full height in grid */
         }
 
         .section-title { 
@@ -61,7 +62,7 @@
 
         .form-group { margin-bottom: 5px; }
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #555; }
-        .form-group input { width: 100%; padding: 6px 8px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.9rem; box-sizing: border-box; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.95rem; box-sizing: border-box; }
         
         /* Target Monitor Box */
         .monitor-box {
@@ -108,7 +109,7 @@
         .txt-b { color: var(--banker); }
 
         .btn-action {
-            width: 100%; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-top: 5px;
+            width: 100%; padding: 12px; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-top: 5px;
         }
         .btn-sim { background: var(--accent); }
         .btn-import { background: #34495e; margin-top: 5px; }
@@ -116,7 +117,12 @@
 
         /* --- MAIN CONTENT --- */
         .main-content { 
-            display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 5px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            overflow-y: auto; 
+            padding-right: 5px;
+            height: 100%;
         }
 
         /* Stats Grid */
@@ -126,17 +132,17 @@
             gap: 10px; flex-shrink: 0;
         }
         .stat-card {
-            background: var(--card-bg); padding: 12px; border-radius: 10px; text-align: center;
+            background: var(--card-bg); padding: 10px; border-radius: 10px; text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.03); border-top: 4px solid transparent;
         }
         .stat-card.profit { border-top-color: var(--tie); }
         .stat-card.loss { border-top-color: var(--banker); }
         .stat-card.pre { border-top-color: var(--warning); background: #fffcf5; }
         
-        .stat-label { font-size: 0.7rem; color: #95a5a6; text-transform: uppercase; }
-        .stat-value { font-size: 1.1rem; font-weight: 800; margin-top: 3px; }
+        .stat-label { font-size: 0.65rem; color: #95a5a6; text-transform: uppercase; line-height: 1.2; }
+        .stat-value { font-size: 1rem; font-weight: 800; margin-top: 3px; }
 
-        /* --- BIG ROAD STYLE --- */
+        /* --- BIG ROAD STYLE (FIXED FOR MOBILE) --- */
         .road-scroll-wrapper {
             background: var(--card-bg);
             padding: 10px;
@@ -144,7 +150,15 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
             overflow-x: auto;
             overflow-y: hidden;
-            height: 170px; /* Fixed height for 6 rows */
+            
+            /* FIX: Force height and prevent shrinking */
+            height: 170px; 
+            min-height: 170px;
+            flex-shrink: 0; 
+            
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .big-road-grid {
@@ -153,17 +167,17 @@
             grid-auto-columns: 26px; /* Columns grow automatically */
             grid-auto-flow: column;
             gap: 1px;
+            min-width: 100%; /* Ensure it fills width */
         }
 
         .big-road-cell {
             width: 24px; height: 24px;
             display: flex; justify-content: center; align-items: center;
             font-size: 10px; font-weight: bold;
-            border: 1px solid #f0f0f0; /* Light grid lines */
+            border: 1px solid #f0f0f0;
             background: white;
         }
 
-        /* Hollow Circle Styles */
         .circle {
             width: 18px; height: 18px;
             border-radius: 50%;
@@ -192,7 +206,7 @@
         .reduced-tag { font-size: 0.8rem; color: var(--success); font-weight: bold; display: none; margin-top: 5px; }
 
         .controls { display: grid; grid-template-columns: 1fr 1fr 80px; gap: 10px; margin-top: 15px; }
-        .btn-ctrl { padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; }
+        .btn-ctrl { padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; touch-action: manipulation; }
         .btn-p { background: var(--player); }
         .btn-b { background: var(--banker); }
         .btn-u { background: #95a5a6; }
@@ -200,87 +214,84 @@
         /* Chart */
         .chart-box {
             background: var(--card-bg); padding: 10px; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-grow: 1; min-height: 200px; position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            flex-grow: 1; 
+            min-height: 250px; /* Ensure chart has height */
+            position: relative;
         }
 
         /* --- POPUP STYLE --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); 
-            display: none; /* Hidden by default */
+            display: none; 
             justify-content: center; align-items: center; 
-            z-index: 999999; /* Highest priority */
+            z-index: 999999; 
             backdrop-filter: blur(3px);
         }
         .modal-box {
             background: white; 
-            padding: 40px 30px; 
+            padding: 30px 20px; 
             border-radius: 15px; 
             text-align: center; 
             max-width: 400px; 
             width: 85%;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             display: flex; flex-direction: column; align-items: center;
-            font-family: 'Sarabun', sans-serif;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
         .modal-icon { font-size: 4rem; margin-bottom: 15px; }
-        
-        .modal-text-th { 
-            font-size: 1.1rem; font-weight: bold; color: #2c3e50; 
-            margin-bottom: 5px; line-height: 1.5;
-        }
-        .modal-email {
-            font-size: 1.1rem; font-weight: bold; color: #2c3e50; 
-            margin-bottom: 10px;
-        }
-        .modal-text-en {
-            font-size: 0.95rem; color: #7f8c8d; 
-            margin-bottom: 20px; line-height: 1.4;
-        }
+        .modal-text-th { font-size: 1.1rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .modal-email { font-size: 1.1rem; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
+        .modal-text-en { font-size: 0.95rem; color: #7f8c8d; margin-bottom: 20px; }
 
-        /* --- UPDATED CSS FOR RED BLINKING TEXT --- */
         @keyframes flashText {
             0% { opacity: 1; }
             50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
-
-        .modal-reset-th {
-            font-size: 1.1rem; 
-            color: var(--danger); /* RED */
-            font-weight: bold;
-            margin-bottom: 2px;
-            animation: flashText 1s infinite; /* BLINK */
-        }
-        .modal-reset-en {
-            font-size: 0.9rem; 
-            color: var(--danger); /* RED */
-            margin-bottom: 25px;
-            animation: flashText 1s infinite; /* BLINK */
-        }
-        /* ----------------------------------------- */
+        .modal-reset-th { font-size: 1.1rem; color: var(--danger); font-weight: bold; margin-bottom: 2px; animation: flashText 1s infinite; }
+        .modal-reset-en { font-size: 0.9rem; color: var(--danger); margin-bottom: 25px; animation: flashText 1s infinite; }
         
-        .btn-modal-ack { 
-            background: #27ae60; 
-            color: white; 
-            border: none; 
-            padding: 12px 20px; 
-            width: 100%; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 1rem; 
-            transition: background 0.2s;
-        }
-        .btn-modal-ack:hover { background: #219150; }
+        .btn-modal-ack { background: #27ae60; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
 
+        /* --- MOBILE RESPONSIVE FIXES --- */
         @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; height: auto; display: block; }
-            .sidebar { margin-bottom: 15px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            body {
+                /* Allow scrolling on mobile */
+                overflow-y: auto; 
+                height: auto;
+                display: block;
+            }
+            .container { 
+                grid-template-columns: 1fr; 
+                height: auto; 
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                padding-bottom: 30px;
+                overflow: visible;
+            }
+            .sidebar { 
+                height: auto; 
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            .main-content {
+                height: auto;
+                overflow: visible;
+            }
+            .road-scroll-wrapper {
+                /* Ensure it doesn't get squashed */
+                min-height: 170px;
+                width: 100%;
+            }
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            .chart-box {
+                min-height: 300px;
+            }
         }
     </style>
 </head>
@@ -821,6 +832,3 @@
 </script>
 </body>
 </html>
-
-
-
