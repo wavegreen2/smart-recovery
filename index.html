@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Hybrid Auto Sim V3</title>
+    <title>Baccarat AI: Aggressive V5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
-            --accent: #16a085;
+            --accent: #e74c3c; /* Changed to Red for Aggressive feel */
             --player: #2980b9;
             --banker: #c0392b;
             --tie: #27ae60;
@@ -38,7 +38,7 @@
             width: 100%;
             max-width: 1200px;
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 340px 1fr;
             gap: 15px;
             height: 95vh;
         }
@@ -65,6 +65,44 @@
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #555; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.95rem; box-sizing: border-box; }
         
+        /* DYNAMIC CONFIG TABLE */
+        .dynamic-config-box {
+            background: #f4f6f7;
+            border: 1px solid #d5dbdb;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 10px;
+            display: none; /* Hidden by default */
+        }
+        .dyn-header {
+            display: grid;
+            grid-template-columns: 1fr 60px 60px;
+            gap: 5px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .dyn-row {
+            display: grid;
+            grid-template-columns: 1fr 60px 60px;
+            gap: 5px;
+            margin-bottom: 3px;
+            align-items: center;
+        }
+        .dyn-label { font-size: 0.75rem; color: #34495e; font-weight: 600; }
+        .dyn-input { 
+            width: 100%; padding: 4px; border: 1px solid #bdc3c7; 
+            border-radius: 4px; font-size: 0.85rem; text-align: center; 
+        }
+        .btn-restore {
+            background: transparent; border: 1px dashed #95a5a6; color: #7f8c8d;
+            font-size: 0.7rem; width: 100%; cursor: pointer; padding: 4px;
+            margin-top: 5px; border-radius: 4px;
+        }
+        .btn-restore:hover { background: #e5e8e8; color: var(--primary); }
+
         .monitor-box {
             background: #e8f8f5;
             border: 1px solid #d1f2eb;
@@ -86,7 +124,6 @@
             margin-bottom: 5px;
         }
 
-        /* WARNING FLASH */
         .warn-flash {
             color: var(--danger);
             font-weight: bold;
@@ -96,12 +133,6 @@
             line-height: 1.2;
             border-top: 1px dashed rgba(231, 76, 60, 0.3);
             padding-top: 5px;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
 
         .brain-monitor {
@@ -129,7 +160,6 @@
         .btn-import { background: #34495e; margin-top: 5px; }
         .btn-reset { background: #95a5a6; margin-top: 10px; }
 
-        /* Sim Stats */
         .sim-stats {
             font-size: 0.75rem; color: #555; margin-top: 5px; text-align: center;
             background: #f4ecf7; padding: 5px; border-radius: 4px; border: 1px solid #e8daef;
@@ -308,9 +338,56 @@
             <input type="number" id="init_bank" value="500000">
         </div>
         
-        <div class="form-group" style="display:none;">
-            <label>Divisor (ตัวหาร)</label>
-            <input type="number" id="divisor_val" value="5.0" step="0.01">
+        <!-- STRATEGY SELECTOR: DEFAULT FIXED -->
+        <div class="form-group">
+            <label>รูปแบบการเดินเงิน (Betting Strategy)</label>
+            <select id="divisor_mode" onchange="toggleDivisorInput()">
+                <option value="fixed" selected>🔒 Fixed (ตัวหารคงที่)</option>
+                <option value="dynamic">🌊 Dynamic (Custom)</option>
+            </select>
+        </div>
+
+        <!-- FIXED DIVISOR INPUT: DEFAULT 3.0 -->
+        <div class="form-group" id="fixed_divisor_group">
+            <label>Divisor (ตัวหารคงที่)</label>
+            <input type="number" id="divisor_val" value="3.0" step="0.01">
+        </div>
+
+        <!-- DYNAMIC CONFIG TABLE -->
+        <div id="dynamic_config_group" class="dynamic-config-box">
+            <div class="dyn-header">
+                <span>Level</span>
+                <span>< Units</span>
+                <span>Divisor</span>
+            </div>
+            
+            <div class="dyn-row">
+                <span class="dyn-label">1. Quick</span>
+                <input type="number" id="th_1" value="6" class="dyn-input">
+                <input type="number" id="div_1" value="2.1" class="dyn-input">
+            </div>
+            <div class="dyn-row">
+                <span class="dyn-label">2. Normal</span>
+                <input type="number" id="th_2" value="20" class="dyn-input">
+                <input type="number" id="div_2" value="4.0" class="dyn-input">
+            </div>
+            <div class="dyn-row">
+                <span class="dyn-label">3. Caution</span>
+                <input type="number" id="th_3" value="60" class="dyn-input">
+                <input type="number" id="div_3" value="6.0" class="dyn-input">
+            </div>
+            <div class="dyn-row">
+                <span class="dyn-label">4. Defense</span>
+                <input type="number" id="th_4" value="150" class="dyn-input">
+                <input type="number" id="div_4" value="6.0" class="dyn-input">
+            </div>
+            <div class="dyn-row">
+                <span class="dyn-label">5. Survival</span>
+                <input type="number" id="th_5" value="9999" class="dyn-input" disabled style="background:#eee;">
+                <input type="number" id="div_5" value="6.0" class="dyn-input">
+            </div>
+
+            <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่าแนะนำ (Hybrid Cap 6)</button>
         </div>
 
         <div class="form-group">
@@ -322,16 +399,16 @@
             <input type="number" id="chip_size" value="5">
         </div>
         
-        <!-- NEW FEATURE: LOSS BALANCING -->
+        <!-- LOSS BALANCE: DEFAULT 0.34 -->
         <div class="form-group">
             <label style="color:var(--danger);">⚖️ กระจายความเสี่ยง (Loss Balance)</label>
             <select id="balance_mode">
-                <option value="1">🚫 ปิด (แยกอิสระ)</option>
-                <option value="0.5" selected>🤝 50% (แบ่งเท่ากัน)</option>
+                <option value="0.34" selected>🪶 34% (หนักถือ ~1/3)</option>
+                <option value="0.5">🤝 50% (แบ่งเท่ากัน)</option>
                 <option value="0.66">⚖️ 66% (หนักถือ 2/3)</option>
                 <option value="0.75">🛡️ 75% (หนักถือ 3/4)</option>
-                <option value="0.34">🪶 34% (หนักถือ ~1/3)</option>
                 <option value="0.25">🪶 25% (หนักถือ 1/4)</option>
+                <option value="1">🚫 ปิด (แยกอิสระ)</option>
             </select>
             <div style="font-size:0.65rem; color:#888; margin-top:2px;">*ช่วยเกลี่ยไม้เมื่อฝั่งใดฝั่งหนึ่งเสียหนัก</div>
         </div>
@@ -367,7 +444,6 @@
             <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา (Hands)">
             <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
             
-            <!-- SPEED SELECTOR -->
             <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
             <select id="sim_speed" style="margin-bottom:5px;">
                 <option value="0">🚀 ทันที (Instant - ไม่แสดงผล)</option>
@@ -499,15 +575,57 @@
     let isAutoRunning = false;
     let simRoundCount = 0;
     let simSuccessCount = 0;
-    let autoTimer = null; // Timer ID
+    let autoTimer = null; 
+
+    function toggleDivisorInput() {
+        const mode = document.getElementById('divisor_mode').value;
+        document.getElementById('fixed_divisor_group').style.display = (mode === 'fixed') ? 'block' : 'none';
+        document.getElementById('dynamic_config_group').style.display = (mode === 'dynamic') ? 'block' : 'none';
+        updateUI();
+    }
+
+    function restoreRecommended() {
+        // Hybrid Cap 6 Values
+        document.getElementById('th_1').value = 6; document.getElementById('div_1').value = 2.1;
+        document.getElementById('th_2').value = 20; document.getElementById('div_2').value = 4.0;
+        document.getElementById('th_3').value = 60; document.getElementById('div_3').value = 6.0;
+        document.getElementById('th_4').value = 150; document.getElementById('div_4').value = 6.0;
+        document.getElementById('th_5').value = 9999; document.getElementById('div_5').value = 6.0;
+        updateUI();
+    }
+
+    // --- CORE LOGIC: DYNAMIC DIVISOR (CUSTOM) ---
+    function calculateDivisor(deficit, minBet) {
+        const mode = document.getElementById('divisor_mode').value;
+        
+        if (mode === 'fixed') {
+            return parseFloat(document.getElementById('divisor_val').value);
+        } else {
+            // Dynamic Logic: Read from Inputs
+            let unitsDown = deficit / minBet;
+            
+            const levels = [
+                { th: parseFloat(document.getElementById('th_1').value), div: parseFloat(document.getElementById('div_1').value) },
+                { th: parseFloat(document.getElementById('th_2').value), div: parseFloat(document.getElementById('div_2').value) },
+                { th: parseFloat(document.getElementById('th_3').value), div: parseFloat(document.getElementById('div_3').value) },
+                { th: parseFloat(document.getElementById('th_4').value), div: parseFloat(document.getElementById('div_4').value) },
+                { th: parseFloat(document.getElementById('th_5').value), div: parseFloat(document.getElementById('div_5').value) }
+            ];
+
+            for (let lvl of levels) {
+                if (unitsDown < lvl.th) return lvl.div;
+            }
+            return levels[levels.length-1].div; // Fallback to last
+        }
+    }
 
     function getRawBet(strat, side) {
-        const divisor = parseFloat(document.getElementById('divisor_val').value);
         const minBet = parseFloat(document.getElementById('min_bet').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
         const WAIT_TARGET = 1; 
 
         let bet = 0;
+        let currentDivisor = 0;
 
         if (strat.stage === 1) {
             if (side === 'P') bet = strat.initBet * 2;
@@ -515,14 +633,28 @@
             if (chip > 0) bet = Math.ceil(bet / chip) * chip;
         } 
         else if (strat.wait >= WAIT_TARGET) {
-            let needed = Math.abs(strat.bal) + minBet; 
-            let adjustedDivisor = (side === 'B') ? (divisor * 0.95) : divisor;
-            let raw = Math.ceil(needed / adjustedDivisor);
-            if (chip > 0) raw = Math.ceil(raw / chip) * chip;
-            if (raw < minBet) raw = minBet;
-            bet = raw;
+            let deficit = Math.abs(strat.bal);
+            if (deficit > 0) {
+                // Calculate dynamic divisor based on this specific strategy's deficit
+                let rawDivisor = calculateDivisor(deficit, minBet);
+                
+                // Adjust for Banker commission
+                let adjustedDivisor = (side === 'B') ? (rawDivisor * 0.95) : rawDivisor;
+                
+                let needed = deficit + minBet; 
+                let raw = Math.ceil(needed / adjustedDivisor);
+                
+                if (chip > 0) raw = Math.ceil(raw / chip) * chip;
+                if (raw < minBet) raw = minBet;
+                
+                bet = raw;
+                currentDivisor = rawDivisor; // Store for UI display
+            } else {
+                // No deficit, bet min
+                bet = minBet;
+            }
         }
-        return bet;
+        return { bet: bet, divisor: currentDivisor };
     }
 
     function updateAI(strat, side, isPWin, rawBet) {
@@ -546,30 +678,25 @@
         }
     }
 
-    // --- NEW FUNCTION: LOSS BALANCING ---
     function applyLossBalancing() {
         const mode = document.getElementById('balance_mode').value;
-        if (mode === "1") return; // Disabled
+        if (mode === "1") return; 
 
         let p = state.pStrat.bal;
         let b = state.bStrat.bal;
         
-        // Only apply if total is negative (in debt)
         if (p + b >= 0) return;
 
         let total = p + b;
-        let ratio = parseFloat(mode); // 0.5, 0.66, 0.75, 0.34, 0.25
+        let ratio = parseFloat(mode); 
         
         let targetP, targetB;
 
-        // Logic: The side with MORE loss (lower value) keeps 'ratio' of the total debt
-        // The other side takes the rest.
-        if (p < b) { 
-            // P is heavier (more negative)
+        // Logic: Heavy side keeps 'ratio' of total debt
+        if (p < b) { // P is heavier
             targetP = total * ratio;
             targetB = total * (1 - ratio);
-        } else { 
-            // B is heavier or equal
+        } else { // B is heavier
             targetB = total * ratio;
             targetP = total * (1 - ratio);
         }
@@ -585,8 +712,11 @@
         const unit = parseFloat(document.getElementById('min_bet').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
         
-        const rawP = getRawBet(state.pStrat, 'P');
-        const rawB = getRawBet(state.bStrat, 'B');
+        const pObj = getRawBet(state.pStrat, 'P');
+        const bObj = getRawBet(state.bStrat, 'B');
+        
+        const rawP = pObj.bet;
+        const rawB = bObj.bet;
 
         let netBet = 0;
         let netSide = null;
@@ -631,7 +761,6 @@
         updateAI(state.pStrat, 'P', isPWin, rawP);
         updateAI(state.bStrat, 'B', isPWin, rawB);
 
-        // Apply Balancing HERE
         applyLossBalancing();
 
         state.history.push(res);
@@ -643,7 +772,6 @@
 
         let winTarget = unit + 0.01;
         
-        // Logic: Once hit, stays hit
         if (!state.firstTargetHit) {
             if (state.realBalance < state.preTargetDD) state.preTargetDD = state.realBalance;
             if (state.realBalance >= winTarget) state.firstTargetHit = true;
@@ -664,8 +792,11 @@
         const unit = parseFloat(document.getElementById('min_bet').value);
         const chip = parseFloat(document.getElementById('chip_size').value);
         
-        const nextP = getRawBet(state.pStrat, 'P');
-        const nextB = getRawBet(state.bStrat, 'B');
+        const pObj = getRawBet(state.pStrat, 'P');
+        const bObj = getRawBet(state.bStrat, 'B');
+        
+        const nextP = pObj.bet;
+        const nextB = bObj.bet;
         
         let netAmt = 0;
         let netSide = "NO BET";
@@ -707,10 +838,14 @@
         document.getElementById('formula_disp').innerText = formula;
         document.getElementById('reduced_tag').style.display = isReduced ? 'block' : 'none';
 
+        // Show Divisor in Info
+        let pDivText = pObj.divisor > 0 ? `Div:${pObj.divisor}` : "";
+        let bDivText = bObj.divisor > 0 ? `Div:${bObj.divisor}` : "";
+
         document.getElementById('mon_p_req').innerText = Math.round(state.pStrat.bal).toLocaleString() + " / " + nextP.toLocaleString();
         document.getElementById('mon_b_req').innerText = Math.round(state.bStrat.bal).toLocaleString() + " / " + nextB.toLocaleString();
-        document.getElementById('mon_p_info').innerText = `Wait: ${state.pStrat.wait} | Stg: ${state.pStrat.stage}`;
-        document.getElementById('mon_b_info').innerText = `Wait: ${state.bStrat.wait} | Stg: ${state.bStrat.stage}`;
+        document.getElementById('mon_p_info').innerText = `Wait:${state.pStrat.wait} | Stg:${state.pStrat.stage} ${pDivText}`;
+        document.getElementById('mon_b_info').innerText = `Wait:${state.bStrat.wait} | Stg:${state.bStrat.stage} ${bDivText}`;
 
         const statusElem = document.getElementById('target_status_display');
         
@@ -734,7 +869,6 @@
         document.getElementById('disp_dd_pre').innerText = state.preTargetDD.toLocaleString(undefined, {minimumFractionDigits: 2});
         document.getElementById('disp_bet_pre').innerText = state.preTargetMaxBet.toLocaleString();
 
-        // Update Sim Stats
         document.getElementById('sim_round_count').innerText = simRoundCount;
         document.getElementById('sim_success_count').innerText = simSuccessCount;
 
@@ -862,13 +996,10 @@
         updateUI();
     }
     
-    // --- NEW FUNCTIONS FOR HYBRID AUTO SIM ---
-
     function resetAll() {
         if(confirm("ต้องการรีเซ็ตระบบใช่หรือไม่? (Hard Reset)")) location.reload();
     }
 
-    // Soft Reset: Clears game state but keeps the page alive for continuous sim
     function softReset() {
         state.realBalance = 0;
         state.history = [];
@@ -926,12 +1057,11 @@
             updateUI();
         }
 
-        // Check Mode
         let speed = parseInt(document.getElementById('sim_speed').value);
         if (speed === 0) {
-            runInstantLoop(); // Old style (Background)
+            runInstantLoop(); 
         } else {
-            autoPlayStep(); // New style (Visual)
+            autoPlayStep(); 
         }
     }
 
@@ -940,11 +1070,9 @@
         const STOP_THRESHOLD = unit * 10000;
 
         while(isAutoRunning) {
-            // Generate & Process (Silent mode: isSim=true)
             let res = Math.random() < 0.4932 ? 'P' : 'B';
             processResult(res, true); 
 
-            // Check Stop
             if (state.realBalance <= -STOP_THRESHOLD) {
                 stopAutoSim();
                 updateUI();
@@ -952,13 +1080,11 @@
                 break;
             }
 
-            // Check Win
             if (state.realBalance >= unit + 0.01) {
                 simSuccessCount++;
                 simRoundCount++;
                 softReset();
                 
-                // Update UI occasionally to show progress without freezing
                 if(simSuccessCount % 10 === 0) {
                     updateUI();
                     await new Promise(r => setTimeout(r, 0));
@@ -971,9 +1097,8 @@
         if (!isAutoRunning) return;
 
         let speed = parseInt(document.getElementById('sim_speed').value);
-        if (speed === 0) return; // Should not happen here, but safety check
+        if (speed === 0) return; 
 
-        // Play Hand (Visual mode: isSim=false to trigger UI updates)
         let res = Math.random() < 0.4932 ? 'P' : 'B';
         processResult(res, false);
 
@@ -1030,7 +1155,10 @@
         }
     }
 
-    window.onload = updateUI;
+    window.onload = function() {
+        toggleDivisorInput();
+        updateUI();
+    };
 </script>
 </body>
 </html>
