@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Aggressive V5</title>
+    <title>Baccarat AI: Aggressive V5.1 (Infinite Fixed)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
-            --accent: #e74c3c; /* Changed to Red for Aggressive feel */
+            --accent: #e74c3c; 
             --player: #2980b9;
             --banker: #c0392b;
             --tie: #27ae60;
@@ -434,7 +434,7 @@
             </div>
         </div>
         <div style="font-size: 0.7rem; color: #999; text-align: center; margin-top: 3px;">
-            *Strict Mode: Cap at Target
+            *Infinite Paroli Mode (x2, x4, x8...)
         </div>
 
         <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
@@ -627,10 +627,37 @@
         let bet = 0;
         let currentDivisor = 0;
 
-        if (strat.stage === 1) {
-            if (side === 'P') bet = strat.initBet * 2;
-            else bet = Math.floor(strat.initBet * 1.95); 
+        if (strat.stage >= 1) {
+            // --- INFINITE PAROLI LOGIC ---
+            // Stage 1: init * 2
+            // Stage 2: init * 4
+            // Stage 3: init * 8
+            let multiplier = Math.pow(2, strat.stage);
+            bet = strat.initBet * multiplier;
+            
             if (chip > 0) bet = Math.ceil(bet / chip) * chip;
+
+            // --- SMART CAP: Don't bet more than needed to hit target ---
+            const target = minBet + 0.01;
+            const currentBal = state.realBalance;
+            const gap = target - currentBal;
+            
+            if (gap > 0) {
+                // Calculate max bet allowed to hit target
+                // If Player: Win = Bet. Needed = Gap.
+                // If Banker: Win = Bet * 0.95. Needed = Gap. => Bet = Gap / 0.95
+                let limit = (side === 'P') ? gap : (gap / 0.95);
+                
+                // Round limit to chip size if needed (optional, but safer to just cap raw)
+                if (chip > 0) limit = Math.ceil(limit / chip) * chip;
+                
+                // Ensure limit is at least minBet
+                if (limit < minBet) limit = minBet;
+
+                if (bet > limit) {
+                    bet = limit;
+                }
+            }
         } 
         else if (strat.wait >= WAIT_TARGET) {
             let deficit = Math.abs(strat.bal);
@@ -659,21 +686,29 @@
 
     function updateAI(strat, side, isPWin, rawBet) {
         const isWin = (side === 'P' && isPWin) || (side === 'B' && !isPWin);
+        
         if (isWin) {
             strat.wait++;
-            if (strat.stage === 1) {
-                let profit = (side === 'P') ? (strat.initBet * 3) : (strat.initBet * 0.95 + strat.initBet * 1.95 * 0.95);
-                strat.bal += profit;
-                strat.stage = 0;
-            } else if (rawBet > 0) {
-                strat.initBet = rawBet;
-                strat.stage = 1;
+            
+            // Always credit profit to reduce deficit immediately
+            let profit = (side === 'P') ? rawBet : (rawBet * 0.95);
+            strat.bal += profit;
+
+            if (rawBet > 0) {
+                if (strat.stage === 0) {
+                    // Start new streak
+                    strat.initBet = rawBet;
+                    strat.stage = 1;
+                } else {
+                    // Continue streak (Infinite)
+                    strat.stage++; 
+                }
             }
         } else {
             strat.wait = 0;
             if (rawBet > 0) {
                 strat.bal -= rawBet; 
-                strat.stage = 0;
+                strat.stage = 0; // Reset to recovery mode
             }
         }
     }
