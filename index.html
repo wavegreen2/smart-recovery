@@ -1188,7 +1188,7 @@
         const winTarget = unit + 0.01;
 
         for(let i=0; i<n; i++) {
-            processResult(Math.random() < 0.4932 ? 'P' : 'B', true);
+            processResult(Math.random() < 0.4931751700554462 ? 'P' : 'B', true);
         }
         updateUI();
         if (state.realBalance >= winTarget) {
@@ -1225,7 +1225,7 @@
         const STOP_THRESHOLD = unit * 10;
 
         while(isAutoRunning) {
-            let res = Math.random() < 0.4932 ? 'P' : 'B';
+            let res = Math.random() < 0.4931751700554462 ? 'P' : 'B';
             processResult(res, true); 
 
             if (state.realBalance <= -STOP_THRESHOLD) {
@@ -1261,7 +1261,7 @@
         let speed = parseInt(document.getElementById('sim_speed').value);
         if (speed === 0) return; 
 
-        let res = Math.random() < 0.4932 ? 'P' : 'B';
+        let res = Math.random() < 0.4931751700554462 ? 'P' : 'B';
         processResult(res, false);
 
         const unit = parseFloat(document.getElementById('min_bet').value);
@@ -1330,3 +1330,4 @@
 </script>
 </body>
 </html>
+
