@@ -1102,7 +1102,7 @@
 
     async function runInstantLoop() {
         const unit = parseFloat(document.getElementById('min_bet').value);
-        const STOP_THRESHOLD = unit * 10000;
+        const STOP_THRESHOLD = unit * 100;
 
         while(isAutoRunning) {
             let res = Math.random() < 0.4932 ? 'P' : 'B';
@@ -1138,7 +1138,7 @@
         processResult(res, false);
 
         const unit = parseFloat(document.getElementById('min_bet').value);
-        const STOP_THRESHOLD = unit * 10000;
+        const STOP_THRESHOLD = unit * 100;
 
         if (state.realBalance <= -STOP_THRESHOLD) {
             stopAutoSim();
@@ -1197,4 +1197,3 @@
 </script>
 </body>
 </html>
-
