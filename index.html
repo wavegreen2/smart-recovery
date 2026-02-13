@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Aggressive V5.1 (Clean Fixed)</title>
+    <title>Baccarat AI: Aggressive V5.1 (Stop Loss Fixed)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -20,6 +20,7 @@
             --warning: #f39c12;
             --danger: #e74c3c;
             --auto: #8e44ad;
+            --stoploss: #7f8c8d;
         }
 
         body {
@@ -303,6 +304,7 @@
         
         .btn-modal-ack { background: #27ae60; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .btn-modal-risk { background: #c0392b; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-modal-stoploss { background: var(--stoploss); color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
 
         /* Risk Modal Specifics */
         .risk-stat-box {
@@ -528,9 +530,9 @@
 <div class="modal-overlay" id="winModal">
     <div class="modal-box">
         <div class="modal-icon">🎉</div>
-        <div class="modal-text-th">เป้าหมายสำเร็จ (MinBet + 0.01)<br>ระยะยาวเจ้ามือชนะเสมอ</div>
+        <div class="modal-text-th">เป้าหมายสำเร็จ (MinBet + 0.01)<br>เราพยายามเอาชน่ะเจ้ามือเสมอ</div>
         <div class="modal-email">wavegreen2@gmail.com</div>
-        <div class="modal-text-en">Target Hit. The house always wins in the long run.</div>
+        <div class="modal-text-en">Target Hit. We always try to beat the house..</div>
         <div class="modal-reset-th">แนะนำให้รีเซ็ตระบบ และเริ่มขอนใหม่</div>
         <div class="modal-reset-en">System reset recommended. New shoe, please</div>
         <button class="btn-modal-ack" onclick="closeWinModal()">อ่านแล้ว (Acknowledge)</button>
@@ -561,6 +563,17 @@
     </div>
 </div>
 
+<!-- STOP LOSS MODAL (NEW) -->
+<div class="modal-overlay" id="stopLossModal">
+    <div class="modal-box" style="border-top: 5px solid #7f8c8d;">
+        <div class="modal-icon">🏳️</div>
+        <div class="modal-text-th" style="color:#c0392b; font-size:1.2rem;">แนะนำให้ยอมแพ้ (Cut Loss)</div>
+        <div class="modal-text-th" style="font-size: 1rem; margin-top:10px;">เริ่มขอนใหม่ ระยะยาวเราจะกลับมากำไร</div>
+        <div class="modal-text-en" style="margin-top:5px; color:#555;">I suggest cutting your losses and starting a fresh shoe. We'll be profitable in the long run.</div>
+        <button class="btn-modal-stoploss" onclick="closeStopLossModal()">รับทราบ (Acknowledge)</button>
+    </div>
+</div>
+
 <script>
     let state = {
         realBalance: 0,
@@ -571,6 +584,7 @@
         preTargetDD: 0,
         preTargetMaxBet: 0,
         targetReached: false,
+        stopLossTriggered: false, // NEW FLAG
         pStrat: { bal: 0, wait: 0, stage: 0, initBet: 0 },
         bStrat: { bal: 0, wait: 0, stage: 0, initBet: 0 },
         graphData: [0],
@@ -823,6 +837,12 @@
 
         let roundedBal = Math.round(state.realBalance * 100) / 100;
         
+        // --- STOP LOSS LOGIC ---
+        if (roundedBal <= -30 && !state.stopLossTriggered && !state.firstTargetHit) {
+            showStopLossModal();
+            state.stopLossTriggered = true;
+        }
+
         if (!isSim && roundedBal >= winTarget && !state.targetReached) {
             showWinModal();
             state.targetReached = true; 
@@ -1053,6 +1073,7 @@
         state.preTargetDD = 0;
         state.preTargetMaxBet = 0;
         state.targetReached = false;
+        state.stopLossTriggered = false; // RESET FLAG
         state.pStrat = { bal: 0, wait: 0, stage: 0, initBet: 0 };
         state.bStrat = { bal: 0, wait: 0, stage: 0, initBet: 0 };
         state.graphData = [0];
@@ -1069,6 +1090,10 @@
         document.getElementById('riskModal').style.display = 'flex';
     }
     function closeRiskModal() { document.getElementById('riskModal').style.display = 'none'; }
+
+    // NEW FUNCTIONS FOR STOP LOSS
+    function showStopLossModal() { document.getElementById('stopLossModal').style.display = 'flex'; }
+    function closeStopLossModal() { document.getElementById('stopLossModal').style.display = 'none'; }
 
     function runSimulation() {
         const n = parseInt(document.getElementById('sim_hands').value);
@@ -1124,6 +1149,13 @@
                 break;
             }
 
+            // Stop if Stop Loss Triggered (-30)
+            if (state.stopLossTriggered) {
+                stopAutoSim();
+                updateUI();
+                break;
+            }
+
             if (state.realBalance >= unit + 0.01) {
                 simSuccessCount++;
                 simRoundCount++;
@@ -1152,6 +1184,12 @@
         if (state.realBalance <= -STOP_THRESHOLD) {
             stopAutoSim();
             showRiskModal();
+            return;
+        }
+
+        // Stop if Stop Loss Triggered (-30)
+        if (state.stopLossTriggered) {
+            stopAutoSim();
             return;
         }
 
