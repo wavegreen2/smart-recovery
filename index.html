@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Mobile Fixed</title>
+    <title>Baccarat AI: Fixed Dragon Road</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -30,7 +30,7 @@
             display: flex;
             justify-content: center;
             height: 100vh;
-            overflow: hidden; /* Default for Desktop */
+            overflow: hidden; 
         }
 
         .container {
@@ -52,7 +52,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            height: 100%; /* Ensure full height in grid */
+            height: 100%;
         }
 
         .section-title { 
@@ -64,7 +64,6 @@
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #555; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.95rem; box-sizing: border-box; }
         
-        /* Target Monitor Box */
         .monitor-box {
             background: #e8f8f5;
             border: 1px solid #d1f2eb;
@@ -91,7 +90,6 @@
             100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
 
-        /* Brain Monitor */
         .brain-monitor {
             background: var(--gray-light);
             border: 1px solid #e0e0e0;
@@ -125,7 +123,6 @@
             height: 100%;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -142,7 +139,7 @@
         .stat-label { font-size: 0.65rem; color: #95a5a6; text-transform: uppercase; line-height: 1.2; }
         .stat-value { font-size: 1rem; font-weight: 800; margin-top: 3px; }
 
-        /* --- BIG ROAD STYLE (FIXED FOR MOBILE) --- */
+        /* --- BIG ROAD STYLE --- */
         .road-scroll-wrapper {
             background: var(--card-bg);
             padding: 10px;
@@ -150,24 +147,21 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
             overflow-x: auto;
             overflow-y: hidden;
-            
-            /* FIX: Force height and prevent shrinking */
             height: 170px; 
             min-height: 170px;
             flex-shrink: 0; 
-            
-            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+            -webkit-overflow-scrolling: touch;
             width: 100%;
             box-sizing: border-box;
         }
         
         .big-road-grid {
             display: grid;
-            grid-template-rows: repeat(6, 26px); /* 6 Rows fixed */
-            grid-auto-columns: 26px; /* Columns grow automatically */
+            grid-template-rows: repeat(6, 26px); 
+            grid-auto-columns: 26px; 
             grid-auto-flow: column;
             gap: 1px;
-            min-width: 100%; /* Ensure it fills width */
+            min-width: 100%;
         }
 
         .big-road-cell {
@@ -216,11 +210,10 @@
             background: var(--card-bg); padding: 10px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
             flex-grow: 1; 
-            min-height: 250px; /* Ensure chart has height */
+            min-height: 250px;
             position: relative;
         }
 
-        /* --- POPUP STYLE --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); 
@@ -255,50 +248,20 @@
         
         .btn-modal-ack { background: #27ae60; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
 
-        /* --- MOBILE RESPONSIVE FIXES --- */
         @media (max-width: 768px) {
-            body {
-                /* Allow scrolling on mobile */
-                overflow-y: auto; 
-                height: auto;
-                display: block;
-            }
-            .container { 
-                grid-template-columns: 1fr; 
-                height: auto; 
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-                padding-bottom: 30px;
-                overflow: visible;
-            }
-            .sidebar { 
-                height: auto; 
-                margin-bottom: 0;
-                flex-shrink: 0;
-            }
-            .main-content {
-                height: auto;
-                overflow: visible;
-            }
-            .road-scroll-wrapper {
-                /* Ensure it doesn't get squashed */
-                min-height: 170px;
-                width: 100%;
-            }
-            .stats-grid { 
-                grid-template-columns: repeat(2, 1fr); 
-            }
-            .chart-box {
-                min-height: 300px;
-            }
+            body { overflow-y: auto; height: auto; display: block; }
+            .container { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 30px; overflow: visible; }
+            .sidebar { height: auto; margin-bottom: 0; flex-shrink: 0; }
+            .main-content { height: auto; overflow: visible; }
+            .road-scroll-wrapper { min-height: 170px; width: 100%; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-box { min-height: 300px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="section-title">⚙️ ตั้งค่า (Settings)</div>
         <div class="form-group">
@@ -306,7 +269,6 @@
             <input type="number" id="init_bank" value="500000">
         </div>
         
-        <!-- HIDDEN DIVISOR -->
         <div class="form-group" style="display:none;">
             <label>Divisor (ตัวหาร)</label>
             <input type="number" id="divisor_val" value="3.01" step="0.01">
@@ -320,7 +282,6 @@
             </div>
         </div>
 
-        <!-- TARGET MONITOR -->
         <div class="section-title">🎯 เป้าหมาย (Target)</div>
         <div class="monitor-box">
             <span class="monitor-label">สถานะกำไร</span>
@@ -328,7 +289,6 @@
             <div style="font-size:0.6rem; color:#999; margin-top:2px;">Target: MinBet + 0.01 (Strict)</div>
         </div>
 
-        <!-- BRAIN MONITOR -->
         <div class="section-title">🧠 AI Brain Monitor (Internal)</div>
         <div class="brain-monitor">
             <div class="brain-col">
@@ -356,9 +316,7 @@
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
-        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card profit">
                 <div class="stat-label">กำไรสุทธิ (Net Profit)</div>
@@ -377,7 +335,6 @@
                 <div class="stat-value" id="disp_hands">0</div>
             </div>
             
-            <!-- PRE-TARGET STATS -->
             <div class="stat-card pre">
                 <div class="stat-label">ขาดทุนสูงสุดก่อนเข้าเป้า<br>(Pre-Target DD)</div>
                 <div class="stat-value" id="disp_dd_pre">0</div>
@@ -388,12 +345,10 @@
             </div>
         </div>
 
-        <!-- Road Map (BIG ROAD) -->
         <div class="road-scroll-wrapper">
             <div class="big-road-grid" id="road_container"></div>
         </div>
 
-        <!-- Bet Panel -->
         <div class="bet-panel">
             <div class="offset-formula" id="formula_disp">P(0) - B(0) = 0</div>
             
@@ -408,53 +363,36 @@
             </div>
         </div>
 
-        <!-- Chart -->
         <div class="chart-box">
             <canvas id="profitChart"></canvas>
         </div>
     </div>
 </div>
 
-<!-- POPUP -->
 <div class="modal-overlay" id="winModal">
     <div class="modal-box">
         <div class="modal-icon">🎉</div>
-        
-        <div class="modal-text-th">
-            เป้าหมายสำเร็จ (MinBet + 0.01)<br>ระยะยาวเจ้ามือชนะเสมอ
-        </div>
-        
+        <div class="modal-text-th">เป้าหมายสำเร็จ (MinBet + 0.01)<br>ระยะยาวเจ้ามือชนะเสมอ</div>
         <div class="modal-email">wavegreen2@gmail.com</div>
-        
-        <div class="modal-text-en">
-            Target Hit. The house always wins in the long run.
-        </div>
-        
+        <div class="modal-text-en">Target Hit. The house always wins in the long run.</div>
         <div class="modal-reset-th">แนะนำให้รีเซ็ตระบบ</div>
         <div class="modal-reset-en">Recommend System Reset</div>
-        
         <button class="btn-modal-ack" onclick="closeWinModal()">อ่านแล้ว (Acknowledge)</button>
     </div>
 </div>
 
 <script>
-    // --- STATE & CONFIG ---
     let state = {
         realBalance: 0,
         history: [],
         maxDrawdown: 0,
         maxBet: 0,
-        
-        // Pre-Target Stats
         firstTargetHit: false,
         preTargetDD: 0,
         preTargetMaxBet: 0,
-
         targetReached: false,
-        
         pStrat: { bal: 0, wait: 0, stage: 0, initBet: 0 },
         bStrat: { bal: 0, wait: 0, stage: 0, initBet: 0 },
-        
         graphData: [0],
         graphLabels: [0]
     };
@@ -462,7 +400,6 @@
     let undoStack = [];
     let chartInstance = null;
 
-    // --- LOGIC ---
     function getRawBet(strat, side) {
         const divisor = parseFloat(document.getElementById('divisor_val').value);
         const minBet = parseFloat(document.getElementById('min_bet').value);
@@ -472,7 +409,6 @@
         let bet = 0;
 
         if (strat.stage === 1) {
-            // Aggressive Mode logic
             if (side === 'P') bet = strat.initBet * 2;
             else bet = Math.floor(strat.initBet * 1.95); 
             if (chip > 0) bet = Math.ceil(bet / chip) * chip;
@@ -530,7 +466,6 @@
             netSide = 'B';
         }
 
-        // --- STRICT TARGET REDUCTION LOGIC ---
         const reductionCap = unit + 0.01; 
         let gap = reductionCap - state.realBalance;
         
@@ -545,10 +480,7 @@
                 if (netBet < unit) netBet = unit; 
             }
         }
-        // -----------------------------------
 
-        // --- PRE-TARGET LOGIC (MAX BET) ---
-        // Record MaxBet ONLY if we haven't hit the target yet
         if (!state.firstTargetHit && netBet > 0) {
             if (netBet > state.preTargetMaxBet) state.preTargetMaxBet = netBet;
         }
@@ -573,16 +505,12 @@
         if (state.realBalance < state.maxDrawdown) state.maxDrawdown = state.realBalance;
         if (netBet > state.maxBet) state.maxBet = netBet;
 
-        // --- PRE-TARGET DD CHECK ---
         let winTarget = unit + 0.01;
         if (!state.firstTargetHit) {
             if (state.realBalance < state.preTargetDD) state.preTargetDD = state.realBalance;
-            
-            // Check if we hit the target
             if (state.realBalance >= winTarget) state.firstTargetHit = true;
         }
 
-        // --- POPUP CHECK ---
         let roundedBal = Math.round(state.realBalance * 100) / 100;
         
         if (!isSim && roundedBal >= winTarget && !state.targetReached) {
@@ -621,7 +549,6 @@
             formula = `P(${nextP}) = B(${nextB}) (OFFSET)`;
         }
 
-        // --- STRICT UI REDUCTION DISPLAY ---
         const reductionCap = unit + 0.01; 
         let gap = reductionCap - state.realBalance;
         
@@ -664,13 +591,10 @@
         document.getElementById('disp_maxbet').innerText = state.maxBet.toLocaleString();
         document.getElementById('disp_hands').innerText = state.history.length;
 
-        // Update Pre-Target Stats
         document.getElementById('disp_dd_pre').innerText = state.preTargetDD.toLocaleString(undefined, {minimumFractionDigits: 2});
         document.getElementById('disp_bet_pre').innerText = state.preTargetMaxBet.toLocaleString();
 
-        // --- BIG ROAD RENDER LOGIC ---
         renderBigRoad();
-
         updateChart();
     }
 
@@ -694,13 +618,20 @@
                 lastWinner = res;
             } else {
                 if (res === lastWinner) {
-                    row++;
-                    if (row > 5) {
+                    // Check if we can go down (Standard)
+                    // Condition: Not at bottom AND cell below is empty
+                    let cellBelowTaken = (matrix[col] && matrix[col][row+1] !== undefined);
+                    
+                    if (row < 5 && !cellBelowTaken) {
+                        row++;
+                    } else {
+                        // DRAGON TAIL LOGIC: Go Right
                         col++;
-                        row = 0;
+                        // Row stays the same (usually 5, or wherever the collision happened)
                     }
                     setCell(col, row, res);
                 } else {
+                    // New Winner -> New Column, Reset Row
                     col++;
                     row = 0;
                     setCell(col, row, res);
