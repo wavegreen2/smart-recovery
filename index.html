@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Aggressive V5.1 (Infinite Fixed)</title>
+    <title>Baccarat AI: Aggressive V5.1 (Clean Fixed)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -338,57 +338,75 @@
             <input type="number" id="init_bank" value="500000">
         </div>
         
-        <!-- STRATEGY SELECTOR: DEFAULT FIXED -->
-        <div class="form-group">
-            <label>รูปแบบการเดินเงิน (Betting Strategy)</label>
-            <select id="divisor_mode" onchange="toggleDivisorInput()">
-                <option value="fixed" selected>🔒 Fixed (ตัวหารคงที่)</option>
-                <option value="dynamic">🌊 Dynamic (Custom)</option>
-            </select>
-        </div>
-
-        <!-- FIXED DIVISOR INPUT: DEFAULT 3.0 -->
-        <div class="form-group" id="fixed_divisor_group">
-            <label>Divisor (ตัวหารคงที่)</label>
-            <input type="number" id="divisor_val" value="3.0" step="0.01">
-        </div>
-
-        <!-- DYNAMIC CONFIG TABLE -->
-        <div id="dynamic_config_group" class="dynamic-config-box">
-            <div class="dyn-header">
-                <span>Level</span>
-                <span>< Units</span>
-                <span>Divisor</span>
-            </div>
-            
-            <div class="dyn-row">
-                <span class="dyn-label">1. Quick</span>
-                <input type="number" id="th_1" value="6" class="dyn-input">
-                <input type="number" id="div_1" value="2.1" class="dyn-input">
-            </div>
-            <div class="dyn-row">
-                <span class="dyn-label">2. Normal</span>
-                <input type="number" id="th_2" value="20" class="dyn-input">
-                <input type="number" id="div_2" value="4.0" class="dyn-input">
-            </div>
-            <div class="dyn-row">
-                <span class="dyn-label">3. Caution</span>
-                <input type="number" id="th_3" value="60" class="dyn-input">
-                <input type="number" id="div_3" value="6.0" class="dyn-input">
-            </div>
-            <div class="dyn-row">
-                <span class="dyn-label">4. Defense</span>
-                <input type="number" id="th_4" value="150" class="dyn-input">
-                <input type="number" id="div_4" value="6.0" class="dyn-input">
-            </div>
-            <div class="dyn-row">
-                <span class="dyn-label">5. Survival</span>
-                <input type="number" id="th_5" value="9999" class="dyn-input" disabled style="background:#eee;">
-                <input type="number" id="div_5" value="6.0" class="dyn-input">
+        <!-- HIDDEN CONFIGURATION SECTION -->
+        <div style="display: none;">
+            <!-- STRATEGY SELECTOR: DEFAULT FIXED -->
+            <div class="form-group">
+                <label>รูปแบบการเดินเงิน (Betting Strategy)</label>
+                <select id="divisor_mode" onchange="toggleDivisorInput()">
+                    <option value="fixed" selected>🔒 Fixed (ตัวหารคงที่)</option>
+                    <option value="dynamic">🌊 Dynamic (Custom)</option>
+                </select>
             </div>
 
-            <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่าแนะนำ (Hybrid Cap 6)</button>
+            <!-- FIXED DIVISOR INPUT: DEFAULT 3.0 -->
+            <div class="form-group" id="fixed_divisor_group">
+                <label>Divisor (ตัวหารคงที่)</label>
+                <input type="number" id="divisor_val" value="3.0" step="0.01">
+            </div>
+
+            <!-- DYNAMIC CONFIG TABLE -->
+            <div id="dynamic_config_group" class="dynamic-config-box">
+                <div class="dyn-header">
+                    <span>Level</span>
+                    <span>< Units</span>
+                    <span>Divisor</span>
+                </div>
+                
+                <div class="dyn-row">
+                    <span class="dyn-label">1. Quick</span>
+                    <input type="number" id="th_1" value="6" class="dyn-input">
+                    <input type="number" id="div_1" value="2.1" class="dyn-input">
+                </div>
+                <div class="dyn-row">
+                    <span class="dyn-label">2. Normal</span>
+                    <input type="number" id="th_2" value="20" class="dyn-input">
+                    <input type="number" id="div_2" value="4.0" class="dyn-input">
+                </div>
+                <div class="dyn-row">
+                    <span class="dyn-label">3. Caution</span>
+                    <input type="number" id="th_3" value="60" class="dyn-input">
+                    <input type="number" id="div_3" value="6.0" class="dyn-input">
+                </div>
+                <div class="dyn-row">
+                    <span class="dyn-label">4. Defense</span>
+                    <input type="number" id="th_4" value="150" class="dyn-input">
+                    <input type="number" id="div_4" value="6.0" class="dyn-input">
+                </div>
+                <div class="dyn-row">
+                    <span class="dyn-label">5. Survival</span>
+                    <input type="number" id="th_5" value="9999" class="dyn-input" disabled style="background:#eee;">
+                    <input type="number" id="div_5" value="6.0" class="dyn-input">
+                </div>
+
+                <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่าแนะนำ (Hybrid Cap 6)</button>
+            </div>
+
+            <!-- LOSS BALANCE: DEFAULT 0.34 -->
+            <div class="form-group">
+                <label style="color:var(--danger);">⚖️ กระจายความเสี่ยง (Loss Balance)</label>
+                <select id="balance_mode">
+                    <option value="0.34" selected>🪶 34% (หนักถือ ~1/3)</option>
+                    <option value="0.5">🤝 50% (แบ่งเท่ากัน)</option>
+                    <option value="0.66">⚖️ 66% (หนักถือ 2/3)</option>
+                    <option value="0.75">🛡️ 75% (หนักถือ 3/4)</option>
+                    <option value="0.25">🪶 25% (หนักถือ 1/4)</option>
+                    <option value="1">🚫 ปิด (แยกอิสระ)</option>
+                </select>
+                <div style="font-size:0.65rem; color:#888; margin-top:2px;">*ช่วยเกลี่ยไม้เมื่อฝั่งใดฝั่งหนึ่งเสียหนัก</div>
+            </div>
         </div>
+        <!-- END HIDDEN SECTION -->
 
         <div class="form-group">
             <label>เดิมพันขั้นต่ำ (Min Bet / Unit)</label>
@@ -399,20 +417,6 @@
             <input type="number" id="chip_size" value="1">
         </div>
         
-        <!-- LOSS BALANCE: DEFAULT 0.34 -->
-        <div class="form-group">
-            <label style="color:var(--danger);">⚖️ กระจายความเสี่ยง (Loss Balance)</label>
-            <select id="balance_mode">
-                <option value="0.34" selected>🪶 34% (หนักถือ ~1/3)</option>
-                <option value="0.5">🤝 50% (แบ่งเท่ากัน)</option>
-                <option value="0.66">⚖️ 66% (หนักถือ 2/3)</option>
-                <option value="0.75">🛡️ 75% (หนักถือ 3/4)</option>
-                <option value="0.25">🪶 25% (หนักถือ 1/4)</option>
-                <option value="1">🚫 ปิด (แยกอิสระ)</option>
-            </select>
-            <div style="font-size:0.65rem; color:#888; margin-top:2px;">*ช่วยเกลี่ยไม้เมื่อฝั่งใดฝั่งหนึ่งเสียหนัก</div>
-        </div>
-
         <div class="section-title">🎯 เป้าหมาย (Target)</div>
         <div class="monitor-box">
             <span class="monitor-label">สถานะกำไร (Status)</span>
@@ -444,21 +448,26 @@
             <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา (Hands)">
             <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
             
-            <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
-            <select id="sim_speed" style="margin-bottom:5px;">
-                <option value="0">🚀 ทันที (Instant - ไม่แสดงผล)</option>
-                <option value="500" selected>🐇 ปานกลาง (0.5 วินาที/ตา)</option>
-                <option value="10">⚡ เร็วมาก (0.01 วินาที/ตา)</option>
-                <option value="1000">🐢 ช้า (1 วินาที/ตา)</option>
-            </select>
+            <!-- HIDDEN MENUS START -->
+            <div style="display:none;">
+                <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
+                <select id="sim_speed" style="margin-bottom:5px;">
+                    <option value="0">🚀 ทันที (Instant - ไม่แสดงผล)</option>
+                    <option value="500" selected>🐇 ปานกลาง (0.5 วินาที/ตา)</option>
+                    <option value="10">⚡ เร็วมาก (0.01 วินาที/ตา)</option>
+                    <option value="1000">🐢 ช้า (1 วินาที/ตา)</option>
+                </select>
 
-            <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 จำลองต่อเนื่อง (Auto Sim)</button>
-            <button class="btn-action btn-stop" id="btn_stop_sim" onclick="stopAutoSim()">⏹ หยุด (STOP)</button>
-            <div id="sim_stats_display" class="sim-stats">
-                รอบที่ (Round): <span id="sim_round_count">0</span><br>
-                รีเซ็ตสำเร็จ: <span id="sim_success_count" style="color:green; font-weight:bold;">0</span>
+                <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 จำลองต่อเนื่อง (Auto Sim)</button>
+                <button class="btn-action btn-stop" id="btn_stop_sim" onclick="stopAutoSim()">⏹ หยุด (STOP)</button>
+                <div id="sim_stats_display" class="sim-stats">
+                    รอบที่ (Round): <span id="sim_round_count">0</span><br>
+                    รีเซ็ตสำเร็จ: <span id="sim_success_count" style="color:green; font-weight:bold;">0</span>
+                </div>
+                <button class="btn-action btn-import" onclick="importLogs()">📥 นำเข้าข้อมูล (Import Logs)</button>
             </div>
-            <button class="btn-action btn-import" onclick="importLogs()">📥 นำเข้าข้อมูล (Import Logs)</button>
+            <!-- HIDDEN MENUS END -->
+
         </div>
     </div>
 
@@ -522,8 +531,8 @@
         <div class="modal-text-th">เป้าหมายสำเร็จ (MinBet + 0.01)<br>ระยะยาวเจ้ามือชนะเสมอ</div>
         <div class="modal-email">wavegreen2@gmail.com</div>
         <div class="modal-text-en">Target Hit. The house always wins in the long run.</div>
-        <div class="modal-reset-th">แนะนำให้รีเซ็ตระบบ</div>
-        <div class="modal-reset-en">Recommend System Reset</div>
+        <div class="modal-reset-th">แนะนำให้รีเซ็ตระบบ และเริ่มขอนใหม่</div>
+        <div class="modal-reset-en">System reset recommended. New shoe, please</div>
         <button class="btn-modal-ack" onclick="closeWinModal()">อ่านแล้ว (Acknowledge)</button>
     </div>
 </div>
@@ -887,7 +896,7 @@
         if (state.firstTargetHit) {
             statusElem.innerHTML = `
                 <span class='status-done'>เป้าหมายแตก (DONE)</span>
-                <div class='warn-flash'>แนะนำให้รีเซ็ตระบบ<br>Recommend System Reset</div>
+                <div class='warn-flash'>แนะนำให้รีเซ็ตระบบ และเริ่มขอนใหม่<br>System reset recommended. New shoe, please.</div>
             `;
         } else {
             statusElem.innerText = "กำลังดำเนินการ...";
@@ -1197,4 +1206,3 @@
 </script>
 </body>
 </html>
-
