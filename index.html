@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Ultimate V3.1 (Target Cycle)</title>
+    <title>Baccarat AI: Ultimate V3.2 (Sniper Fixed)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -107,7 +107,7 @@
     <div class="sidebar">
         <!-- Header Title -->
         <div class="section-title" style="justify-content: center; border-bottom: none;">
-            <span class="badge-ult" style="font-size: 0.8rem; padding: 5px 10px;">V3.1 TARGET CYCLE</span>
+            <span class="badge-ult" style="font-size: 0.8rem; padding: 5px 10px;">V3.2 SNIPER MODE</span>
         </div>
 
         <!-- MOVED: Simulation Tools (Top) -->
@@ -145,6 +145,7 @@
             <div class="form-group">
                 <label>Reset Cycle if Profit >=</label>
                 <input type="number" id="target_profit" value="1" placeholder="เช่น 20 หน่วย">
+                <div style="font-size:0.65rem; color:#16a085; margin-top:2px;">*ระบบจะปรับลดเงินเดิมพันอัตโนมัติเมื่อใกล้ถึงเป้า (Sniper Mode)</div>
             </div>
         </div>
 
@@ -221,7 +222,7 @@
             <input type="number" id="min_bet" value="1">
         </div>
 
-        <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า Ultimate V3.1</button>
+        <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า Ultimate V3.2</button>
 
         <div class="section-title">🎯 สถานะ (Status)</div>
         <div class="monitor-box">
@@ -444,6 +445,31 @@
         return count;
     }
 
+    // --- V3.2 SNIPER LOGIC ---
+    function applyTargetSniper(betAmount, side) {
+        const targetProfit = parseFloat(document.getElementById('target_profit').value);
+        const minBet = parseFloat(document.getElementById('min_bet').value);
+        
+        if (targetProfit <= 0) return betAmount; // Feature disabled
+        
+        const currentCycleProfit = state.realBalance - state.cycleStartBalance;
+        const needed = targetProfit - currentCycleProfit;
+        
+        // If we are close to target (needed > 0) and the bet is larger than what we need
+        if (needed > 0 && betAmount > needed) {
+            let capped = needed;
+            // If Banker, we need to bet slightly more to cover 5% commission
+            if (side === 'B' || side === 'BANKER') {
+                capped = needed / 0.95;
+            }
+            capped = Math.ceil(capped);
+            
+            // Ensure we don't go below min bet
+            return Math.max(capped, minBet);
+        }
+        return betAmount;
+    }
+
     function processResult(res, isSim = false) {
         if (!isSim) saveState();
         const isPWin = (res === 'P');
@@ -487,6 +513,11 @@
             let systemBet = Math.max(rawP, rawB);
             netSide = trendSide;
             netBet = systemBet;
+        }
+
+        // --- V3.2 Apply Sniper Cap (Before Bet) ---
+        if (netBet > 0) {
+            netBet = applyTargetSniper(netBet, netSide);
         }
 
         if (netBet > maxBetCap) netBet = maxBetCap;
@@ -605,6 +636,15 @@
             netAmt = systemBet;
             sideClass = trendSide === 'PLAYER' ? 'side-p' : 'side-b';
             formula = `${stratMode === 'anti_last' ? 'Anti' : 'Follow'} Last`;
+        }
+
+        // --- V3.2 UI Display Sniper Cap ---
+        let originalAmt = netAmt;
+        if (netAmt > 0) {
+            netAmt = applyTargetSniper(netAmt, netSide);
+        }
+        if (originalAmt > netAmt) {
+            formula += " [Sniper Active]";
         }
 
         if (netAmt > maxBetCap) netAmt = maxBetCap;
@@ -763,7 +803,6 @@
             let cycleProfit = state.realBalance - state.cycleStartBalance;
             if (targetProfit > 0 && cycleProfit >= targetProfit) {
                 simSuccessCount++; simRoundCount++; 
-                // In sim, we might want to hard reset to track "Win Rate per session"
                 softReset(); 
                 if(simSuccessCount % 10 === 0) { updateUI(); await new Promise(r => setTimeout(r, 0)); }
             }
@@ -783,8 +822,6 @@
         if (document.getElementById('winModal').style.display === 'flex') {
              closeWinModal();
              simSuccessCount++; simRoundCount++; 
-             // In auto play, we continue with the cycle reset logic inside processResult
-             // But for stats tracking, we can increment here
              updateUI();
         }
         
