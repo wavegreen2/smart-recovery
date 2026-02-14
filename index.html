@@ -105,10 +105,30 @@
 
 <div class="container">
     <div class="sidebar">
-        <div class="section-title">
-            <span>⚙️ ตั้งค่า (Settings)</span>
-            <span class="badge-ult">V3.1 TARGET CYCLE</span>
+        <!-- Header Title -->
+        <div class="section-title" style="justify-content: center; border-bottom: none;">
+            <span class="badge-ult" style="font-size: 0.8rem; padding: 5px 10px;">V3.1 TARGET CYCLE</span>
         </div>
+
+        <!-- MOVED: Simulation Tools (Top) -->
+        <div class="section-title">🧪 จำลองผล (Simulation)</div>
+        <div class="form-group">
+            <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา (Hands)">
+            <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
+            <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
+            <select id="sim_speed" style="margin-bottom:5px;">
+                <option value="0">🚀 ทันที (Instant)</option>
+                <option value="100" selected>⚡ เร็ว (Fast)</option>
+            </select>
+            <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 จำลองต่อเนื่อง (Auto Sim)</button>
+            <button class="btn-action btn-stop" id="btn_stop_sim" onclick="stopAutoSim()">⏹ หยุด (STOP)</button>
+            <div id="sim_stats_display" class="sim-stats" style="display:none; font-size:0.75rem; text-align:center; margin-top:5px;">
+                รอบที่: <span id="sim_round_count">0</span> | สำเร็จ: <span id="sim_success_count" style="color:green;">0</span>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="section-title">⚙️ ตั้งค่า (Settings)</div>
         
         <div class="form-group">
             <label>โหมดกลยุทธ์ (Strategy Mode)</label>
@@ -124,7 +144,7 @@
             <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
             <div class="form-group">
                 <label>Reset Cycle if Profit >=</label>
-                <input type="number" id="target_profit" value="25" placeholder="เช่น 20 หน่วย">
+                <input type="number" id="target_profit" value="1" placeholder="เช่น 20 หน่วย">
             </div>
         </div>
 
@@ -231,22 +251,6 @@
         </div>
 
         <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
-
-        <div class="section-title">🧪 เครื่องมือ (Tools)</div>
-        <div class="form-group">
-            <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา (Hands)">
-            <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
-            <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
-            <select id="sim_speed" style="margin-bottom:5px;">
-                <option value="0">🚀 ทันที (Instant)</option>
-                <option value="100" selected>⚡ เร็ว (Fast)</option>
-            </select>
-            <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 จำลองต่อเนื่อง (Auto Sim)</button>
-            <button class="btn-action btn-stop" id="btn_stop_sim" onclick="stopAutoSim()">⏹ หยุด (STOP)</button>
-            <div id="sim_stats_display" class="sim-stats" style="display:none; font-size:0.75rem; text-align:center; margin-top:5px;">
-                รอบที่: <span id="sim_round_count">0</span> | สำเร็จ: <span id="sim_success_count" style="color:green;">0</span>
-            </div>
-        </div>
     </div>
 
     <div class="main-content">
@@ -342,7 +346,7 @@
         document.getElementById('strat_mode').value = "offset";
         
         // V3.1 Defaults
-        document.getElementById('target_profit').value = 25; // Default Target
+        document.getElementById('target_profit').value = 1; // Default Target
         document.getElementById('trail_start').value = 11;
         document.getElementById('trail_drop').value = 17.3;
         document.getElementById('chaos_limit').value = 5;
