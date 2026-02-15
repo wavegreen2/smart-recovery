@@ -359,17 +359,17 @@
 
     <div class="form-group">
       <label>เงินทุน (Bankroll)</label>
-      <input type="number" id="init_bank" value="5000000">
+      <input type="number" id="init_bank" value="10000">
     </div>
 
     <div class="form-group">
       <label>Stop Loss (Reset Threshold)</label>
-      <input type="number" id="stop_loss" value="10605" style="color:var(--danger); font-weight:bold;">
+      <input type="number" id="stop_loss" value="10000" style="color:var(--danger); font-weight:bold;">
     </div>
 
     <div class="form-group">
       <label>Max Bet Cap (7.1% of Capital)</label>
-      <input type="number" id="max_bet_cap" value="71000">
+      <input type="number" id="max_bet_cap" value="10000">
     </div>
 
     <div class="form-group">
@@ -812,7 +812,7 @@ A=1, 2-9=ตามเลข, 10/J/Q/K=10
   }
 
   function restoreRecommended() {
-    document.getElementById('init_bank').value = 5000000;
+    document.getElementById('init_bank').value = 10000;
     document.getElementById('strat_mode').value = "offset";
     document.getElementById('min_bet').value = 5;
     document.getElementById('chip_size').value = 5;
@@ -823,9 +823,9 @@ A=1, 2-9=ตามเลข, 10/J/Q/K=10
     document.getElementById('surv_trigger').value = 46;
     document.getElementById('surv_div').value = 2.04;
     document.getElementById('dragon_limit').value = 7;
-    document.getElementById('max_bet_cap').value = 71000;
+    document.getElementById('max_bet_cap').value = 10000;
     document.getElementById('rebalance_val').value = 4.62;
-    document.getElementById('stop_loss').value = 10605;
+    document.getElementById('stop_loss').value = 10000;
 
     // FIX: ค่าเริ่มต้นเป็น Shoe
     document.getElementById('rng_method').value = 'shoe';
