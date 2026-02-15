@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Ultimate V3.3 (Original Values)</title>
+    <title>Baccarat AI: Ultimate V3.3 (Dual Sim Fixed)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -110,13 +110,13 @@
             <span class="badge-ult" style="font-size: 0.8rem; padding: 5px 10px;">V3.3 REAL CHIP MODE</span>
         </div>
 
-        <!-- MOVED: Simulation Tools (Top) -->
-        <div class="section-title">🧪 จำลองผล (Simulation)</div>
+        <!-- Simulation Tools (Top) -->
+        <div class="section-title">🧪 จำลองผล (Top)</div>
         <div class="form-group">
-            <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา (Hands)">
+            <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา (Hands)" oninput="syncSimSettings('top')">
             <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
             <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
-            <select id="sim_speed" style="margin-bottom:5px;">
+            <select id="sim_speed" style="margin-bottom:5px;" onchange="syncSimSettings('top')">
                 <option value="0">🚀 ทันที (Instant)</option>
                 <option value="20" selected>⚡ เร็ว (Fast)</option>
             </select>
@@ -257,6 +257,23 @@
             </div>
         </div>
 
+        <!-- Simulation Tools (Bottom) - NEW ADDITION -->
+        <div class="section-title">🧪 จำลองผล (Bottom)</div>
+        <div class="form-group">
+            <input type="number" id="sim_hands_bot" value="1" placeholder="จำนวนตา (Hands)" oninput="syncSimSettings('bot')">
+            <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
+            <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
+            <select id="sim_speed_bot" style="margin-bottom:5px;" onchange="syncSimSettings('bot')">
+                <option value="0">🚀 ทันที (Instant)</option>
+                <option value="20" selected>⚡ เร็ว (Fast)</option>
+            </select>
+            <button class="btn-action btn-auto" id="btn_auto_sim_bot" onclick="toggleAutoSim()">🚀 จำลองต่อเนื่อง (Auto Sim)</button>
+            <button class="btn-action btn-stop" id="btn_stop_sim_bot" onclick="stopAutoSim()">⏹ หยุด (STOP)</button>
+            <div id="sim_stats_display_bot" class="sim-stats" style="display:none; font-size:0.75rem; text-align:center; margin-top:5px;">
+                รอบที่: <span id="sim_round_count_bot">0</span> | สำเร็จ: <span id="sim_success_count_bot" style="color:green;">0</span>
+            </div>
+        </div>
+
         <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
     </div>
 
@@ -334,7 +351,7 @@
     let state = { 
         realBalance: 0, history: [], maxDrawdown: 0, maxBet: 0, 
         highWaterMark: 0, targetReached: false, survivalActive: false,
-        cycleStartBalance: 0, // V3.1: Track start of current cycle
+        cycleStartBalance: 0,
         pStrat: { bal: 0, wait: 0, stage: 0, initBet: 0, cons_loss: 0 }, 
         bStrat: { bal: 0, wait: 0, stage: 0, initBet: 0, cons_loss: 0 }, 
         graphData: [0], graphLabels: [0] 
@@ -348,13 +365,23 @@
 
     const DEFAULT_DIVISOR = 2.0;
 
+    // --- New Sync Function for Top/Bottom controls ---
+    function syncSimSettings(source) {
+        if (source === 'top') {
+            document.getElementById('sim_hands_bot').value = document.getElementById('sim_hands').value;
+            document.getElementById('sim_speed_bot').value = document.getElementById('sim_speed').value;
+        } else {
+            document.getElementById('sim_hands').value = document.getElementById('sim_hands_bot').value;
+            document.getElementById('sim_speed').value = document.getElementById('sim_speed_bot').value;
+        }
+    }
+
     function restoreRecommended() {
         document.getElementById('init_bank').value = 5000000;
         document.getElementById('strat_mode').value = "offset";
         
-        // V3.3 Defaults (Restored to V3.2 Values)
         document.getElementById('min_bet').value = 5;
-        document.getElementById('chip_size').value = 5; // Default Chip = Min Bet
+        document.getElementById('chip_size').value = 5;
         document.getElementById('target_profit').value = 1; 
         document.getElementById('trail_start').value = 11;
         document.getElementById('trail_drop').value = 17.3;
@@ -369,14 +396,10 @@
         updateUI();
     }
 
-    // --- V3.3 Chip Rounding Helper ---
     function roundToChip(val) {
         const chip = parseFloat(document.getElementById('chip_size').value) || 1;
         const min = parseFloat(document.getElementById('min_bet').value);
         if (val <= 0) return 0;
-        
-        // Ceiling Rounding: Always ensure we bet enough to cover the calculated requirement
-        // e.g., if calc is 12 and chip is 10 -> bet 20.
         let rounded = Math.ceil(val / chip) * chip;
         return Math.max(min, rounded);
     }
@@ -418,13 +441,11 @@
                 let div = calculateDivisor(deficit, minBet);
                 div = div * Math.pow(1.04, strat.cons_loss || 0);
                 let needed = deficit + minBet;
-                bet = needed / div; // Keep raw for now
+                bet = needed / div; 
             } else {
                 bet = minBet;
             }
         }
-        
-        // V3.3: Apply Chip Rounding here to ensure internal logic respects real chips
         return roundToChip(bet);
     }
 
@@ -466,7 +487,6 @@
         return count;
     }
 
-    // --- V3.2 SNIPER LOGIC (Updated for V3.3 Chips) ---
     function applyTargetSniper(betAmount, side) {
         const targetProfit = parseFloat(document.getElementById('target_profit').value);
         const minBet = parseFloat(document.getElementById('min_bet').value);
@@ -477,15 +497,12 @@
         const currentCycleProfit = state.realBalance - state.cycleStartBalance;
         const needed = targetProfit - currentCycleProfit;
         
-        // If we are close to target (needed > 0) and the bet is larger than what we need
         if (needed > 0 && betAmount > needed) {
             let capped = needed;
             if (side === 'B' || side === 'BANKER') {
                 capped = needed / 0.95;
             }
-            // V3.3: Ensure capped amount is also a valid chip multiple
             capped = Math.ceil(capped / chipSize) * chipSize;
-            
             return Math.max(capped, minBet);
         }
         return betAmount;
@@ -494,14 +511,12 @@
     function processResult(res, isSim = false) {
         if (!isSim) saveState();
         const isPWin = (res === 'P');
-        const unit = parseFloat(document.getElementById('min_bet').value);
         const stratMode = document.getElementById('strat_mode').value;
         const maxBetCap = parseFloat(document.getElementById('max_bet_cap').value);
         const chaosLimit = parseInt(document.getElementById('chaos_limit').value);
         const dragonLimit = parseInt(document.getElementById('dragon_limit').value);
         const targetProfit = parseFloat(document.getElementById('target_profit').value);
 
-        // 1. Check Filters
         let chaosCount = checkChaos();
         let dragonCount = checkDragon();
         let isChaos = chaosCount >= chaosLimit;
@@ -515,11 +530,9 @@
             return; 
         }
 
-        // 2. Calculate AI Bets (Already Rounded by getRawBet)
         const rawP = getRawBet(state.pStrat, 'P');
         const rawB = getRawBet(state.bStrat, 'B');
 
-        // 3. Strategy Logic
         let netBet = 0, netSide = null;
 
         if (stratMode === 'offset') {
@@ -536,27 +549,22 @@
             netBet = systemBet;
         }
 
-        // V3.3: Ensure Net Bet is also Chip Compliant (Offset might create non-compliant diffs)
         if (netBet > 0) netBet = roundToChip(netBet);
 
-        // --- V3.2 Apply Sniper Cap (Before Bet) ---
         if (netBet > 0) {
             netBet = applyTargetSniper(netBet, netSide);
         }
 
         if (netBet > maxBetCap) netBet = maxBetCap;
 
-        // 5. Execute Bet
         if (netBet > 0) {
             if (netSide === 'P') state.realBalance += isPWin ? netBet : -netBet;
             else state.realBalance += !isPWin ? (netBet * 0.95) : -netBet;
         }
 
-        // 6. Update AI Internal State
         updateAI(state.pStrat, 'P', isPWin, rawP);
         updateAI(state.bStrat, 'B', isPWin, rawB);
 
-        // 7. Dynamic Rebalance
         const rebalanceVal = parseFloat(document.getElementById('rebalance_val').value);
         if (Math.abs(state.pStrat.bal - state.bStrat.bal) > 100) {
             let avg = (state.pStrat.bal + state.bStrat.bal) / 2;
@@ -571,25 +579,20 @@
         if (state.realBalance < state.maxDrawdown) state.maxDrawdown = state.realBalance;
         if (netBet > state.maxBet) state.maxBet = netBet;
 
-        // --- V3.1 LOGIC: TARGET PROFIT & TRAILING STOP ---
-        
-        // A. Target Profit Check (Priority)
         let cycleProfit = state.realBalance - state.cycleStartBalance;
         
         if (targetProfit > 0 && cycleProfit >= targetProfit) {
             if (!isSim && !state.targetReached) {
-                showWinModal(false, cycleProfit); // false = Target Hit
+                showWinModal(false, cycleProfit);
                 state.targetReached = true;
             }
-            // RESET CYCLE
             state.pStrat = { bal: 0, wait: 0, stage: 0, initBet: 0, cons_loss: 0 };
             state.bStrat = { bal: 0, wait: 0, stage: 0, initBet: 0, cons_loss: 0 };
-            state.cycleStartBalance = state.realBalance; // Set new baseline
-            state.highWaterMark = state.realBalance; // Reset HWM for trailing
-            state.targetReached = false; // Allow next trigger
+            state.cycleStartBalance = state.realBalance; 
+            state.highWaterMark = state.realBalance; 
+            state.targetReached = false; 
         }
         
-        // B. Trailing Stop Check (Secondary)
         const trailStart = parseFloat(document.getElementById('trail_start').value);
         const trailDrop = parseFloat(document.getElementById('trail_drop').value);
         
@@ -601,14 +604,13 @@
             let cutLine = state.highWaterMark * (1 - (trailDrop / 100));
             if (state.realBalance <= cutLine) {
                 if (!state.targetReached) {
-                    showWinModal(true, 0); // true = Trailing
+                    showWinModal(true, 0); 
                     state.targetReached = true;
                 }
-                // Bet Reduction
                 state.pStrat = { bal: 0, wait: 0, stage: 0, initBet: 0, cons_loss: 0 };
                 state.bStrat = { bal: 0, wait: 0, stage: 0, initBet: 0, cons_loss: 0 };
                 state.highWaterMark = state.realBalance;
-                state.cycleStartBalance = state.realBalance; // Also reset cycle baseline on trailing stop
+                state.cycleStartBalance = state.realBalance;
                 state.targetReached = false; 
             }
         }
@@ -617,7 +619,6 @@
     }
 
     function updateUI() {
-        const unit = parseFloat(document.getElementById('min_bet').value);
         const stratMode = document.getElementById('strat_mode').value;
         const maxBetCap = parseFloat(document.getElementById('max_bet_cap').value);
         const chaosLimit = parseInt(document.getElementById('chaos_limit').value);
@@ -661,10 +662,8 @@
             formula = `${stratMode === 'anti_last' ? 'Anti' : 'Follow'} Last`;
         }
 
-        // V3.3: Ensure UI also shows rounded chips
         if (netAmt > 0) netAmt = roundToChip(netAmt);
 
-        // --- V3.2 UI Display Sniper Cap ---
         let originalAmt = netAmt;
         if (netAmt > 0) {
             netAmt = applyTargetSniper(netAmt, netSide);
@@ -688,7 +687,6 @@
         const statusElem = document.getElementById('target_status_display');
         statusElem.innerText = `${state.realBalance.toFixed(2)} / ${state.highWaterMark.toFixed(2)}`;
         
-        // Cycle Profit Display
         let cycleProfit = state.realBalance - state.cycleStartBalance;
         let targetProfit = parseFloat(document.getElementById('target_profit').value);
         document.getElementById('cycle_profit_disp').innerText = `${cycleProfit.toFixed(2)} / ${targetProfit}`;
@@ -710,8 +708,11 @@
         if (state.survivalActive) document.getElementById('survival_box').classList.add('survival-active');
         else document.getElementById('survival_box').classList.remove('survival-active');
 
+        // Update both top and bottom stats
         document.getElementById('sim_round_count').innerText = simRoundCount;
         document.getElementById('sim_success_count').innerText = simSuccessCount;
+        document.getElementById('sim_round_count_bot').innerText = simRoundCount;
+        document.getElementById('sim_success_count_bot').innerText = simSuccessCount;
 
         renderBigRoad();
         updateChart();
@@ -805,9 +806,15 @@
     function toggleAutoSim() {
         if (isAutoRunning) return;
         isAutoRunning = true;
+        // Toggle both sets of buttons
         document.getElementById('btn_auto_sim').style.display = 'none';
+        document.getElementById('btn_auto_sim_bot').style.display = 'none';
         document.getElementById('btn_stop_sim').style.display = 'inline-block';
+        document.getElementById('btn_stop_sim_bot').style.display = 'inline-block';
+        
         document.getElementById('sim_stats_display').style.display = 'block';
+        document.getElementById('sim_stats_display_bot').style.display = 'block';
+        
         if (simRoundCount === 0) { simRoundCount = 1; simSuccessCount = 0; softReset(); updateUI(); }
         let speed = parseInt(document.getElementById('sim_speed').value);
         if (speed === 0) runInstantLoop(); else autoPlayStep();
@@ -825,7 +832,6 @@
                 stopAutoSim(); updateUI(); showRiskModal("Stop Loss Reached"); break; 
             }
             
-            // Check Cycle Reset in Sim
             let cycleProfit = state.realBalance - state.cycleStartBalance;
             if (targetProfit > 0 && cycleProfit >= targetProfit) {
                 simSuccessCount++; simRoundCount++; 
@@ -856,8 +862,11 @@
 
     function stopAutoSim() {
         isAutoRunning = false; clearTimeout(autoTimer);
+        // Reset both sets of buttons
         document.getElementById('btn_auto_sim').style.display = 'inline-block';
+        document.getElementById('btn_auto_sim_bot').style.display = 'inline-block';
         document.getElementById('btn_stop_sim').style.display = 'none';
+        document.getElementById('btn_stop_sim_bot').style.display = 'none';
         updateUI();
     }
 
@@ -865,5 +874,3 @@
 </script>
 </body>
 </html>
-
-
