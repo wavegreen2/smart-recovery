@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Baccarat AI: Ultimate V3.2 (Sniper Fixed)</title>
+    <title>Baccarat AI: Ultimate V3.3 (Original Values)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -16,7 +16,7 @@
         .container { width: 100%; max-width: 1200px; display: grid; grid-template-columns: 350px 1fr; gap: 15px; height: 95vh; }
         .sidebar { background: var(--card-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-y: auto; display: flex; flex-direction: column; gap: 10px; height: 100%; border-top: 5px solid var(--target); }
         .section-title { font-size: 0.85rem; font-weight: bold; color: var(--primary); margin-top: 5px; border-bottom: 2px solid #eee; padding-bottom: 3px; display: flex; justify-content: space-between; align-items: center; }
-        .badge-ult { background: var(--target); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; box-shadow: 0 2px 4px rgba(22, 160, 133, 0.3); }
+        .badge-ult { background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; box-shadow: 0 2px 4px rgba(44, 62, 80, 0.3); }
         .form-group { margin-bottom: 5px; }
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #555; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.95rem; box-sizing: border-box; transition: all 0.2s; }
@@ -107,7 +107,7 @@
     <div class="sidebar">
         <!-- Header Title -->
         <div class="section-title" style="justify-content: center; border-bottom: none;">
-            <span class="badge-ult" style="font-size: 0.8rem; padding: 5px 10px;">V3.2 SNIPER MODE</span>
+            <span class="badge-ult" style="font-size: 0.8rem; padding: 5px 10px;">V3.3 REAL CHIP MODE</span>
         </div>
 
         <!-- MOVED: Simulation Tools (Top) -->
@@ -198,7 +198,7 @@
         </div>
 
         <div class="form-group">
-            <label>เงินทุน (Bankroll)30000mytest - 5000000 monte carlo</label>
+            <label>เงินทุน (Bankroll)</label>
             <input type="number" id="init_bank" value="5000000">
         </div>
 
@@ -217,12 +217,18 @@
             <input type="number" id="rebalance_val" value="4.62" step="0.01">
         </div>
 
-        <div class="form-group">
-            <label>เดิมพันขั้นต่ำ (Min Bet)</label>
-            <input type="number" id="min_bet" value="5">
+        <div class="dual-input">
+            <div class="form-group">
+                <label>เดิมพันขั้นต่ำ (Min)</label>
+                <input type="number" id="min_bet" value="5">
+            </div>
+            <div class="form-group">
+                <label style="color:var(--primary);">ขนาดชิป (Chip Unit)</label>
+                <input type="number" id="chip_size" value="5" style="border:2px solid var(--primary); font-weight:bold;">
+            </div>
         </div>
 
-        <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า Ultimate V3.2</button>
+        <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า Ultimate V3.3</button>
 
         <div class="section-title">🎯 สถานะ (Status)</div>
         <div class="monitor-box">
@@ -346,8 +352,10 @@
         document.getElementById('init_bank').value = 5000000;
         document.getElementById('strat_mode').value = "offset";
         
-        // V3.1 Defaults
-        document.getElementById('target_profit').value = 1; // Default Target
+        // V3.3 Defaults (Restored to V3.2 Values)
+        document.getElementById('min_bet').value = 5;
+        document.getElementById('chip_size').value = 5; // Default Chip = Min Bet
+        document.getElementById('target_profit').value = 1; 
         document.getElementById('trail_start').value = 11;
         document.getElementById('trail_drop').value = 17.3;
         document.getElementById('chaos_limit').value = 5;
@@ -359,6 +367,18 @@
         document.getElementById('rebalance_val').value = 4.62;
         document.getElementById('stop_loss').value = 10605;
         updateUI();
+    }
+
+    // --- V3.3 Chip Rounding Helper ---
+    function roundToChip(val) {
+        const chip = parseFloat(document.getElementById('chip_size').value) || 1;
+        const min = parseFloat(document.getElementById('min_bet').value);
+        if (val <= 0) return 0;
+        
+        // Ceiling Rounding: Always ensure we bet enough to cover the calculated requirement
+        // e.g., if calc is 12 and chip is 10 -> bet 20.
+        let rounded = Math.ceil(val / chip) * chip;
+        return Math.max(min, rounded);
     }
 
     function calculateDivisor(deficit, minBet) {
@@ -398,13 +418,14 @@
                 let div = calculateDivisor(deficit, minBet);
                 div = div * Math.pow(1.04, strat.cons_loss || 0);
                 let needed = deficit + minBet;
-                bet = Math.ceil(needed / div);
-                if (bet < minBet) bet = minBet;
+                bet = needed / div; // Keep raw for now
             } else {
                 bet = minBet;
             }
         }
-        return bet;
+        
+        // V3.3: Apply Chip Rounding here to ensure internal logic respects real chips
+        return roundToChip(bet);
     }
 
     function updateAI(strat, side, isPWin, rawBet) {
@@ -445,12 +466,13 @@
         return count;
     }
 
-    // --- V3.2 SNIPER LOGIC ---
+    // --- V3.2 SNIPER LOGIC (Updated for V3.3 Chips) ---
     function applyTargetSniper(betAmount, side) {
         const targetProfit = parseFloat(document.getElementById('target_profit').value);
         const minBet = parseFloat(document.getElementById('min_bet').value);
+        const chipSize = parseFloat(document.getElementById('chip_size').value) || 1;
         
-        if (targetProfit <= 0) return betAmount; // Feature disabled
+        if (targetProfit <= 0) return betAmount; 
         
         const currentCycleProfit = state.realBalance - state.cycleStartBalance;
         const needed = targetProfit - currentCycleProfit;
@@ -458,13 +480,12 @@
         // If we are close to target (needed > 0) and the bet is larger than what we need
         if (needed > 0 && betAmount > needed) {
             let capped = needed;
-            // If Banker, we need to bet slightly more to cover 5% commission
             if (side === 'B' || side === 'BANKER') {
                 capped = needed / 0.95;
             }
-            capped = Math.ceil(capped);
+            // V3.3: Ensure capped amount is also a valid chip multiple
+            capped = Math.ceil(capped / chipSize) * chipSize;
             
-            // Ensure we don't go below min bet
             return Math.max(capped, minBet);
         }
         return betAmount;
@@ -494,7 +515,7 @@
             return; 
         }
 
-        // 2. Calculate AI Bets
+        // 2. Calculate AI Bets (Already Rounded by getRawBet)
         const rawP = getRawBet(state.pStrat, 'P');
         const rawB = getRawBet(state.bStrat, 'B');
 
@@ -514,6 +535,9 @@
             netSide = trendSide;
             netBet = systemBet;
         }
+
+        // V3.3: Ensure Net Bet is also Chip Compliant (Offset might create non-compliant diffs)
+        if (netBet > 0) netBet = roundToChip(netBet);
 
         // --- V3.2 Apply Sniper Cap (Before Bet) ---
         if (netBet > 0) {
@@ -577,7 +601,6 @@
             let cutLine = state.highWaterMark * (1 - (trailDrop / 100));
             if (state.realBalance <= cutLine) {
                 if (!state.targetReached) {
-                    // Only show if we haven't just hit the main target
                     showWinModal(true, 0); // true = Trailing
                     state.targetReached = true;
                 }
@@ -637,6 +660,9 @@
             sideClass = trendSide === 'PLAYER' ? 'side-p' : 'side-b';
             formula = `${stratMode === 'anti_last' ? 'Anti' : 'Follow'} Last`;
         }
+
+        // V3.3: Ensure UI also shows rounded chips
+        if (netAmt > 0) netAmt = roundToChip(netAmt);
 
         // --- V3.2 UI Display Sniper Cap ---
         let originalAmt = netAmt;
@@ -839,11 +865,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
