@@ -259,7 +259,7 @@
       </div>
       <div class="form-group">
         <label>อัตราค่าคอม / โรลลิ่ง (%)</label>
-        <input type="number" id="commission_rate" value="0.0" step="0.01" min="0" oninput="updateUI()">
+        <input type="number" id="commission_rate" value="0.9" step="0.01" min="0" oninput="updateUI()">
         <div style="font-size:.6rem;color:var(--comm);margin-top:2px;">*คิดจากยอดเดิมพันทุกมือที่มีการเดิมพันจริง</div>
       </div>
       <div class="comm-grid">
@@ -319,8 +319,8 @@
     <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.62" step="0.01"></div>
 
     <div class="dual-input">
-      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="100"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="100" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
     <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า V3.4</button>
@@ -711,8 +711,8 @@ function generateOutcome(){
 function restoreRecommended(){
   document.getElementById('init_bank').value=10000;
   document.getElementById('strat_mode').value="offset";
-  document.getElementById('min_bet').value=5;
-  document.getElementById('chip_size').value=5;
+  document.getElementById('min_bet').value=100;
+  document.getElementById('chip_size').value=100;
   document.getElementById('target_profit').value=1;
   document.getElementById('trail_start').value=11;
   document.getElementById('trail_drop').value=17.3;
@@ -723,7 +723,7 @@ function restoreRecommended(){
   document.getElementById('max_bet_cap').value=10000;
   document.getElementById('rebalance_val').value=4.62;
   document.getElementById('stop_loss').value=10000;
-  document.getElementById('commission_rate').value="0.0";
+  document.getElementById('commission_rate').value="0.9";
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
   syncSimSettings('top');
@@ -872,7 +872,7 @@ function processResult(res,isSim=false){
   if(netBet>maxBetCap) netBet=maxBetCap;
 
   // Commission/Rolling: คิดจากยอดเดิมพันทุกมือที่มีการเดิมพันจริง
-  if(netBet>0){
+  if(netBet>0 && res!=='T'){
     state.commTurnover += netBet;
     state.commHands += 1;
     if(commRate>0){
