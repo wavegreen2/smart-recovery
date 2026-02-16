@@ -329,15 +329,15 @@
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
         <label>Stop if Streak >=</label>
-        <input type="number" id="dragon_limit" value="7">
+        <input type="number" id="dragon_limit" value="9">
       </div>
     </div>
 
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="11"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="17.3"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="25.166273343000494"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="37.42069569491824"></div>
       </div>
     </div>
 
@@ -346,24 +346,24 @@
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
         <select id="chaos_limit" onchange="updateUI()">
-          <option value="5" selected>5/10</option>
-          <option value="9">9/10</option>
-          <option value="11">Disable</option>
-        </select>
+  <option value="5">5/10</option>
+  <option value="9" selected>9/10</option>
+  <option value="11">Disable</option>
+</select>
       </div>
     </div>
 
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="46"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.04"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="72.19447839322856"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.3061917717042646"></div>
       </div>
     </div>
 
     <div class="form-group"><label>เงินทุน (Bankroll)=MINBETX2000</label><input type="number" id="init_bank" value="20000"></div>
     <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="20000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.62" step="0.01"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="6.971544829092806" step="0.01"></div>
 
     <div class="dual-input">
       <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="10"></div>
@@ -949,14 +949,14 @@ function restoreRecommended(){
   document.getElementById('min_bet').value=10;
   document.getElementById('chip_size').value=10;
   document.getElementById('target_profit').value=40;
-  document.getElementById('trail_start').value=11;
-  document.getElementById('trail_drop').value=17.3;
-  document.getElementById('chaos_limit').value=5;
-  document.getElementById('surv_trigger').value=46;
-  document.getElementById('surv_div').value=2.04;
-  document.getElementById('dragon_limit').value=7;
+  document.getElementById('trail_start').value=25.166273343000494;
+  document.getElementById('trail_drop').value=37.42069569491824;
+  document.getElementById('chaos_limit').value=9;
+  document.getElementById('surv_trigger').value=72.19447839322856;
+  document.getElementById('surv_div').value=2.3061917717042646;
+  document.getElementById('dragon_limit').value=9;
   document.getElementById('max_bet_cap').value=20000;
-  document.getElementById('rebalance_val').value=4.62;
+  document.getElementById('rebalance_val').value=6.971544829092806;
   document.getElementById('commission_rate').value="0.9";
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
@@ -1486,6 +1486,7 @@ window.onload=function(){
 
 </body>
 </html>
+
 
 
 
