@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baccarat AI: Ultimate V3.4 (Full + Sessions)</title>
+  <title>Baccarat AI: Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — t=163 Default</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root{
       --primary:#2c3e50;--accent:#e74c3c;--player:#2980b9;--banker:#c0392b;--tie:#27ae60;
@@ -90,12 +91,7 @@
     .modal-box{background:#fff;padding:30px 20px;border-radius:15px;text-align:center;max-width:520px;width:90%;box-shadow:0 20px 50px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;border:2px solid var(--gold)}
     .modal-icon{font-size:3rem;margin-bottom:10px}
     .modal-text-th{font-size:1.2rem;font-weight:bold;color:#2c3e50;margin-bottom:5px}
-    .modal-sub{font-size:1rem;color:var(--success);font-weight:bold;margin-bottom:15px}
     .btn-modal-ack{background:var(--success);color:#fff;border:none;padding:12px 20px;width:100%;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1rem;margin-top:15px}
-
-    .risk-stat-box{background:#fdedec;border:1px solid #fadbd8;padding:10px;width:100%;border-radius:8px;margin-bottom:15px;text-align:left}
-    .risk-row{display:flex;justify-content:space-between;margin-bottom:5px;font-size:.9rem}
-    .risk-val{font-weight:bold;color:#c0392b}
 
     /* ===== Shoe UI ===== */
     .shoe-ui{display:none;background:linear-gradient(135deg,#0d5e2e,#083a1c);border:2px solid rgba(255,215,0,.35);border-radius:12px;padding:12px}
@@ -163,12 +159,12 @@
     }
   </style>
 </head>
-<body>
 
+<body>
 <div class="container">
   <div class="sidebar">
     <div class="section-title" style="justify-content:center;border-bottom:none">
-      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS</span>
+      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS (DEFAULT t=163)</span>
     </div>
 
     <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
@@ -264,8 +260,9 @@
       <label>โหมดกลยุทธ์ (Strategy Mode)</label>
       <select id="strat_mode" onchange="updateUI()">
         <option value="offset">⚖️ Offset (สมดุล P-B)</option>
-        <option value="anti_last" selected>⚡ Anti Last (สวนตัวติด)</option>
+        <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
         <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
+        <option value="something_else" selected>🧪 Something Else (Engine)</option>
       </select>
     </div>
 
@@ -302,7 +299,7 @@
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="35.719790455597774">
+        <input type="number" id="target_profit" value="84.01334214864322">
       </div>
     </div>
 
@@ -310,15 +307,15 @@
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
         <label>Stop if Streak >=</label>
-        <input type="number" id="dragon_limit" value="7">
+        <input type="number" id="dragon_limit" value="4">
       </div>
     </div>
 
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="63.9603287332431"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="18.225074837004158"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="61.12171923623268"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="6.281293771274585"></div>
       </div>
     </div>
 
@@ -337,21 +334,21 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="29.50267708885238"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.2717082887907885"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="83.11689145189904"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.3331462126244618"></div>
       </div>
     </div>
 
-    <div class="form-group"><label>เงินทุน(Bankroll)=MAX DD 50100</label><input type="number" id="init_bank" value="20000"></div>
-    <div class="form-group"><label>Max Bet = PEAK 20000</label><input type="number" id="max_bet_cap" value="20000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="3.3205388727823033" step="0.01"></div>
+    <div class="form-group"><label>เงินทุน (Bankroll)=MINBETX2000</label><input type="number" id="init_bank" value="20000"></div>
+    <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="20000"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="7.091056715953166" step="0.01"></div>
 
     <div class="dual-input">
-      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="1"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="1" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (Best Optimize)</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (BEST t=163)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
@@ -453,7 +450,7 @@
     <div class="road-scroll-wrapper"><div class="big-road-grid" id="road_container"></div></div>
 
     <div class="bet-panel">
-      <div class="offset-formula" id="formula_disp">Strategy: Anti Last</div>
+      <div class="offset-formula" id="formula_disp">Strategy: Something Else</div>
       <div class="rec-amount" id="rec_amount">0</div>
       <div class="rec-side side-n" id="rec_side">WAIT</div>
       <div class="controls">
@@ -467,25 +464,14 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="riskModal">
-  <div class="modal-box" style="border-top:5px solid #c0392b;">
-    <div class="modal-icon">⚠️</div>
-    <div class="modal-text-th" style="color:#c0392b;">Session End</div>
-    <div class="risk-stat-box">
-      <div class="risk-row"><span>Reason:</span><span class="risk-val" id="risk_reason">-</span></div>
-      <div class="risk-row"><span>Net:</span><span class="risk-val" id="risk_dd">-</span></div>
-      <div class="risk-row"><span>ทุนคงเหลือ:</span><span class="risk-val" id="risk_left">-</span></div>
-    </div>
-    <button class="btn-modal-ack" style="background:#c0392b;" onclick="closeRiskModal()">ปิด</button>
-  </div>
-</div>
-
 <div class="modal-overlay" id="guideModal">
   <div class="modal-box" style="border:2px solid var(--comm); text-align:left;">
     <div class="modal-icon" style="width:100%;text-align:center;">💰</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      ค่าเริ่มต้นถูกตั้งเป็นชุด Optimize (anti_last + minbet 5 + trailing/target ตามผลที่ดีที่สุด)
+      ค่าเริ่มต้นถูกตั้งเป็นชุด BEST TRAIN ELIGIBLE (t=163):<br/>
+      rng=shoe, strat=something_else, comm=0.9, minbet=1, chip=1, target=84.0133, dragon=4,
+      trail_start=61.1217, trail_drop=6.2813, chaos=5, surv_trigger=83.1169, surv_div=2.3331, pen=60
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
   </div>
@@ -725,9 +711,6 @@ function getMinBet(){ return parseFloat(document.getElementById('min_bet').value
 function getChip(){ return parseFloat(document.getElementById('chip_size').value)||1; }
 function getBankrollLeft(){ return getBankroll() + state.realBalance + state.commTotal; }
 
-function disablePlayButtons(disabled){
-  document.querySelectorAll('.btn-ctrl').forEach(b=>{ b.disabled=!!disabled; });
-}
 function capBetToBankroll(netBet){
   if(netBet<=0) return 0;
   const chip=getChip();
@@ -795,7 +778,6 @@ function startNewSession(){
   state.graphData=[0]; state.graphLabels=[0];
   state.commTurnover=0; state.commTotal=0; state.commHands=0;
   undoStack=[];
-  disablePlayButtons(false);
 }
 function closeSessionAndRestart(reason){
   const net=state.realBalance;
@@ -887,34 +869,35 @@ function generateOutcome(){
 }
 
 /* =========================
-   DEFAULT = BEST OPTIMIZE SETTINGS
+   DEFAULT = BEST TRAIN ELIGIBLE t=163
    ========================= */
 function restoreRecommended(){
-  document.getElementById('init_bank').value=20000;
-  document.getElementById('max_bet_cap').value=20000;
-
-  document.getElementById('strat_mode').value="anti_last";
-  document.getElementById('commission_rate').value="0.9";
-
-  document.getElementById('min_bet').value=5;
-  document.getElementById('chip_size').value=5;
-
-  document.getElementById('rebalance_val').value=3.3205388727823033;
-
-  document.getElementById('target_profit').value=35.719790455597774;
-  document.getElementById('dragon_limit').value=7;
-
-  document.getElementById('trail_start').value=63.9603287332431;
-  document.getElementById('trail_drop').value=18.225074837004158;
-
-  document.getElementById('chaos_limit').value=5;
-  document.getElementById('surv_trigger').value=29.50267708885238;
-  document.getElementById('surv_div').value=2.2717082887907885;
-
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
 
+  document.getElementById('strat_mode').value='something_else';
+  document.getElementById('commission_rate').value='0.9';
+
+  document.getElementById('init_bank').value=20000;
+  document.getElementById('max_bet_cap').value=20000;
+
+  document.getElementById('rebalance_val').value=7.091056715953166;
+
+  document.getElementById('min_bet').value=1;
+  document.getElementById('chip_size').value=1;
+
+  document.getElementById('target_profit').value=84.01334214864322;
+  document.getElementById('dragon_limit').value=4;
+
+  document.getElementById('trail_start').value=61.12171923623268;
+  document.getElementById('trail_drop').value=6.281293771274585;
+
+  document.getElementById('chaos_limit').value=5;
+  document.getElementById('surv_trigger').value=83.11689145189904;
+  document.getElementById('surv_div').value=2.3331462126244618;
+
   syncSimSettings('top');
+  onRngChange();
   updateUI();
 }
 
@@ -1013,6 +996,9 @@ function applyTargetSniper(betAmount, side){
   return betAmount;
 }
 
+/* =========================
+   ✅ something_else = engine.py 1:1
+   ========================= */
 function processResult(res,isSim=false){
   if(checkAndEndSessionIfNeeded(isSim)) return;
   if(!isSim) saveState();
@@ -1043,9 +1029,20 @@ function processResult(res,isSim=false){
   const rawB=getRawBet(state.bStrat);
 
   let netBet=0, netSide=null;
+
   if(stratMode==='offset'){
     if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
     else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
+  }else if(stratMode==='something_else'){
+    const diff = Math.abs(rawP - rawB);
+    const threshold = Math.max(getMinBet(), 2 * getChip());
+    if(diff <= threshold){
+      netSide = 'B';
+      netBet  = Math.max(rawP, rawB);
+    }else{
+      if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
+      else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
+    }
   }else{
     const lastRes=state.history.length>0?state.history[state.history.length-1]:null;
     let trendSide='P';
@@ -1085,10 +1082,13 @@ function processResult(res,isSim=false){
   updateAI(state.pStrat,'P',res,rawP);
   updateAI(state.bStrat,'B',res,rawB);
 
-  if(Math.abs(state.pStrat.bal - state.bStrat.bal) > 100){
+  // rebalance_val (คงโครงไว้ แต่ทำให้ใช้ค่าจาก input จริง)
+  const rebalance_val=parseFloat(document.getElementById('rebalance_val').value)||0;
+  if(rebalance_val>0 && Math.abs(state.pStrat.bal - state.bStrat.bal) > 100){
     const avg=(state.pStrat.bal + state.bStrat.bal)/2;
-    state.pStrat.bal += (avg - state.pStrat.bal)*0.01;
-    state.bStrat.bal += (avg - state.bStrat.bal)*0.01;
+    const k = Math.min(0.05, rebalance_val/1000); // gentle
+    state.pStrat.bal += (avg - state.pStrat.bal)*k;
+    state.bStrat.bal += (avg - state.bStrat.bal)*k;
   }
 
   state.history.push(res);
@@ -1138,6 +1138,17 @@ function updateUI(){
     if(nextP>nextB){ netAmt=nextP-nextB; netSide="PLAYER"; sideClass="side-p"; }
     else if(nextB>nextP){ netAmt=nextB-nextP; netSide="BANKER"; sideClass="side-b"; }
     formula=`Offset: P${nextP} vs B${nextB}`;
+  }else if(stratMode==='something_else'){
+    const diff = Math.abs(nextP - nextB);
+    const threshold = Math.max(getMinBet(), 2 * getChip());
+    if(diff <= threshold){
+      netSide="BANKER"; netAmt=Math.max(nextP,nextB); sideClass="side-b";
+      formula=`Something Else: diff<=${threshold} => BANKER (max)`;
+    }else{
+      if(nextP>nextB){ netAmt=nextP-nextB; netSide="PLAYER"; sideClass="side-p"; }
+      else if(nextB>nextP){ netAmt=nextB-nextP; netSide="BANKER"; sideClass="side-b"; }
+      formula=`Something Else: diff>${threshold} => Offset (P${nextP} vs B${nextB})`;
+    }
   }else{
     const lastRes=state.history.length>0?state.history[state.history.length-1]:null;
     let trendSide="PLAYER";
@@ -1306,7 +1317,6 @@ function resetAll(){
   if(confirm("ต้องการรีเซ็ตระบบใช่หรือไม่?")) location.reload();
 }
 
-function closeRiskModal(){ document.getElementById('riskModal').style.display='none'; }
 function showGuideModal(){ document.getElementById('guideModal').style.display='flex'; }
 function closeGuideModal(){ document.getElementById('guideModal').style.display='none'; }
 
@@ -1362,7 +1372,7 @@ function autoPlayStep(){
 
 /* ===== Boot ===== */
 window.onload=function(){
-  // โหลด “ชุด Optimize” เป็นค่าเริ่มต้น
+  // โหลดค่าเริ่มต้นเป็น t=163
   restoreRecommended();
   startNewSession();
   onRngChange();
@@ -1370,7 +1380,5 @@ window.onload=function(){
   updateUI();
 };
 </script>
-
 </body>
 </html>
-
