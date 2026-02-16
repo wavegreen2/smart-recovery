@@ -263,8 +263,8 @@
     <div class="form-group">
       <label>โหมดกลยุทธ์ (Strategy Mode)</label>
       <select id="strat_mode" onchange="updateUI()">
-        <option value="offset" selected>⚖️ Offset (สมดุล P-B)</option>
-        <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
+        <option value="offset">⚖️ Offset (สมดุล P-B)</option>
+        <option value="anti_last" selected>⚡ Anti Last (สวนตัวติด)</option>
         <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
       </select>
     </div>
@@ -287,44 +287,25 @@
       </div>
     </div>
 
-    <!-- ===== NEW: Lifetime Stats (ตั้งแต่เริ่ม) ===== -->
     <div class="section-title">📊 สถิติรวมทั้งหมด (ตั้งแต่เริ่ม)</div>
     <div class="comm-box" style="border-color:#cfe2ff;background:#f7fbff">
-      <div class="comm-title" style="color:#1d4ed8">
-        <span>Lifetime Stats</span>
-      </div>
-
+      <div class="comm-title" style="color:#1d4ed8"><span>Lifetime Stats</span></div>
       <div class="comm-grid">
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
-          <div class="lb">Net Profit รวมทั้งหมด</div>
-          <div class="vl" id="all_net">0</div>
-        </div>
-
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
-          <div class="lb">Net + Commission รวมทั้งหมด</div>
-          <div class="vl" id="all_net_comm">0</div>
-        </div>
-
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
-          <div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div>
-          <div class="vl" id="all_max_dd">0</div>
-        </div>
-
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
-          <div class="lb">Max Bet สูงสุดตั้งแต่ต้น</div>
-          <div class="vl" id="all_max_bet">0</div>
-        </div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net Profit รวมทั้งหมด</div><div class="vl" id="all_net">0</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net + Commission รวมทั้งหมด</div><div class="vl" id="all_net_comm">0</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_dd">0</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Bet สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_bet">0</div></div>
       </div>
     </div>
-    <!-- ===== /NEW ===== -->
 
     <div class="target-box">
-      <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ) (ยังคงอยู่)</div>
+      <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="40">
+        <input type="number" id="target_profit" value="35.719790455597774">
       </div>
     </div>
+
     <div class="feature-box" style="border-color: var(--dragon);">
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
@@ -336,8 +317,8 @@
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="11"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="17.3"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="63.9603287332431"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="18.225074837004158"></div>
       </div>
     </div>
 
@@ -356,21 +337,21 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="46"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.04"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="29.50267708885238"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.2717082887907885"></div>
       </div>
     </div>
 
     <div class="form-group"><label>เงินทุน (Bankroll)=MINBETX2000</label><input type="number" id="init_bank" value="20000"></div>
     <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="20000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.62" step="0.01"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="3.3205388727823033" step="0.01"></div>
 
     <div class="dual-input">
-      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="10"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="10" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า V3.4</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (Best Optimize)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
@@ -387,7 +368,6 @@
       </div>
     </div>
 
-    <!-- ===== Session History on Sidebar ===== -->
     <div class="sess-box">
       <div class="sess-head">
         <div class="t">📒 Session History (ล่าสุด)</div>
@@ -400,14 +380,7 @@
         <table class="sess-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Reason</th>
-              <th>Hands</th>
-              <th>Net+Comm</th>
-              <th>Comm</th>
-              <th>Turn</th>
-              <th>Left</th>
-              <th>Time</th>
+              <th>#</th><th>Reason</th><th>Hands</th><th>Net+Comm</th><th>Comm</th><th>Turn</th><th>Left</th><th>Time</th>
             </tr>
           </thead>
           <tbody id="session_table_body">
@@ -467,46 +440,20 @@
 
   <div class="main-content">
     <div class="stats-grid">
-      <div class="stat-card profit">
-        <div class="stat-label">Net Profit</div>
-        <div class="stat-value" id="disp_net">0</div>
-      </div>
-      <div class="stat-card comm">
-        <div class="stat-label">Net + Commission</div>
-        <div class="stat-value" id="disp_net_comm" style="color:var(--comm);">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Max Drawdown</div>
-        <div class="stat-value" id="disp_dd">0</div>
-      </div>
-      <div class="stat-card loss">
-        <div class="stat-label">Max Bet</div>
-        <div class="stat-value" id="disp_maxbet">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Hands</div>
-        <div class="stat-value" id="disp_hands">0</div>
-      </div>
-      <div class="stat-card pre">
-        <div class="stat-label">Dragon</div>
-        <div class="stat-value" id="disp_dragon">0</div>
-      </div>
-      <div class="stat-card pre">
-        <div class="stat-label">Chaos</div>
-        <div class="stat-value" id="disp_chaos">0</div>
-      </div>
-      <div class="stat-card comm">
-        <div class="stat-label">Commission Total</div>
-        <div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0</div>
-      </div>
+      <div class="stat-card profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="disp_net">0</div></div>
+      <div class="stat-card comm"><div class="stat-label">Net + Commission</div><div class="stat-value" id="disp_net_comm" style="color:var(--comm);">0</div></div>
+      <div class="stat-card"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="disp_dd">0</div></div>
+      <div class="stat-card loss"><div class="stat-label">Max Bet</div><div class="stat-value" id="disp_maxbet">0</div></div>
+      <div class="stat-card"><div class="stat-label">Hands</div><div class="stat-value" id="disp_hands">0</div></div>
+      <div class="stat-card pre"><div class="stat-label">Dragon</div><div class="stat-value" id="disp_dragon">0</div></div>
+      <div class="stat-card pre"><div class="stat-label">Chaos</div><div class="stat-value" id="disp_chaos">0</div></div>
+      <div class="stat-card comm"><div class="stat-label">Commission Total</div><div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0</div></div>
     </div>
 
-    <div class="road-scroll-wrapper">
-      <div class="big-road-grid" id="road_container"></div>
-    </div>
+    <div class="road-scroll-wrapper"><div class="big-road-grid" id="road_container"></div></div>
 
     <div class="bet-panel">
-      <div class="offset-formula" id="formula_disp">Strategy: Offset</div>
+      <div class="offset-formula" id="formula_disp">Strategy: Anti Last</div>
       <div class="rec-amount" id="rec_amount">0</div>
       <div class="rec-side side-n" id="rec_side">WAIT</div>
       <div class="controls">
@@ -516,13 +463,10 @@
       </div>
     </div>
 
-    <div class="chart-box">
-      <canvas id="profitChart"></canvas>
-    </div>
+    <div class="chart-box"><canvas id="profitChart"></canvas></div>
   </div>
 </div>
 
-<!-- Risk Modal -->
 <div class="modal-overlay" id="riskModal">
   <div class="modal-box" style="border-top:5px solid #c0392b;">
     <div class="modal-icon">⚠️</div>
@@ -536,13 +480,12 @@
   </div>
 </div>
 
-<!-- Guide Modal -->
 <div class="modal-overlay" id="guideModal">
   <div class="modal-box" style="border:2px solid var(--comm); text-align:left;">
     <div class="modal-icon" style="width:100%;text-align:center;">💰</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      ฉันพยายามตั้งค่าเริ่มต้น คือค่าที่ดีที่สุด ติดต่อฉันที่ wavegreen2@gmail.com I’m trying to set the default configuration to the best-performing values. Please contact me at wavegreen2@gmail.com.
+      ค่าเริ่มต้นถูกตั้งเป็นชุด Optimize (anti_last + minbet 5 + trailing/target ตามผลที่ดีที่สุด)
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
   </div>
@@ -703,9 +646,9 @@ function refreshShoeUI(){
     document.getElementById('bc_sc').innerText=shoe.lastHand.b;
 
     const dr=document.getElementById('deal_res');
-    if(shoe.lastHand.res==='P'){ dr.innerText=`🔵 PLAYER WIN — P:${shoe.lastHand.p} vs B:${shoe.lastHand.b}`; dr.style.color='#3498db'; }
-    else if(shoe.lastHand.res==='B'){ dr.innerText=`🔴 BANKER WIN — P:${shoe.lastHand.p} vs B:${shoe.lastHand.b}`; dr.style.color='#e74c3c'; }
-    else { dr.innerText=`🟢 TIE — P:${shoe.lastHand.p} vs B:${shoe.lastHand.b}`; dr.style.color='#27ae60'; }
+    if(shoe.lastHand.res==='P'){ dr.innerText=`PLAYER WIN — P:${shoe.lastHand.p} vs B:${shoe.lastHand.b}`; dr.style.color='#3498db'; }
+    else if(shoe.lastHand.res==='B'){ dr.innerText=`BANKER WIN — P:${shoe.lastHand.p} vs B:${shoe.lastHand.b}`; dr.style.color='#e74c3c'; }
+    else { dr.innerText=`TIE — P:${shoe.lastHand.p} vs B:${shoe.lastHand.b}`; dr.style.color='#27ae60'; }
   }else{
     dealArea.style.display='none';
   }
@@ -741,43 +684,28 @@ let state={
   commTurnover:0, commTotal:0, commHands:0
 };
 
-// ===== NEW: Lifetime (ทั้งหมดตั้งแต่เริ่ม) =====
-let lifetime = {
-  net: 0,
-  comm: 0,
-  maxBet: 0,
-  highWater: 0,
-  maxDrawdown: 0
-};
-function lifetimeEquity(){
-  return lifetime.net + lifetime.comm;
-}
+let lifetime = { net:0, comm:0, maxBet:0, highWater:0, maxDrawdown:0 };
+function lifetimeEquity(){ return lifetime.net + lifetime.comm; }
 function updateLifetimeUI(){
-  const netAll = lifetime.net;
-  const netCommAll = lifetimeEquity();
-
-  const elNet = document.getElementById('all_net');
-  const elNetComm = document.getElementById('all_net_comm');
-  const elDD = document.getElementById('all_max_dd');
-  const elMaxBet = document.getElementById('all_max_bet');
-
+  const elNet=document.getElementById('all_net');
+  const elNetComm=document.getElementById('all_net_comm');
+  const elDD=document.getElementById('all_max_dd');
+  const elMaxBet=document.getElementById('all_max_bet');
   if(elNet){
-    elNet.innerText = netAll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    elNet.style.color = netAll>=0 ? 'var(--success)' : 'var(--danger)';
+    elNet.innerText=lifetime.net.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    elNet.style.color=lifetime.net>=0?'var(--success)':'var(--danger)';
   }
   if(elNetComm){
-    elNetComm.innerText = netCommAll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    elNetComm.style.color = netCommAll>=0 ? 'var(--success)' : 'var(--danger)';
+    const eq=lifetimeEquity();
+    elNetComm.innerText=eq.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    elNetComm.style.color=eq>=0?'var(--success)':'var(--danger)';
   }
   if(elDD){
-    elDD.innerText = lifetime.maxDrawdown.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    elDD.style.color = lifetime.maxDrawdown<=0 ? 'var(--danger)' : 'var(--text)';
+    elDD.innerText=lifetime.maxDrawdown.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    elDD.style.color=lifetime.maxDrawdown<=0?'var(--danger)':'var(--text)';
   }
-  if(elMaxBet){
-    elMaxBet.innerText = lifetime.maxBet.toLocaleString();
-  }
+  if(elMaxBet) elMaxBet.innerText=lifetime.maxBet.toLocaleString();
 }
-// ===== /NEW =====
 
 let undoStack=[];
 let chartInstance=null;
@@ -786,26 +714,20 @@ let simRoundCount=0;
 let simSuccessCount=0;
 let autoTimer=null;
 
-// ===== Sessions =====
-let sessionHistory = [];
-let sessionNo = 0;
-let sessionStartTs = Date.now();
+let sessionHistory=[];
+let sessionNo=0;
+let sessionStartTs=Date.now();
 
 const DEFAULT_DIVISOR=2.0;
 
 function getBankroll(){ return parseFloat(document.getElementById('init_bank').value)||0; }
 function getMinBet(){ return parseFloat(document.getElementById('min_bet').value)||0; }
 function getChip(){ return parseFloat(document.getElementById('chip_size').value)||1; }
-
-// ทุนคงเหลือจริง = bankroll + net + commission
-function getBankrollLeft(){
-  return getBankroll() + state.realBalance + state.commTotal;
-}
+function getBankrollLeft(){ return getBankroll() + state.realBalance + state.commTotal; }
 
 function disablePlayButtons(disabled){
-  document.querySelectorAll('.btn-ctrl').forEach(b=>{ b.disabled = !!disabled; });
+  document.querySelectorAll('.btn-ctrl').forEach(b=>{ b.disabled=!!disabled; });
 }
-
 function capBetToBankroll(netBet){
   if(netBet<=0) return 0;
   const chip=getChip();
@@ -824,7 +746,7 @@ function renderSessionHistory(){
     body.innerHTML=`<tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr>`;
     return;
   }
-  const rows=sessionHistory.slice(-60).reverse().map(s=>{
+  body.innerHTML=sessionHistory.slice(-60).reverse().map(s=>{
     const cls=(s.netPlusComm>=0)?'pos':'neg';
     const t=new Date(s.tsEnd);
     const timeStr=t.toLocaleString('th-TH',{hour12:false});
@@ -842,9 +764,7 @@ function renderSessionHistory(){
       </tr>
     `;
   }).join('');
-  body.innerHTML=rows;
 }
-
 function exportSessionHistory(){
   const blob=new Blob([JSON.stringify(sessionHistory,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -864,8 +784,8 @@ function clearSessionHistory(){
 }
 
 function startNewSession(){
-  sessionNo += 1;
-  sessionStartTs = Date.now();
+  sessionNo+=1;
+  sessionStartTs=Date.now();
 
   state.realBalance=0; state.history=[]; state.maxDrawdown=0; state.maxBet=0;
   state.highWaterMark=0; state.targetReached=false; state.survivalActive=false;
@@ -877,7 +797,6 @@ function startNewSession(){
   undoStack=[];
   disablePlayButtons(false);
 }
-
 function closeSessionAndRestart(reason){
   const net=state.realBalance;
   const comm=state.commTotal;
@@ -900,8 +819,6 @@ function closeSessionAndRestart(reason){
   startNewSession();
   renderSessionHistory();
 }
-
-// จบ session เมื่อ: bankrollLeft <= 0 หรือ bankrollLeft < minBet
 function checkAndEndSessionIfNeeded(isSim){
   const left=getBankrollLeft();
   const minBet=getMinBet();
@@ -917,32 +834,22 @@ function checkAndEndSessionIfNeeded(isSim){
   }
   return false;
 }
-
-/* ===== NEW: Session End Rules (Optimize-style) =====
-   - End session when Cycle Profit >= Target Profit
-   - End session when Trailing Stop hits
-*/
 function checkAndEndSessionByTargetOrTrailing(isSim){
-  const targetProfit = parseFloat(document.getElementById('target_profit').value) || 0;
+  const targetProfit=parseFloat(document.getElementById('target_profit').value)||0;
 
-  // ----- Target Profit (Cycle) -----
-  const cycleProfit = state.realBalance - state.cycleStartBalance;
-  if(targetProfit > 0 && cycleProfit >= targetProfit){
+  const cycleProfit=state.realBalance-state.cycleStartBalance;
+  if(targetProfit>0 && cycleProfit>=targetProfit){
     closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`);
     if(!isSim) updateUI();
     return true;
   }
 
-  // ----- Trailing Stop -----
   const trailStart=parseFloat(document.getElementById('trail_start').value);
   const trailDrop=parseFloat(document.getElementById('trail_drop').value);
 
-  // update HWM after reaching start
   if(state.realBalance>=trailStart && state.realBalance>state.highWaterMark){
     state.highWaterMark=state.realBalance;
   }
-
-  // if active, check drop
   if(state.highWaterMark>=trailStart){
     const cutLine=state.highWaterMark*(1-(trailDrop/100));
     if(state.realBalance<=cutLine){
@@ -951,7 +858,6 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
       return true;
     }
   }
-
   return false;
 }
 
@@ -980,23 +886,34 @@ function generateOutcome(){
   return Math.random()<0.4932?'P':'B';
 }
 
+/* =========================
+   DEFAULT = BEST OPTIMIZE SETTINGS
+   ========================= */
 function restoreRecommended(){
   document.getElementById('init_bank').value=20000;
-  document.getElementById('strat_mode').value="offset";
-  document.getElementById('min_bet').value=10;
-  document.getElementById('chip_size').value=10;
-  document.getElementById('target_profit').value=40;
-  document.getElementById('trail_start').value=11;
-  document.getElementById('trail_drop').value=17.3;
-  document.getElementById('chaos_limit').value=9;
-  document.getElementById('surv_trigger').value=46;
-  document.getElementById('surv_div').value=2.04;
-  document.getElementById('dragon_limit').value=7;
   document.getElementById('max_bet_cap').value=20000;
-  document.getElementById('rebalance_val').value=4.62;
+
+  document.getElementById('strat_mode').value="anti_last";
   document.getElementById('commission_rate').value="0.9";
+
+  document.getElementById('min_bet').value=5;
+  document.getElementById('chip_size').value=5;
+
+  document.getElementById('rebalance_val').value=3.3205388727823033;
+
+  document.getElementById('target_profit').value=35.719790455597774;
+  document.getElementById('dragon_limit').value=7;
+
+  document.getElementById('trail_start').value=63.9603287332431;
+  document.getElementById('trail_drop').value=18.225074837004158;
+
+  document.getElementById('chaos_limit').value=5;
+  document.getElementById('surv_trigger').value=29.50267708885238;
+  document.getElementById('surv_div').value=2.2717082887907885;
+
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
+
   syncSimSettings('top');
   updateUI();
 }
@@ -1015,7 +932,7 @@ function calculateDivisor(deficit,minBet){
   const survTrigger=parseFloat(document.getElementById('surv_trigger').value);
   const survMult=parseFloat(document.getElementById('surv_div').value);
 
-  let currentDD = state.realBalance<0 ? Math.abs(state.realBalance) : 0;
+  let currentDD=state.realBalance<0?Math.abs(state.realBalance):0;
   let ddPercent=(bank>0)?(currentDD/bank)*100:0;
 
   if(ddPercent>=survTrigger){ baseDiv*=survMult; state.survivalActive=true; }
@@ -1097,14 +1014,11 @@ function applyTargetSniper(betAmount, side){
 }
 
 function processResult(res,isSim=false){
-  // จบ session ทันทีถ้าทุนต่ำกว่า minBet หรือ <=0
   if(checkAndEndSessionIfNeeded(isSim)) return;
-
   if(!isSim) saveState();
 
-  // ===== Lifetime delta trackers =====
-  let commAdded = 0;
-  let netDelta = 0;
+  let commAdded=0;
+  let netDelta=0;
 
   const stratMode=document.getElementById('strat_mode').value;
   const maxBetCap=parseFloat(document.getElementById('max_bet_cap').value);
@@ -1145,11 +1059,8 @@ function processResult(res,isSim=false){
   if(netBet>0) netBet=roundToChip(netBet);
   if(netBet>0) netBet=applyTargetSniper(netBet,netSide);
   if(netBet>maxBetCap) netBet=maxBetCap;
-
-  // CAP ตามทุนจริง (ถ้าเหลือ < minBet จะกลายเป็น 0)
   if(netBet>0) netBet=capBetToBankroll(netBet);
 
-  // Commission/Rolling
   if(netBet>0 && res!=='T'){
     state.commTurnover += netBet;
     state.commHands += 1;
@@ -1159,15 +1070,14 @@ function processResult(res,isSim=false){
     }
   }
 
-  // P/L (Tie push)
   if(netBet>0){
     if(res==='T'){
-      netDelta = 0; // push
+      netDelta=0;
     }else if(netSide==='P'){
-      netDelta = (res==='P') ? netBet : -netBet;
+      netDelta=(res==='P') ? netBet : -netBet;
       state.realBalance += netDelta;
     }else{
-      netDelta = (res==='B') ? (netBet*0.95) : -netBet;
+      netDelta=(res==='B') ? (netBet*0.95) : -netBet;
       state.realBalance += netDelta;
     }
   }
@@ -1175,7 +1085,6 @@ function processResult(res,isSim=false){
   updateAI(state.pStrat,'P',res,rawP);
   updateAI(state.bStrat,'B',res,rawB);
 
-  // rebalance
   if(Math.abs(state.pStrat.bal - state.bStrat.bal) > 100){
     const avg=(state.pStrat.bal + state.bStrat.bal)/2;
     state.pStrat.bal += (avg - state.pStrat.bal)*0.01;
@@ -1189,25 +1098,17 @@ function processResult(res,isSim=false){
   if(state.realBalance < state.maxDrawdown) state.maxDrawdown=state.realBalance;
   if(netBet > state.maxBet) state.maxBet=netBet;
 
-  // ===== NEW: Lifetime Update (ทั้งหมดตั้งแต่เริ่ม) =====
   if(netBet>0){
     lifetime.net += netDelta;
     lifetime.comm += commAdded;
-
-    if(netBet > lifetime.maxBet) lifetime.maxBet = netBet;
-
-    const eq = lifetimeEquity();
-    if(eq > lifetime.highWater) lifetime.highWater = eq;
-
-    const dd = eq - lifetime.highWater; // <= 0
-    if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown = dd;
+    if(netBet > lifetime.maxBet) lifetime.maxBet=netBet;
+    const eq=lifetimeEquity();
+    if(eq > lifetime.highWater) lifetime.highWater=eq;
+    const dd=eq - lifetime.highWater;
+    if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown=dd;
   }
-  // ===== /NEW =====
 
-  // ===== SESSION RULE: Target OR Trailing => ปิด session + บันทึก =====
   if(checkAndEndSessionByTargetOrTrailing(isSim)) return;
-
-  // ===== SESSION RULE: ทุนต่ำกว่า minBet / ทุนหมด => ปิด session =====
   if(checkAndEndSessionIfNeeded(isSim)) return;
 
   if(!isSim) updateUI();
@@ -1255,7 +1156,6 @@ function updateUI(){
   if(originalAmt>netAmt) formula += " [Sniper]";
   if(netAmt>maxBetCap) netAmt=maxBetCap;
 
-  // preview cap
   if(netAmt>0){
     const cappedPreview=capBetToBankroll(netAmt);
     if(cappedPreview===0) formula += " [NoBet: Bankroll<Min]";
@@ -1325,7 +1225,6 @@ function updateUI(){
   refreshShoeUI();
 }
 
-/* ===== Road ===== */
 function renderBigRoad(){
   const roadDiv=document.getElementById('road_container');
   roadDiv.innerHTML='';
@@ -1362,12 +1261,11 @@ function renderBigRoad(){
   const wrapper=document.querySelector('.road-scroll-wrapper');
   if(wrapper){
     setTimeout(()=>{
-      wrapper.scrollLeft = (maxCol*27)>wrapper.clientWidth ? (maxCol*27)-wrapper.clientWidth+50 : 0;
+      wrapper.scrollLeft=(maxCol*27)>wrapper.clientWidth ? (maxCol*27)-wrapper.clientWidth+50 : 0;
     },0);
   }
 }
 
-/* ===== Chart ===== */
 function updateChart(){
   const ctx=document.getElementById('profitChart').getContext('2d');
   if(!chartInstance){
@@ -1379,8 +1277,7 @@ function updateChart(){
           borderWidth:2, fill:true, pointRadius:0, tension:0.1
         }]
       },
-      options:{
-        responsive:true, maintainAspectRatio:false, animation:{duration:0},
+      options:{ responsive:true, maintainAspectRatio:false, animation:{duration:0},
         plugins:{ legend:{display:false}},
         scales:{ x:{display:false}, y:{grid:{color:'#f0f0f0'}}}
       }
@@ -1388,18 +1285,14 @@ function updateChart(){
   }else{
     chartInstance.data.labels=state.graphLabels;
     chartInstance.data.datasets[0].data=state.graphData;
-    chartInstance.data.datasets[0].borderColor = state.realBalance>=0 ? '#27ae60' : '#c0392b';
-    chartInstance.data.datasets[0].backgroundColor = state.realBalance>=0 ? 'rgba(39,174,96,0.1)' : 'rgba(192,57,43,0.1)';
+    chartInstance.data.datasets[0].borderColor=state.realBalance>=0?'#27ae60':'#c0392b';
+    chartInstance.data.datasets[0].backgroundColor=state.realBalance>=0?'rgba(39,174,96,0.1)':'rgba(192,57,43,0.1)';
     chartInstance.update();
   }
 }
 
-/* ===== Undo/Reset ===== */
 function saveState(){
-  undoStack.push({
-    state: JSON.parse(JSON.stringify(state)),
-    lifetime: JSON.parse(JSON.stringify(lifetime))
-  });
+  undoStack.push({ state: JSON.parse(JSON.stringify(state)), lifetime: JSON.parse(JSON.stringify(lifetime)) });
   if(undoStack.length>30) undoStack.shift();
 }
 function undo(){
@@ -1413,24 +1306,14 @@ function resetAll(){
   if(confirm("ต้องการรีเซ็ตระบบใช่หรือไม่?")) location.reload();
 }
 
-/* ===== Modals ===== */
-function showRiskModal(reason){
-  document.getElementById('risk_reason').innerText=reason;
-  document.getElementById('risk_dd').innerText=state.realBalance.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById('risk_left').innerText=getBankrollLeft().toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById('riskModal').style.display='flex';
-}
 function closeRiskModal(){ document.getElementById('riskModal').style.display='none'; }
 function showGuideModal(){ document.getElementById('guideModal').style.display='flex'; }
 function closeGuideModal(){ document.getElementById('guideModal').style.display='none'; }
 
-/* ===== Simulation ===== */
 function runSimulation(){
   const n=parseInt(document.getElementById('sim_hands').value)||1;
   saveState();
-  for(let i=0;i<n;i++){
-    processResult(generateOutcome(), true);
-  }
+  for(let i=0;i<n;i++) processResult(generateOutcome(), true);
   updateUI();
 }
 
@@ -1455,7 +1338,6 @@ function toggleAutoSim(){
   if(speed===0) runInstantLoop();
   else autoPlayStep();
 }
-
 function stopAutoSim(){
   isAutoRunning=false;
   if(autoTimer) clearTimeout(autoTimer);
@@ -1464,14 +1346,12 @@ function stopAutoSim(){
   document.getElementById('btn_stop_sim').style.display='none';
   document.getElementById('btn_stop_sim_bot').style.display='none';
 }
-
 async function runInstantLoop(){
   while(isAutoRunning){
     processResult(generateOutcome(), true);
     await new Promise(r=>setTimeout(r,0));
   }
 }
-
 function autoPlayStep(){
   if(!isAutoRunning) return;
   const speed=parseInt(document.getElementById('sim_speed').value);
@@ -1482,6 +1362,7 @@ function autoPlayStep(){
 
 /* ===== Boot ===== */
 window.onload=function(){
+  // โหลด “ชุด Optimize” เป็นค่าเริ่มต้น
   restoreRecommended();
   startNewSession();
   onRngChange();
