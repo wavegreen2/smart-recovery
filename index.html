@@ -336,7 +336,7 @@
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
         <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="10"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.01"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="3.0"></div>
       </div>
     </div>
 
@@ -345,8 +345,8 @@
     <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="10" step="0.01"></div>
 
     <div class="dual-input">
-      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="100"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="100" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="10"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="10" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
     <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (LOW DD DEFAULT)</button>
@@ -471,7 +471,7 @@
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
       ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br/>
-      rng=shoe, strat=something_else, comm=0.9, minbet=100, chip=100, target=60,
+      rng=shoe, strat=something_else, comm=0.9, minbet=10, chip=10, target=60,
       max_bet_cap=10000, dragon=6, chaos=5/10, trail_start=30, trail_drop=3,
       surv_trigger=10, surv_div=4, pen=60, rebalance=10
       <br/><br/>
@@ -918,8 +918,8 @@ function restoreRecommended(){
   document.getElementById('rebalance_val').value=10.0;
 
   // Bet sizing
-  document.getElementById('min_bet').value=100.0;
-  document.getElementById('chip_size').value=100.0;
+  document.getElementById('min_bet').value=10.0;
+  document.getElementById('chip_size').value=10.0;
 
   // Target
   document.getElementById('target_profit').value=60.0;
@@ -934,7 +934,7 @@ function restoreRecommended(){
 
   // Survival
   document.getElementById('surv_trigger').value=10.0;
-  document.getElementById('surv_div').value=2.01;
+  document.getElementById('surv_div').value=3.0;
 
   syncSimSettings('top');
   onRngChange();
