@@ -345,11 +345,12 @@
       <div class="feature-title">🌪️ Chaos Filter</div>
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
-       <select id="chaos_limit" onchange="updateUI()">
+   <select id="chaos_limit" onchange="updateUI()">
   <option value="9">9/10</option>
   <option value="5" selected>5/10</option>
   <option value="11">Disable</option>
 </select>
+
 
         </select>
       </div>
@@ -990,7 +991,7 @@ function restoreRecommended(){
   document.getElementById('target_profit').value=40;
   document.getElementById('trail_start').value=11;
   document.getElementById('trail_drop').value=17.3;
-  document.getElementById('chaos_limit').value=9;
+  document.getElementById('chaos_limit').value=5;
   document.getElementById('surv_trigger').value=46;
   document.getElementById('surv_div').value=2.04;
   document.getElementById('dragon_limit').value=7;
@@ -1494,6 +1495,7 @@ window.onload=function(){
 
 </body>
 </html>
+
 
 
 
