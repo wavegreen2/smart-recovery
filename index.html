@@ -264,8 +264,8 @@
     <div class="form-group">
       <label>โหมดกลยุทธ์ (Strategy Mode)</label>
       <select id="strat_mode" onchange="updateUI()">
-        <option value="offset" selected>⚖️ Offset (สมดุล P-B)</option>
-        <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
+        <option value="offset">⚖️ Offset (สมดุล P-B)</option>
+        <option value="anti_last" selected>⚡ Anti Last (สวนตัวติด)</option>
         <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
         <option value="something_else">🧩 Something Else (Hybrid)</option>
       </select>
@@ -324,7 +324,7 @@
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ) (ยังคงอยู่)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="39.80456682549584">
+        <input type="number" id="target_profit" value="91.61360555218317">
       </div>
     </div>
 
@@ -332,15 +332,15 @@
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
         <label>Stop if Streak >=</label>
-        <input type="number" id="dragon_limit" value="5">
+        <input type="number" id="dragon_limit" value="8">
       </div>
     </div>
 
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="13.3388572902752"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="15.491282082008215"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="47.56035430399356"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="37.12602312431165"></div>
       </div>
     </div>
 
@@ -359,18 +359,18 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="39.38392690411764"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="3.721260445305812"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="42.9473815753558"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="5.132310085595817"></div>
       </div>
     </div>
 
     <div class="form-group"><label>เงินทุน (Bankroll)Bank for Life=100000</label><input type="number" id="init_bank" value="20000"></div>
     <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="20000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.103034121865692" step="0.01"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="5.024308498230409" step="0.01"></div>
 
     <div class="dual-input">
       <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="1" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
     <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า BEST (Optimized)</button>
@@ -558,15 +558,12 @@
    ========================= */
 let lcgState = 0 >>> 0;
 function lcgSeedFromTime(){
-  // เอาเวลา+noise นิดหน่อย เพื่อให้ไม่ซ้ำง่าย
   const t = (Date.now() ^ (performance.now()*1000|0)) >>> 0;
   lcgState = (t || 123456789) >>> 0;
 }
 function lcgRand01(){
-  // 32-bit LCG: x = (a*x + c) mod 2^32
-  // ค่ามาตรฐานที่ใช้บ่อย (Numerical Recipes)
   lcgState = (Math.imul(1664525, lcgState) + 1013904223) >>> 0;
-  return lcgState / 4294967296; // [0,1)
+  return lcgState / 4294967296;
 }
 
 /* =========================
@@ -749,7 +746,6 @@ function onRngChange(){
   }
 
   if(m==='lcg'){
-    // seed ใหม่ทุกครั้งที่สลับมาใช้ LCG เพื่อไม่ให้ติดรูปแบบเดิมจาก session ก่อน
     lcgSeedFromTime();
   }
 }
@@ -902,7 +898,6 @@ function startNewSession(){
   undoStack=[];
   disablePlayButtons(false);
 
-  // ให้ LCG เริ่มใหม่ทุก session เพื่อให้ reproducible ใน session เดียว
   if(document.getElementById('rng_method').value==='lcg') lcgSeedFromTime();
 }
 
@@ -953,7 +948,6 @@ function checkAndEndSessionIfNeeded(isSim){
 function checkAndEndSessionByTargetOrTrailing(isSim){
   const targetProfit = parseFloat(document.getElementById('target_profit').value) || 0;
 
-  // Target Profit (Cycle)
   const cycleProfit = state.realBalance - state.cycleStartBalance;
   if(targetProfit > 0 && cycleProfit >= targetProfit){
     closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`);
@@ -961,7 +955,6 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
     return true;
   }
 
-  // Trailing Stop
   const trailStart=parseFloat(document.getElementById('trail_start').value);
   const trailDrop=parseFloat(document.getElementById('trail_drop').value);
 
@@ -1014,34 +1007,37 @@ function generateOutcome(){
 }
 
 /* =========================
-   Restore BEST Settings
+   Restore BEST Settings (t=15)
    ========================= */
 function restoreRecommended(){
-  // BEST settings from optimizer
-  document.getElementById('rng_method').value='lcg';
+  // RNG
+  document.getElementById('rng_method').value='shoe';
+  document.getElementById('rng_method_bot').value='shoe';
   document.getElementById('shoe_pen').value='60';
 
-  document.getElementById('strat_mode').value="something_else";
+  // Strategy + Commission
+  document.getElementById('strat_mode').value="anti_last";
   document.getElementById('commission_rate').value="0.9";
 
+  // Bankroll
   document.getElementById('init_bank').value=20000.0;
   document.getElementById('max_bet_cap').value=20000.0;
 
-  document.getElementById('rebalance_val').value=4.103034121865692;
+  // Rebalance
+  document.getElementById('rebalance_val').value=5.024308498230409;
 
+  // Min/Chip
   document.getElementById('min_bet').value=5;
-  document.getElementById('chip_size').value=1;
+  document.getElementById('chip_size').value=5;
 
-  document.getElementById('target_profit').value=39.80456682549584;
-  document.getElementById('dragon_limit').value=5;
-
-  document.getElementById('trail_start').value=13.3388572902752;
-  document.getElementById('trail_drop').value=15.491282082008215;
-
+  // Targets / Filters
+  document.getElementById('target_profit').value=91.61360555218317;
+  document.getElementById('dragon_limit').value=8;
+  document.getElementById('trail_start').value=47.56035430399356;
+  document.getElementById('trail_drop').value=37.12602312431165;
   document.getElementById('chaos_limit').value=5;
-
-  document.getElementById('surv_trigger').value=39.38392690411764;
-  document.getElementById('surv_div').value=3.721260445305812;
+  document.getElementById('surv_trigger').value=42.9473815753558;
+  document.getElementById('surv_div').value=5.132310085595817;
 
   syncSimSettings('top');
   onRngChange();
@@ -1147,7 +1143,6 @@ function processResult(res,isSim=false){
   if(checkAndEndSessionIfNeeded(isSim)) return;
   if(!isSim) saveState();
 
-  // Lifetime delta trackers
   let commAdded = 0;
   let netDelta = 0;
 
@@ -1180,15 +1175,12 @@ function processResult(res,isSim=false){
     else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
 
   }else if(stratMode==='something_else'){
-    // Hybrid:
-    // 1) ถ้า P/B ใกล้กันมาก -> เอนไปทาง BANKER (เพราะจ่าย 0.95 แต่โอกาสชนะมักสูงกว่าเล็กน้อยในโมเดลจริง)
-    // 2) ถ้าห่างกัน -> ใช้ offset ปกติ
     const diff = Math.abs(rawP-rawB);
     const minBet = getMinBet();
-    const threshold = Math.max(minBet, 2*getChip()); // ใกล้กันระดับนี้ถือว่า "สูสี"
+    const threshold = Math.max(minBet, 2*getChip());
     if(diff <= threshold){
       netSide = 'B';
-      netBet = Math.max(rawP, rawB); // วางเต็มฝั่งที่เลือก
+      netBet = Math.max(rawP, rawB);
     }else{
       if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
       else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
@@ -1208,10 +1200,8 @@ function processResult(res,isSim=false){
   if(netBet>0) netBet=applyTargetSniper(netBet,netSide);
   if(netBet>maxBetCap) netBet=maxBetCap;
 
-  // CAP ตามทุนจริง
   if(netBet>0) netBet=capBetToBankroll(netBet);
 
-  // Commission/Rolling
   if(netBet>0 && res!=='T'){
     state.commTurnover += netBet;
     state.commHands += 1;
@@ -1221,7 +1211,6 @@ function processResult(res,isSim=false){
     }
   }
 
-  // P/L (Tie push)
   if(netBet>0){
     if(res==='T'){
       netDelta = 0;
@@ -1237,7 +1226,6 @@ function processResult(res,isSim=false){
   updateAI(state.pStrat,'P',res,rawP);
   updateAI(state.bStrat,'B',res,rawB);
 
-  // rebalance (ใช้ rebalance_val จริง)
   const rebVal = parseFloat(document.getElementById('rebalance_val').value) || 4.0;
   const k = Math.min(0.20, Math.max(0.001, 1.0 / rebVal));
   if(Math.abs(state.pStrat.bal - state.bStrat.bal) > 100){
@@ -1253,7 +1241,6 @@ function processResult(res,isSim=false){
   if(state.realBalance < state.maxDrawdown) state.maxDrawdown=state.realBalance;
   if(netBet > state.maxBet) state.maxBet=netBet;
 
-  // Lifetime Update
   if(netBet>0){
     lifetime.net += netDelta;
     lifetime.comm += commAdded;
@@ -1263,7 +1250,7 @@ function processResult(res,isSim=false){
     const eq = lifetimeEquity();
     if(eq > lifetime.highWater) lifetime.highWater = eq;
 
-    const dd = eq - lifetime.highWater; // <= 0
+    const dd = eq - lifetime.highWater;
     if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown = dd;
   }
 
@@ -1553,7 +1540,8 @@ function autoPlayStep(){
 
 /* ===== Boot ===== */
 window.onload=function(){
-  restoreRecommended();   // เริ่มด้วย BEST settings
+  // ตอนนี้ค่าเริ่มต้นใน HTML ก็ตรง BEST แล้ว แต่ยังเรียก restore เพื่อการันตีอีกชั้น
+  restoreRecommended();
   startNewSession();
   onRngChange();
   renderSessionHistory();
@@ -1563,4 +1551,3 @@ window.onload=function(){
 
 </body>
 </html>
-
