@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baccarat AI: Ultimate V3.4 (Real Shoe + Commission/Rolling)</title>
+  <title>Baccarat AI: Ultimate V3.4 (Full + Sessions)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
@@ -13,7 +13,7 @@
     }
     *{box-sizing:border-box}
     body{font-family:'Segoe UI','Sarabun',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:10px;display:flex;justify-content:center;height:100vh;overflow:hidden}
-    .container{width:100%;max-width:1200px;display:grid;grid-template-columns:350px 1fr;gap:15px;height:95vh}
+    .container{width:100%;max-width:1200px;display:grid;grid-template-columns:360px 1fr;gap:15px;height:95vh}
     .sidebar{background:var(--card-bg);padding:15px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.05);overflow-y:auto;display:flex;flex-direction:column;gap:10px;height:100%;border-top:5px solid var(--target)}
     .main-content{display:flex;flex-direction:column;gap:15px;overflow-y:auto;padding-right:5px;height:100%}
     .section-title{font-size:.85rem;font-weight:bold;color:var(--primary);margin-top:5px;border-bottom:2px solid #eee;padding-bottom:3px;display:flex;justify-content:space-between;align-items:center}
@@ -81,13 +81,14 @@
 
     .controls{display:grid;grid-template-columns:1fr 1fr 80px;gap:10px;margin-top:15px}
     .btn-ctrl{padding:15px;border:none;border-radius:8px;font-size:1rem;font-weight:bold;cursor:pointer;color:#fff;touch-action:manipulation}
+    .btn-ctrl:disabled{opacity:.55;cursor:not-allowed}
     .btn-p{background:var(--player)} .btn-b{background:var(--banker)} .btn-u{background:#95a5a6}
 
     .chart-box{background:var(--card-bg);padding:10px;border-radius:12px;flex-grow:1;min-height:250px;position:relative}
 
     .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;justify-content:center;align-items:center;z-index:999999;backdrop-filter:blur(5px)}
     .modal-box{background:#fff;padding:30px 20px;border-radius:15px;text-align:center;max-width:520px;width:90%;box-shadow:0 20px 50px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;border:2px solid var(--gold)}
-    .modal-icon{font-size:4rem;margin-bottom:15px}
+    .modal-icon{font-size:3rem;margin-bottom:10px}
     .modal-text-th{font-size:1.2rem;font-weight:bold;color:#2c3e50;margin-bottom:5px}
     .modal-sub{font-size:1rem;color:var(--success);font-weight:bold;margin-bottom:15px}
     .btn-modal-ack{background:var(--success);color:#fff;border:none;padding:12px 20px;width:100%;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1rem;margin-top:15px}
@@ -136,6 +137,22 @@
     .mini-card.placeholder{visibility:hidden}
     .shoe-newbtn{background:linear-gradient(135deg,#ffd700,#f39c12);color:#2c3e50;border:none;padding:8px 10px;border-radius:6px;font-weight:900;cursor:pointer;font-size:.75rem;white-space:nowrap}
 
+    /* ===== Session History UI ===== */
+    .sess-box{background:#ffffff;border:1px solid #e8e8e8;border-radius:10px;padding:10px}
+    .sess-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+    .sess-head .t{font-weight:900;color:var(--primary);font-size:.8rem}
+    .sess-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .btn-mini{border:none;border-radius:6px;padding:6px 8px;font-size:.7rem;font-weight:900;cursor:pointer}
+    .btn-mini.export{background:var(--comm);color:#fff}
+    .btn-mini.clear{background:#ecf0f1;color:#2c3e50;border:1px solid #d0d0d0}
+    .sess-table-wrap{max-height:240px;overflow:auto;border:1px solid #eee;border-radius:8px}
+    table.sess-table{width:100%;border-collapse:collapse;font-size:.72rem}
+    .sess-table th,.sess-table td{padding:6px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top;white-space:nowrap}
+    .sess-table th{position:sticky;top:0;background:#f8f9fb;z-index:2;text-align:left;color:#6c7a89;font-weight:900}
+    .pos{color:var(--success);font-weight:900}
+    .neg{color:var(--danger);font-weight:900}
+    .muted{color:#7f8c8d}
+
     @media(max-width:768px){
       body{overflow-y:auto;height:auto;display:block}
       .container{grid-template-columns:1fr;height:auto;display:flex;flex-direction:column;gap:20px;padding-bottom:30px}
@@ -151,7 +168,7 @@
 <div class="container">
   <div class="sidebar">
     <div class="section-title" style="justify-content:center;border-bottom:none">
-      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 REAL SHOE + COMMISSION</span>
+      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS</span>
     </div>
 
     <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
@@ -234,8 +251,8 @@
         <option value="20" selected>⚡ เร็ว (Fast)</option>
       </select>
 
-      <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 จำลองต่อเนื่อง (Auto Sim)</button>
-      <button class="btn-action btn-stop" id="btn_stop_sim" onclick="stopAutoSim()">⏹ หยุด (STOP)</button>
+      <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 Auto Sim</button>
+      <button class="btn-action btn-stop" id="btn_stop_sim" onclick="stopAutoSim()">⏹ STOP</button>
 
       <div id="sim_stats_display" style="display:none;font-size:.75rem;text-align:center;margin-top:5px;">
         รอบที่: <span id="sim_round_count">0</span> | สำเร็จ: <span id="sim_success_count" style="color:green;">0</span>
@@ -270,8 +287,39 @@
       </div>
     </div>
 
+    <!-- ===== NEW: Lifetime Stats (ตั้งแต่เริ่ม) ===== -->
+    <div class="section-title">📊 สถิติรวมทั้งหมด (ตั้งแต่เริ่ม)</div>
+    <div class="comm-box" style="border-color:#cfe2ff;background:#f7fbff">
+      <div class="comm-title" style="color:#1d4ed8">
+        <span>Lifetime Stats</span>
+      </div>
+
+      <div class="comm-grid">
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
+          <div class="lb">Net Profit รวมทั้งหมด</div>
+          <div class="vl" id="all_net">0</div>
+        </div>
+
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
+          <div class="lb">Net + Commission รวมทั้งหมด</div>
+          <div class="vl" id="all_net_comm">0</div>
+        </div>
+
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
+          <div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div>
+          <div class="vl" id="all_max_dd">0</div>
+        </div>
+
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)">
+          <div class="lb">Max Bet สูงสุดตั้งแต่ต้น</div>
+          <div class="vl" id="all_max_bet">0</div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== /NEW ===== -->
+
     <div class="target-box">
-      <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
+      <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ) (ยังคงอยู่)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
         <input type="number" id="target_profit" value="1">
@@ -314,7 +362,6 @@
     </div>
 
     <div class="form-group"><label>เงินทุน (Bankroll)</label><input type="number" id="init_bank" value="10000"></div>
-    <div class="form-group"><label>Stop Loss</label><input type="number" id="stop_loss" value="10000" style="color:var(--danger);font-weight:bold"></div>
     <div class="form-group"><label>Max Bet Cap</label><input type="number" id="max_bet_cap" value="10000"></div>
     <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.62" step="0.01"></div>
 
@@ -334,6 +381,43 @@
         <span id="cycle_profit_disp" style="color:var(--target);font-weight:bold;">0</span>
       </div>
       <div style="font-size:.6rem;color:#bdc3c7;margin-top:4px;" id="trailing_info">Trailing Inactive</div>
+      <div style="font-size:.7rem;color:#d7f7e6;margin-top:8px;">
+        ทุนคงเหลือ (รวมค่าคอม): <b id="bankroll_left_disp">0</b><br/>
+        Session #: <b id="session_no_disp">0</b> | Sessions Saved: <b id="session_saved_disp">0</b>
+      </div>
+    </div>
+
+    <!-- ===== Session History on Sidebar ===== -->
+    <div class="sess-box">
+      <div class="sess-head">
+        <div class="t">📒 Session History (ล่าสุด)</div>
+        <div class="sess-actions">
+          <button class="btn-mini export" onclick="exportSessionHistory()">Export JSON</button>
+          <button class="btn-mini clear" onclick="clearSessionHistory()">Clear</button>
+        </div>
+      </div>
+      <div class="sess-table-wrap">
+        <table class="sess-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Reason</th>
+              <th>Hands</th>
+              <th>Net+Comm</th>
+              <th>Comm</th>
+              <th>Turn</th>
+              <th>Left</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="session_table_body">
+            <tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="muted" style="font-size:.68rem;margin-top:6px;line-height:1.5">
+        * บันทึกเมื่อ: Net Profit ≥ 0.01 หรือ BankrollLeft &lt; MinBet/≤ 0 แล้วเริ่ม session ใหม่อัตโนมัติ
+      </div>
     </div>
 
     <div class="section-title">🧠 AI Brain Monitor</div>
@@ -371,7 +455,7 @@
       </select>
 
       <button class="btn-action btn-auto" id="btn_auto_sim_bot" onclick="toggleAutoSim()">🚀 Auto Sim</button>
-      <button class="btn-action btn-stop" id="btn_stop_sim_bot" onclick="stopAutoSim()">⏹ หยุด</button>
+      <button class="btn-action btn-stop" id="btn_stop_sim_bot" onclick="stopAutoSim()">⏹ STOP</button>
 
       <div id="sim_stats_display_bot" style="display:none;font-size:.75rem;text-align:center;margin-top:5px;">
         รอบที่: <span id="sim_round_count_bot">0</span> | สำเร็จ: <span id="sim_success_count_bot" style="color:green;">0</span>
@@ -438,25 +522,15 @@
   </div>
 </div>
 
-<!-- Win Modal -->
-<div class="modal-overlay" id="winModal">
-  <div class="modal-box">
-    <div class="modal-icon">🎯</div>
-    <div class="modal-text-th" id="modal_title">Target Hit!</div>
-    <div class="modal-sub" id="modal_profit_show">+0 Units</div>
-    <div class="modal-text-th" style="font-size:.9rem;color:#7f8c8d;">System Reset Betting Progression</div>
-    <button class="btn-modal-ack" onclick="closeWinModal()">รับทราบ</button>
-  </div>
-</div>
-
 <!-- Risk Modal -->
 <div class="modal-overlay" id="riskModal">
   <div class="modal-box" style="border-top:5px solid #c0392b;">
     <div class="modal-icon">⚠️</div>
-    <div class="modal-text-th" style="color:#c0392b;">Stop Loss / Logic Stop</div>
+    <div class="modal-text-th" style="color:#c0392b;">Session End</div>
     <div class="risk-stat-box">
       <div class="risk-row"><span>Reason:</span><span class="risk-val" id="risk_reason">-</span></div>
-      <div class="risk-row"><span>Drawdown:</span><span class="risk-val" id="risk_dd">-</span></div>
+      <div class="risk-row"><span>Net:</span><span class="risk-val" id="risk_dd">-</span></div>
+      <div class="risk-row"><span>ทุนคงเหลือ:</span><span class="risk-val" id="risk_left">-</span></div>
     </div>
     <button class="btn-modal-ack" style="background:#c0392b;" onclick="closeRiskModal()">ปิด</button>
   </div>
@@ -468,18 +542,12 @@
     <div class="modal-icon" style="width:100%;text-align:center;">💰</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      ถ้าคุณได้ค่าคอมมิชชั่น-โรลลิ่ง ตั้งแต่ 0.1% ซึ่งส่วนมากเจ้ามือจะให้ 0.5% ถึง 1%
-      แนะนำให้นำทุนมาเล่นครั้งละไม่เกิน 1% ของยอดเงินของคุณที่มีทั้งหมด ระยะยาวคุณจะได้กำไร  เพราะกลยุทธ์นี้ระยะยาวเสียไม่เกิน 0.08% เท่านั้น
-     **เก็บกำไรรอบสั้นๆ ถ้า Net Profit มีกำไรให้ ให้กดเริ่มการเดินเงินใหม่ กดล้างสกอร์เพื่อเริ่มเล่นใหม่ ติดต่อฉันที่ wavegreen2@gmail.com
-      <div style="margin-top:12px;background:#f5eef8;border-left:4px solid var(--comm);padding:10px;border-radius:0 6px 6px 0;color:#555;font-size:.85rem;line-height:1.6;">
-        If you get a rolling commission of at least 0.1% (usually 0.5% - 1%), I recommend betting no more than 1% of your total capital at a time. 
-        You will gain profit in the long term, as this strategy keeps losses under 0.08%.
-**Take profits in short rounds. Once your Net Profit is positive, restart your money management strategy. Clear the score to start over. Contact me at wavegreen2@gmail.com
-      </div>
+      Take profits in short rounds. Once your Net Profit is positive, restart your session.
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
   </div>
 </div>
+
 <script>
 /* =========================
    Real Shoe Engine (8 Deck + Burn Card)
@@ -661,7 +729,7 @@ function onRngChange(){
 }
 
 /* =========================
-   Core System + Commission
+   Core System + Commission + Sessions + Bankroll Cap
    ========================= */
 let state={
   realBalance:0, history:[], maxDrawdown:0, maxBet:0,
@@ -673,6 +741,44 @@ let state={
   commTurnover:0, commTotal:0, commHands:0
 };
 
+// ===== NEW: Lifetime (ทั้งหมดตั้งแต่เริ่ม) =====
+let lifetime = {
+  net: 0,
+  comm: 0,
+  maxBet: 0,
+  highWater: 0,
+  maxDrawdown: 0
+};
+function lifetimeEquity(){
+  return lifetime.net + lifetime.comm;
+}
+function updateLifetimeUI(){
+  const netAll = lifetime.net;
+  const netCommAll = lifetimeEquity();
+
+  const elNet = document.getElementById('all_net');
+  const elNetComm = document.getElementById('all_net_comm');
+  const elDD = document.getElementById('all_max_dd');
+  const elMaxBet = document.getElementById('all_max_bet');
+
+  if(elNet){
+    elNet.innerText = netAll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    elNet.style.color = netAll>=0 ? 'var(--success)' : 'var(--danger)';
+  }
+  if(elNetComm){
+    elNetComm.innerText = netCommAll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    elNetComm.style.color = netCommAll>=0 ? 'var(--success)' : 'var(--danger)';
+  }
+  if(elDD){
+    elDD.innerText = lifetime.maxDrawdown.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    elDD.style.color = lifetime.maxDrawdown<=0 ? 'var(--danger)' : 'var(--text)';
+  }
+  if(elMaxBet){
+    elMaxBet.innerText = lifetime.maxBet.toLocaleString();
+  }
+}
+// ===== /NEW =====
+
 let undoStack=[];
 let chartInstance=null;
 let isAutoRunning=false;
@@ -680,7 +786,137 @@ let simRoundCount=0;
 let simSuccessCount=0;
 let autoTimer=null;
 
+// ===== Sessions =====
+let sessionHistory = [];
+let sessionNo = 0;
+let sessionStartTs = Date.now();
+
 const DEFAULT_DIVISOR=2.0;
+
+function getBankroll(){ return parseFloat(document.getElementById('init_bank').value)||0; }
+function getMinBet(){ return parseFloat(document.getElementById('min_bet').value)||0; }
+function getChip(){ return parseFloat(document.getElementById('chip_size').value)||1; }
+
+// ทุนคงเหลือจริง = bankroll + net + commission
+function getBankrollLeft(){
+  return getBankroll() + state.realBalance + state.commTotal;
+}
+
+function disablePlayButtons(disabled){
+  document.querySelectorAll('.btn-ctrl').forEach(b=>{ b.disabled = !!disabled; });
+}
+
+function capBetToBankroll(netBet){
+  if(netBet<=0) return 0;
+  const chip=getChip();
+  const left=getBankrollLeft();
+  const minBet=getMinBet();
+  if(left<=0) return 0;
+  const capped=Math.floor(Math.min(netBet,left)/chip)*chip;
+  if(capped<minBet) return 0;
+  return capped;
+}
+
+function renderSessionHistory(){
+  const body=document.getElementById('session_table_body');
+  if(!body) return;
+  if(sessionHistory.length===0){
+    body.innerHTML=`<tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr>`;
+    return;
+  }
+  const rows=sessionHistory.slice(-60).reverse().map(s=>{
+    const cls=(s.netPlusComm>=0)?'pos':'neg';
+    const t=new Date(s.tsEnd);
+    const timeStr=t.toLocaleString('th-TH',{hour12:false});
+    const reason=String(s.reason||'').slice(0,20);
+    return `
+      <tr>
+        <td>${s.sessionNo}</td>
+        <td title="${s.reason}">${reason}</td>
+        <td>${s.hands}</td>
+        <td class="${cls}">${(s.netPlusComm||0).toFixed(2)}</td>
+        <td>${(s.comm||0).toFixed(2)}</td>
+        <td>${(s.turnover||0).toFixed(0)}</td>
+        <td>${(s.bankrollLeft||0).toFixed(2)}</td>
+        <td class="muted">${timeStr}</td>
+      </tr>
+    `;
+  }).join('');
+  body.innerHTML=rows;
+}
+
+function exportSessionHistory(){
+  const blob=new Blob([JSON.stringify(sessionHistory,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`sessionHistory_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function clearSessionHistory(){
+  if(!confirm("ล้าง Session History ทั้งหมด?")) return;
+  sessionHistory=[];
+  renderSessionHistory();
+  updateUI();
+}
+
+function startNewSession(){
+  sessionNo += 1;
+  sessionStartTs = Date.now();
+
+  state.realBalance=0; state.history=[]; state.maxDrawdown=0; state.maxBet=0;
+  state.highWaterMark=0; state.targetReached=false; state.survivalActive=false;
+  state.cycleStartBalance=0;
+  state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
+  state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
+  state.graphData=[0]; state.graphLabels=[0];
+  state.commTurnover=0; state.commTotal=0; state.commHands=0;
+  undoStack=[];
+  disablePlayButtons(false);
+}
+
+function closeSessionAndRestart(reason){
+  const net=state.realBalance;
+  const comm=state.commTotal;
+  const netPlusComm=net+comm;
+  sessionHistory.push({
+    sessionNo: sessionNo||1,
+    reason,
+    tsStart: sessionStartTs,
+    tsEnd: Date.now(),
+    hands: state.history.length,
+    net,
+    comm,
+    netPlusComm,
+    turnover: state.commTurnover,
+    betHands: state.commHands,
+    bankroll: getBankroll(),
+    bankrollLeft: getBankrollLeft(),
+    minBet: getMinBet()
+  });
+  startNewSession();
+  renderSessionHistory();
+}
+
+// จบ session เมื่อ: bankrollLeft <= 0 หรือ bankrollLeft < minBet
+function checkAndEndSessionIfNeeded(isSim){
+  const left=getBankrollLeft();
+  const minBet=getMinBet();
+  if(left<=0){
+    closeSessionAndRestart("Bankroll Empty (<= 0)");
+    if(!isSim) updateUI();
+    return true;
+  }
+  if(left<minBet){
+    closeSessionAndRestart("Bankroll < MinBet");
+    if(!isSim) updateUI();
+    return true;
+  }
+  return false;
+}
 
 function syncSimSettings(source){
   if(source==='top'){
@@ -697,7 +933,6 @@ function syncSimSettings(source){
 
 function generateOutcome(){
   const method=document.getElementById('rng_method').value;
-
   if(method==='crypto'){
     const array=new Uint32Array(1);
     window.crypto.getRandomValues(array);
@@ -722,7 +957,6 @@ function restoreRecommended(){
   document.getElementById('dragon_limit').value=7;
   document.getElementById('max_bet_cap').value=10000;
   document.getElementById('rebalance_val').value=4.62;
-  document.getElementById('stop_loss').value=10000;
   document.getElementById('commission_rate').value="0.9";
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
@@ -731,8 +965,8 @@ function restoreRecommended(){
 }
 
 function roundToChip(val){
-  const chip=parseFloat(document.getElementById('chip_size').value)||1;
-  const min=parseFloat(document.getElementById('min_bet').value);
+  const chip=getChip();
+  const min=getMinBet();
   if(val<=0) return 0;
   const rounded=Math.ceil(val/chip)*chip;
   return Math.max(min,rounded);
@@ -740,12 +974,12 @@ function roundToChip(val){
 
 function calculateDivisor(deficit,minBet){
   let baseDiv=DEFAULT_DIVISOR;
-  const bank=parseFloat(document.getElementById('init_bank').value);
+  const bank=getBankroll();
   const survTrigger=parseFloat(document.getElementById('surv_trigger').value);
   const survMult=parseFloat(document.getElementById('surv_div').value);
 
   let currentDD = state.realBalance<0 ? Math.abs(state.realBalance) : 0;
-  let ddPercent=(currentDD/bank)*100;
+  let ddPercent=(bank>0)?(currentDD/bank)*100:0;
 
   if(ddPercent>=survTrigger){ baseDiv*=survMult; state.survivalActive=true; }
   else state.survivalActive=false;
@@ -758,9 +992,8 @@ function calculateDivisor(deficit,minBet){
 }
 
 function getRawBet(strat){
-  const minBet=parseFloat(document.getElementById('min_bet').value);
+  const minBet=getMinBet();
   let bet=0;
-
   if(strat.stage>=1){
     bet=strat.initBet*Math.pow(2,strat.stage);
   }else if(strat.wait>=1){
@@ -810,8 +1043,8 @@ function checkDragon(){
 
 function applyTargetSniper(betAmount, side){
   const targetProfit=parseFloat(document.getElementById('target_profit').value);
-  const minBet=parseFloat(document.getElementById('min_bet').value);
-  const chipSize=parseFloat(document.getElementById('chip_size').value)||1;
+  const minBet=getMinBet();
+  const chipSize=getChip();
   if(targetProfit<=0) return betAmount;
 
   const currentCycleProfit=state.realBalance-state.cycleStartBalance;
@@ -827,7 +1060,14 @@ function applyTargetSniper(betAmount, side){
 }
 
 function processResult(res,isSim=false){
+  // จบ session ทันทีถ้าทุนต่ำกว่า minBet หรือ <=0
+  if(checkAndEndSessionIfNeeded(isSim)) return;
+
   if(!isSim) saveState();
+
+  // ===== Lifetime delta trackers =====
+  let commAdded = 0;
+  let netDelta = 0;
 
   const stratMode=document.getElementById('strat_mode').value;
   const maxBetCap=parseFloat(document.getElementById('max_bet_cap').value);
@@ -853,7 +1093,6 @@ function processResult(res,isSim=false){
   const rawB=getRawBet(state.bStrat);
 
   let netBet=0, netSide=null;
-
   if(stratMode==='offset'){
     if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
     else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
@@ -871,23 +1110,29 @@ function processResult(res,isSim=false){
   if(netBet>0) netBet=applyTargetSniper(netBet,netSide);
   if(netBet>maxBetCap) netBet=maxBetCap;
 
-  // Commission/Rolling: คิดจากยอดเดิมพันทุกมือที่มีการเดิมพันจริง
+  // CAP ตามทุนจริง (ถ้าเหลือ < minBet จะกลายเป็น 0)
+  if(netBet>0) netBet=capBetToBankroll(netBet);
+
+  // Commission/Rolling
   if(netBet>0 && res!=='T'){
     state.commTurnover += netBet;
     state.commHands += 1;
     if(commRate>0){
-      state.commTotal += netBet*(commRate/100);
+      commAdded = netBet*(commRate/100);
+      state.commTotal += commAdded;
     }
   }
 
-  // P/L (Tie = Push)
+  // P/L (Tie push)
   if(netBet>0){
     if(res==='T'){
-      // push
+      netDelta = 0; // push
     }else if(netSide==='P'){
-      state.realBalance += (res==='P') ? netBet : -netBet;
+      netDelta = (res==='P') ? netBet : -netBet;
+      state.realBalance += netDelta;
     }else{
-      state.realBalance += (res==='B') ? (netBet*0.95) : -netBet;
+      netDelta = (res==='B') ? (netBet*0.95) : -netBet;
+      state.realBalance += netDelta;
     }
   }
 
@@ -908,13 +1153,34 @@ function processResult(res,isSim=false){
   if(state.realBalance < state.maxDrawdown) state.maxDrawdown=state.realBalance;
   if(netBet > state.maxBet) state.maxBet=netBet;
 
-  // Target cycle reset
+  // ===== NEW: Lifetime Update (ทั้งหมดตั้งแต่เริ่ม) =====
+  if(netBet>0){
+    lifetime.net += netDelta;
+    lifetime.comm += commAdded;
+
+    if(netBet > lifetime.maxBet) lifetime.maxBet = netBet;
+
+    const eq = lifetimeEquity();
+    if(eq > lifetime.highWater) lifetime.highWater = eq;
+
+    const dd = eq - lifetime.highWater; // <= 0
+    if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown = dd;
+  }
+  // ===== /NEW =====
+
+  // ===== SESSION RULE: กำไรเมื่อ Net Profit >= 0.01 => ปิด session เก็บ Net+Comm =====
+  if(state.realBalance >= 0.01){
+    closeSessionAndRestart("Profit >= 0.01 (Net Profit)");
+    if(!isSim) updateUI();
+    return;
+  }
+
+  // ===== SESSION RULE: ทุนต่ำกว่า minBet / ทุนหมด => ปิด session =====
+  if(checkAndEndSessionIfNeeded(isSim)) return;
+
+  // (ยังคง logic เดิมไว้) Target cycle reset / trailing
   const cycleProfit = state.realBalance - state.cycleStartBalance;
   if(targetProfit>0 && cycleProfit>=targetProfit){
-    if(!isSim && !state.targetReached){
-      showWinModal(false, cycleProfit);
-      state.targetReached=true;
-    }
     state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
     state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
     state.cycleStartBalance=state.realBalance;
@@ -922,20 +1188,14 @@ function processResult(res,isSim=false){
     state.targetReached=false;
   }
 
-  // Trailing
   const trailStart=parseFloat(document.getElementById('trail_start').value);
   const trailDrop=parseFloat(document.getElementById('trail_drop').value);
-
   if(state.realBalance>=trailStart && state.realBalance>state.highWaterMark){
     state.highWaterMark=state.realBalance;
   }
   if(state.highWaterMark>=trailStart){
     const cutLine=state.highWaterMark*(1-(trailDrop/100));
     if(state.realBalance<=cutLine){
-      if(!state.targetReached){
-        showWinModal(true,0);
-        state.targetReached=true;
-      }
       state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
       state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
       state.highWaterMark=state.realBalance;
@@ -989,6 +1249,14 @@ function updateUI(){
   if(originalAmt>netAmt) formula += " [Sniper]";
   if(netAmt>maxBetCap) netAmt=maxBetCap;
 
+  // preview cap
+  if(netAmt>0){
+    const cappedPreview=capBetToBankroll(netAmt);
+    if(cappedPreview===0) formula += " [NoBet: Bankroll<Min]";
+    else if(cappedPreview<netAmt) formula += " [Cap: Bankroll]";
+    netAmt=cappedPreview;
+  }
+
   document.getElementById('rec_amount').innerText=netAmt.toLocaleString();
   document.getElementById('rec_side').innerText=netSide;
   document.getElementById('rec_side').className=`rec-side ${sideClass}`;
@@ -1002,7 +1270,7 @@ function updateUI(){
   document.getElementById('target_status_display').innerText=`${state.realBalance.toFixed(2)} / ${state.highWaterMark.toFixed(2)}`;
 
   const cycleProfit=state.realBalance-state.cycleStartBalance;
-  const targetProfit=parseFloat(document.getElementById('target_profit').value);
+  const targetProfit=parseFloat(document.getElementById('target_profit').value)||0;
   document.getElementById('cycle_profit_disp').innerText=`${cycleProfit.toFixed(2)} / ${targetProfit}`;
 
   const trailStart=parseFloat(document.getElementById('trail_start').value);
@@ -1021,7 +1289,6 @@ function updateUI(){
   if(state.survivalActive) document.getElementById('survival_box').classList.add('survival-active');
   else document.getElementById('survival_box').classList.remove('survival-active');
 
-  // Commission display (Net + Commission)
   const netPlusComm = state.realBalance + state.commTotal;
   document.getElementById('comm_turnover').innerText = state.commTurnover.toLocaleString(undefined,{maximumFractionDigits:2});
   document.getElementById('comm_total').innerText = state.commTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1036,8 +1303,19 @@ function updateUI(){
   document.getElementById('sim_round_count_bot').innerText=simRoundCount;
   document.getElementById('sim_success_count_bot').innerText=simSuccessCount;
 
+  const left=getBankrollLeft();
+  const el=document.getElementById('bankroll_left_disp');
+  if(el){
+    el.innerText = left.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    el.style.color = left>=getMinBet() ? '#d7f7e6' : '#ffb3b3';
+  }
+  document.getElementById('session_no_disp').innerText = sessionNo.toLocaleString();
+  document.getElementById('session_saved_disp').innerText = sessionHistory.length.toLocaleString();
+
+  renderSessionHistory();
   renderBigRoad();
   updateChart();
+  updateLifetimeUI(); // ===== NEW =====
   refreshShoeUI();
 }
 
@@ -1112,39 +1390,28 @@ function updateChart(){
 
 /* ===== Undo/Reset ===== */
 function saveState(){
-  undoStack.push(JSON.parse(JSON.stringify(state)));
+  undoStack.push({
+    state: JSON.parse(JSON.stringify(state)),
+    lifetime: JSON.parse(JSON.stringify(lifetime))
+  });
   if(undoStack.length>30) undoStack.shift();
 }
 function undo(){
   if(undoStack.length===0) return;
-  state=undoStack.pop();
+  const snap=undoStack.pop();
+  state=snap.state;
+  lifetime=snap.lifetime;
   updateUI();
-}
-function softReset(){
-  state.realBalance=0; state.history=[]; state.maxDrawdown=0; state.maxBet=0;
-  state.highWaterMark=0; state.targetReached=false; state.survivalActive=false;
-  state.cycleStartBalance=0;
-  state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-  state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-  state.graphData=[0]; state.graphLabels=[0];
-  state.commTurnover=0; state.commTotal=0; state.commHands=0;
-  undoStack=[];
 }
 function resetAll(){
   if(confirm("ต้องการรีเซ็ตระบบใช่หรือไม่?")) location.reload();
 }
 
 /* ===== Modals ===== */
-function showWinModal(isTrailing=false, profitVal=0){
-  if(isAutoRunning) return;
-  document.getElementById('modal_title').innerText = isTrailing ? "Profit Locked (Trailing)" : "Target Hit! (Cycle Reset)";
-  document.getElementById('modal_profit_show').innerText = isTrailing ? "Profit Locked" : `+${profitVal.toFixed(2)} Units`;
-  document.getElementById('winModal').style.display='flex';
-}
-function closeWinModal(){ document.getElementById('winModal').style.display='none'; }
 function showRiskModal(reason){
   document.getElementById('risk_reason').innerText=reason;
   document.getElementById('risk_dd').innerText=state.realBalance.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('risk_left').innerText=getBankrollLeft().toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('riskModal').style.display='flex';
 }
 function closeRiskModal(){ document.getElementById('riskModal').style.display='none'; }
@@ -1155,7 +1422,9 @@ function closeGuideModal(){ document.getElementById('guideModal').style.display=
 function runSimulation(){
   const n=parseInt(document.getElementById('sim_hands').value)||1;
   saveState();
-  for(let i=0;i<n;i++) processResult(generateOutcome(), true);
+  for(let i=0;i<n;i++){
+    processResult(generateOutcome(), true);
+  }
   updateUI();
 }
 
@@ -1172,7 +1441,8 @@ function toggleAutoSim(){
 
   if(simRoundCount===0){
     simRoundCount=1; simSuccessCount=0;
-    softReset(); updateUI();
+    startNewSession();
+    updateUI();
   }
 
   const speed=parseInt(document.getElementById('sim_speed').value);
@@ -1190,46 +1460,16 @@ function stopAutoSim(){
 }
 
 async function runInstantLoop(){
-  const stopLoss=parseFloat(document.getElementById('stop_loss').value);
-  const targetProfit=parseFloat(document.getElementById('target_profit').value);
-
   while(isAutoRunning){
     processResult(generateOutcome(), true);
-
-    if(state.realBalance <= -stopLoss){
-      stopAutoSim(); updateUI(); showRiskModal("Stop Loss Reached"); break;
-    }
-
-    const cycleProfit=state.realBalance-state.cycleStartBalance;
-    if(targetProfit>0 && cycleProfit>=targetProfit){
-      simSuccessCount++; simRoundCount++;
-      softReset(); updateUI();
-      await new Promise(r=>setTimeout(r,10));
-      continue;
-    }
     await new Promise(r=>setTimeout(r,0));
   }
 }
 
 function autoPlayStep(){
   if(!isAutoRunning) return;
-
-  const stopLoss=parseFloat(document.getElementById('stop_loss').value);
-  const targetProfit=parseFloat(document.getElementById('target_profit').value);
   const speed=parseInt(document.getElementById('sim_speed').value);
-
   processResult(generateOutcome(), true);
-
-  if(state.realBalance <= -stopLoss){
-    stopAutoSim(); updateUI(); showRiskModal("Stop Loss Reached"); return;
-  }
-
-  const cycleProfit=state.realBalance-state.cycleStartBalance;
-  if(targetProfit>0 && cycleProfit>=targetProfit){
-    simSuccessCount++; simRoundCount++;
-    softReset();
-  }
-
   updateUI();
   autoTimer=setTimeout(autoPlayStep, speed);
 }
@@ -1237,15 +1477,12 @@ function autoPlayStep(){
 /* ===== Boot ===== */
 window.onload=function(){
   restoreRecommended();
+  startNewSession();
   onRngChange();
+  renderSessionHistory();
   updateUI();
 };
 </script>
 
 </body>
 </html>
-
-
-
-
-
