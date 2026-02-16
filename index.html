@@ -180,6 +180,7 @@
         <option value="math">🎲 Standard (Math.random)</option>
         <option value="crypto">🔒 Crypto Secure</option>
         <option value="shoe" selected>🃏 Real 8-Deck Shoe</option>
+        <option value="lcg">🧮 LCG (Deterministic)</option>
       </select>
     </div>
 
@@ -266,6 +267,7 @@
         <option value="offset" selected>⚖️ Offset (สมดุล P-B)</option>
         <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
         <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
+        <option value="something_else">🧩 Something Else (Hybrid)</option>
       </select>
     </div>
 
@@ -322,22 +324,23 @@
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ) (ยังคงอยู่)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="40">
+        <input type="number" id="target_profit" value="39.80456682549584">
       </div>
     </div>
+
     <div class="feature-box" style="border-color: var(--dragon);">
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
         <label>Stop if Streak >=</label>
-        <input type="number" id="dragon_limit" value="7">
+        <input type="number" id="dragon_limit" value="5">
       </div>
     </div>
 
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="11"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="17.3"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="13.3388572902752"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="15.491282082008215"></div>
       </div>
     </div>
 
@@ -345,13 +348,10 @@
       <div class="feature-title">🌪️ Chaos Filter</div>
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
-   <select id="chaos_limit" onchange="updateUI()">
-  <option value="9">9/10</option>
-  <option value="5" selected>5/10</option>
-  <option value="11">Disable</option>
-</select>
-
-
+        <select id="chaos_limit" onchange="updateUI()">
+          <option value="9">9/10</option>
+          <option value="5" selected>5/10</option>
+          <option value="11">Disable</option>
         </select>
       </div>
     </div>
@@ -359,21 +359,21 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="46"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.04"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="39.38392690411764"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="3.721260445305812"></div>
       </div>
     </div>
 
     <div class="form-group"><label>เงินทุน (Bankroll)=MINBETX2000</label><input type="number" id="init_bank" value="20000"></div>
     <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="20000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.62" step="0.01"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="4.103034121865692" step="0.01"></div>
 
     <div class="dual-input">
-      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="10"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="10" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="1" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า V3.4</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า BEST (Optimized)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
@@ -444,6 +444,7 @@
         <option value="math">🎲 Standard</option>
         <option value="crypto">🔒 Crypto</option>
         <option value="shoe" selected>🃏 Real Shoe</option>
+        <option value="lcg">🧮 LCG</option>
       </select>
     </div>
 
@@ -552,6 +553,22 @@
 </div>
 
 <script>
+/* =========================
+   LCG RNG (Deterministic)
+   ========================= */
+let lcgState = 0 >>> 0;
+function lcgSeedFromTime(){
+  // เอาเวลา+noise นิดหน่อย เพื่อให้ไม่ซ้ำง่าย
+  const t = (Date.now() ^ (performance.now()*1000|0)) >>> 0;
+  lcgState = (t || 123456789) >>> 0;
+}
+function lcgRand01(){
+  // 32-bit LCG: x = (a*x + c) mod 2^32
+  // ค่ามาตรฐานที่ใช้บ่อย (Numerical Recipes)
+  lcgState = (Math.imul(1664525, lcgState) + 1013904223) >>> 0;
+  return lcgState / 4294967296; // [0,1)
+}
+
 /* =========================
    Real Shoe Engine (8 Deck + Burn Card)
    ========================= */
@@ -722,12 +739,18 @@ function onPenChange(){
 function onRngChange(){
   const m=document.getElementById('rng_method').value;
   const ui=document.getElementById('shoe_ui');
+
   if(m==='shoe'){
     ui.classList.add('active');
     initShoe(false);
     refreshShoeUI();
   }else{
     ui.classList.remove('active');
+  }
+
+  if(m==='lcg'){
+    // seed ใหม่ทุกครั้งที่สลับมาใช้ LCG เพื่อไม่ให้ติดรูปแบบเดิมจาก session ก่อน
+    lcgSeedFromTime();
   }
 }
 
@@ -744,7 +767,7 @@ let state={
   commTurnover:0, commTotal:0, commHands:0
 };
 
-// ===== NEW: Lifetime (ทั้งหมดตั้งแต่เริ่ม) =====
+// ===== Lifetime (ทั้งหมดตั้งแต่เริ่ม) =====
 let lifetime = {
   net: 0,
   comm: 0,
@@ -780,7 +803,6 @@ function updateLifetimeUI(){
     elMaxBet.innerText = lifetime.maxBet.toLocaleString();
   }
 }
-// ===== /NEW =====
 
 let undoStack=[];
 let chartInstance=null;
@@ -879,6 +901,9 @@ function startNewSession(){
   state.commTurnover=0; state.commTotal=0; state.commHands=0;
   undoStack=[];
   disablePlayButtons(false);
+
+  // ให้ LCG เริ่มใหม่ทุก session เพื่อให้ reproducible ใน session เดียว
+  if(document.getElementById('rng_method').value==='lcg') lcgSeedFromTime();
 }
 
 function closeSessionAndRestart(reason){
@@ -921,14 +946,14 @@ function checkAndEndSessionIfNeeded(isSim){
   return false;
 }
 
-/* ===== NEW: Session End Rules (Optimize-style) =====
+/* ===== Session End Rules =====
    - End session when Cycle Profit >= Target Profit
    - End session when Trailing Stop hits
 */
 function checkAndEndSessionByTargetOrTrailing(isSim){
   const targetProfit = parseFloat(document.getElementById('target_profit').value) || 0;
 
-  // ----- Target Profit (Cycle) -----
+  // Target Profit (Cycle)
   const cycleProfit = state.realBalance - state.cycleStartBalance;
   if(targetProfit > 0 && cycleProfit >= targetProfit){
     closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`);
@@ -936,16 +961,14 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
     return true;
   }
 
-  // ----- Trailing Stop -----
+  // Trailing Stop
   const trailStart=parseFloat(document.getElementById('trail_start').value);
   const trailDrop=parseFloat(document.getElementById('trail_drop').value);
 
-  // update HWM after reaching start
   if(state.realBalance>=trailStart && state.realBalance>state.highWaterMark){
     state.highWaterMark=state.realBalance;
   }
 
-  // if active, check drop
   if(state.highWaterMark>=trailStart){
     const cutLine=state.highWaterMark*(1-(trailDrop/100));
     if(state.realBalance<=cutLine){
@@ -954,7 +977,6 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
       return true;
     }
   }
-
   return false;
 }
 
@@ -973,34 +995,56 @@ function syncSimSettings(source){
 
 function generateOutcome(){
   const method=document.getElementById('rng_method').value;
+
   if(method==='crypto'){
     const array=new Uint32Array(1);
     window.crypto.getRandomValues(array);
     const val=array[0]/(0xFFFFFFFF+1);
     return val<0.4932?'P':'B';
   }
+
   if(method==='shoe') return dealBaccarat();
+
+  if(method==='lcg'){
+    const v = lcgRand01();
+    return v<0.4932?'P':'B';
+  }
+
   return Math.random()<0.4932?'P':'B';
 }
 
+/* =========================
+   Restore BEST Settings
+   ========================= */
 function restoreRecommended(){
-  document.getElementById('init_bank').value=20000;
-  document.getElementById('strat_mode').value="offset";
-  document.getElementById('min_bet').value=10;
-  document.getElementById('chip_size').value=10;
-  document.getElementById('target_profit').value=40;
-  document.getElementById('trail_start').value=11;
-  document.getElementById('trail_drop').value=17.3;
-  document.getElementById('chaos_limit').value=5;
-  document.getElementById('surv_trigger').value=46;
-  document.getElementById('surv_div').value=2.04;
-  document.getElementById('dragon_limit').value=7;
-  document.getElementById('max_bet_cap').value=20000;
-  document.getElementById('rebalance_val').value=4.62;
-  document.getElementById('commission_rate').value="0.9";
-  document.getElementById('rng_method').value='shoe';
+  // BEST settings from optimizer
+  document.getElementById('rng_method').value='lcg';
   document.getElementById('shoe_pen').value='60';
+
+  document.getElementById('strat_mode').value="something_else";
+  document.getElementById('commission_rate').value="0.9";
+
+  document.getElementById('init_bank').value=20000.0;
+  document.getElementById('max_bet_cap').value=20000.0;
+
+  document.getElementById('rebalance_val').value=4.103034121865692;
+
+  document.getElementById('min_bet').value=5;
+  document.getElementById('chip_size').value=1;
+
+  document.getElementById('target_profit').value=39.80456682549584;
+  document.getElementById('dragon_limit').value=5;
+
+  document.getElementById('trail_start').value=13.3388572902752;
+  document.getElementById('trail_drop').value=15.491282082008215;
+
+  document.getElementById('chaos_limit').value=5;
+
+  document.getElementById('surv_trigger').value=39.38392690411764;
+  document.getElementById('surv_div').value=3.721260445305812;
+
   syncSimSettings('top');
+  onRngChange();
   updateUI();
 }
 
@@ -1100,12 +1144,10 @@ function applyTargetSniper(betAmount, side){
 }
 
 function processResult(res,isSim=false){
-  // จบ session ทันทีถ้าทุนต่ำกว่า minBet หรือ <=0
   if(checkAndEndSessionIfNeeded(isSim)) return;
-
   if(!isSim) saveState();
 
-  // ===== Lifetime delta trackers =====
+  // Lifetime delta trackers
   let commAdded = 0;
   let netDelta = 0;
 
@@ -1132,9 +1174,26 @@ function processResult(res,isSim=false){
   const rawB=getRawBet(state.bStrat);
 
   let netBet=0, netSide=null;
+
   if(stratMode==='offset'){
     if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
     else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
+
+  }else if(stratMode==='something_else'){
+    // Hybrid:
+    // 1) ถ้า P/B ใกล้กันมาก -> เอนไปทาง BANKER (เพราะจ่าย 0.95 แต่โอกาสชนะมักสูงกว่าเล็กน้อยในโมเดลจริง)
+    // 2) ถ้าห่างกัน -> ใช้ offset ปกติ
+    const diff = Math.abs(rawP-rawB);
+    const minBet = getMinBet();
+    const threshold = Math.max(minBet, 2*getChip()); // ใกล้กันระดับนี้ถือว่า "สูสี"
+    if(diff <= threshold){
+      netSide = 'B';
+      netBet = Math.max(rawP, rawB); // วางเต็มฝั่งที่เลือก
+    }else{
+      if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
+      else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
+    }
+
   }else{
     const lastRes=state.history.length>0?state.history[state.history.length-1]:null;
     let trendSide='P';
@@ -1149,7 +1208,7 @@ function processResult(res,isSim=false){
   if(netBet>0) netBet=applyTargetSniper(netBet,netSide);
   if(netBet>maxBetCap) netBet=maxBetCap;
 
-  // CAP ตามทุนจริง (ถ้าเหลือ < minBet จะกลายเป็น 0)
+  // CAP ตามทุนจริง
   if(netBet>0) netBet=capBetToBankroll(netBet);
 
   // Commission/Rolling
@@ -1165,7 +1224,7 @@ function processResult(res,isSim=false){
   // P/L (Tie push)
   if(netBet>0){
     if(res==='T'){
-      netDelta = 0; // push
+      netDelta = 0;
     }else if(netSide==='P'){
       netDelta = (res==='P') ? netBet : -netBet;
       state.realBalance += netDelta;
@@ -1178,11 +1237,13 @@ function processResult(res,isSim=false){
   updateAI(state.pStrat,'P',res,rawP);
   updateAI(state.bStrat,'B',res,rawB);
 
-  // rebalance
+  // rebalance (ใช้ rebalance_val จริง)
+  const rebVal = parseFloat(document.getElementById('rebalance_val').value) || 4.0;
+  const k = Math.min(0.20, Math.max(0.001, 1.0 / rebVal));
   if(Math.abs(state.pStrat.bal - state.bStrat.bal) > 100){
     const avg=(state.pStrat.bal + state.bStrat.bal)/2;
-    state.pStrat.bal += (avg - state.pStrat.bal)*0.01;
-    state.bStrat.bal += (avg - state.bStrat.bal)*0.01;
+    state.pStrat.bal += (avg - state.pStrat.bal) * k;
+    state.bStrat.bal += (avg - state.bStrat.bal) * k;
   }
 
   state.history.push(res);
@@ -1192,7 +1253,7 @@ function processResult(res,isSim=false){
   if(state.realBalance < state.maxDrawdown) state.maxDrawdown=state.realBalance;
   if(netBet > state.maxBet) state.maxBet=netBet;
 
-  // ===== NEW: Lifetime Update (ทั้งหมดตั้งแต่เริ่ม) =====
+  // Lifetime Update
   if(netBet>0){
     lifetime.net += netDelta;
     lifetime.comm += commAdded;
@@ -1205,12 +1266,8 @@ function processResult(res,isSim=false){
     const dd = eq - lifetime.highWater; // <= 0
     if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown = dd;
   }
-  // ===== /NEW =====
 
-  // ===== SESSION RULE: Target OR Trailing => ปิด session + บันทึก =====
   if(checkAndEndSessionByTargetOrTrailing(isSim)) return;
-
-  // ===== SESSION RULE: ทุนต่ำกว่า minBet / ทุนหมด => ปิด session =====
   if(checkAndEndSessionIfNeeded(isSim)) return;
 
   if(!isSim) updateUI();
@@ -1240,6 +1297,18 @@ function updateUI(){
     if(nextP>nextB){ netAmt=nextP-nextB; netSide="PLAYER"; sideClass="side-p"; }
     else if(nextB>nextP){ netAmt=nextB-nextP; netSide="BANKER"; sideClass="side-b"; }
     formula=`Offset: P${nextP} vs B${nextB}`;
+  }else if(stratMode==='something_else'){
+    const diff = Math.abs(nextP-nextB);
+    const threshold = Math.max(getMinBet(), 2*getChip());
+    if(diff <= threshold){
+      netSide="BANKER"; sideClass="side-b";
+      netAmt=Math.max(nextP,nextB);
+      formula=`SomethingElse: close(P${nextP},B${nextB}) => BANKER full`;
+    }else{
+      if(nextP>nextB){ netAmt=nextP-nextB; netSide="PLAYER"; sideClass="side-p"; }
+      else if(nextB>nextP){ netAmt=nextB-nextP; netSide="BANKER"; sideClass="side-b"; }
+      formula=`SomethingElse: offset P${nextP} vs B${nextB}`;
+    }
   }else{
     const lastRes=state.history.length>0?state.history[state.history.length-1]:null;
     let trendSide="PLAYER";
@@ -1258,7 +1327,6 @@ function updateUI(){
   if(originalAmt>netAmt) formula += " [Sniper]";
   if(netAmt>maxBetCap) netAmt=maxBetCap;
 
-  // preview cap
   if(netAmt>0){
     const cappedPreview=capBetToBankroll(netAmt);
     if(cappedPreview===0) formula += " [NoBet: Bankroll<Min]";
@@ -1485,7 +1553,7 @@ function autoPlayStep(){
 
 /* ===== Boot ===== */
 window.onload=function(){
-  restoreRecommended();
+  restoreRecommended();   // เริ่มด้วย BEST settings
   startNewSession();
   onRngChange();
   renderSessionHistory();
@@ -1495,12 +1563,3 @@ window.onload=function(){
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
