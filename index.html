@@ -300,7 +300,7 @@
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="60">
+        <input type="number" id="target_profit" value="6">
       </div>
     </div>
 
@@ -471,7 +471,7 @@
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
       ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br/>
-      rng=shoe, strat=something_else, comm=0.9, minbet=10, chip=10, target=60,
+      rng=shoe, strat=something_else, comm=0.9, minbet=10, chip=10, target=6,
       max_bet_cap=10000, dragon=6, chaos=5/10, trail_start=30, trail_drop=3,
       surv_trigger=10, surv_div=4, pen=60, rebalance=10
       <br/><br/>
@@ -922,7 +922,7 @@ function restoreRecommended(){
   document.getElementById('chip_size').value=10.0;
 
   // Target
-  document.getElementById('target_profit').value=60.0;
+  document.getElementById('target_profit').value=6.0;
 
   // Dragon / Chaos
   document.getElementById('dragon_limit').value=6;
