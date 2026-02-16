@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baccarat AI: Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — BEST TRAIN ELIGIBLE t=5617 + Casino CutCard</title>
+  <title>Baccarat AI: Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — LOW DD DEFAULT + Casino CutCard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -164,7 +164,7 @@
 <div class="container">
   <div class="sidebar">
     <div class="section-title" style="justify-content:center;border-bottom:none">
-      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS (DEFAULT BEST t=5617 + Casino CutCard)</span>
+      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS (DEFAULT: LOW DRAW DOWN + Casino CutCard)</span>
     </div>
 
     <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
@@ -263,6 +263,7 @@
         <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
         <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
         <option value="something_else" selected>🧪 Something Else (Engine)</option>
+        <option value="policy_ai">🧠 Policy AI (trained weights)</option>
       </select>
     </div>
 
@@ -299,7 +300,7 @@
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="117.81914175857622">
+        <input type="number" id="target_profit" value="60">
       </div>
     </div>
 
@@ -307,15 +308,15 @@
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
         <label>Stop if Streak >=</label>
-        <input type="number" id="dragon_limit" value="9">
+        <input type="number" id="dragon_limit" value="6">
       </div>
     </div>
 
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="41.87162455609199"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="5.5746567454643925"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="30"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="3"></div>
       </div>
     </div>
 
@@ -324,9 +325,9 @@
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
         <select id="chaos_limit" onchange="updateUI()">
-          <option value="5">5/10</option>
+          <option value="5" selected>5/10</option>
           <option value="9">9/10</option>
-          <option value="11" selected>Disable</option>
+          <option value="11">Disable</option>
         </select>
       </div>
     </div>
@@ -334,21 +335,21 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="35.010806932018134"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.9430496682874425"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="10"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="3.01"></div>
       </div>
     </div>
 
     <div class="form-group"><label>เงินทุน (Bankroll)=MINBETX2000</label><input type="number" id="init_bank" value="20000"></div>
-    <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="20000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="6.927859299036649" step="0.01"></div>
+    <div class="form-group"><label>Max Bet Cap=MINBETX2000</label><input type="number" id="max_bet_cap" value="2000"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="10" step="0.01"></div>
 
     <div class="dual-input">
       <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="100"></div>
       <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="100" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (BEST t=5617)</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (LOW DD DEFAULT)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
@@ -469,11 +470,12 @@
     <div class="modal-icon" style="width:100%;text-align:center;">💰</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      ค่าเริ่มต้นถูกตั้งเป็นชุด BEST TRAIN ELIGIBLE (t=5617):<br/>
-      rng=shoe, strat=something_else, comm=0.9, minbet=100, chip=100, target=117.8191, dragon=9,
-      trail_start=41.8716, trail_drop=5.5747, chaos=Disable(11), surv_trigger=35.0108, surv_div=2.9430, pen=60, rebalance=6.9279
+      ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br/>
+      rng=shoe, strat=something_else, comm=0.9, minbet=100, chip=100, target=60,
+      max_bet_cap=2000, dragon=6, chaos=5/10, trail_start=30, trail_drop=3,
+      surv_trigger=10, surv_div=4, pen=60, rebalance=10
       <br/><br/>
-      ปรับเพิ่มความเหมือนคาสิโน: Cut Card จะ “แกว่ง” รอบ ๆ %penetration ในแต่ละ Shoe
+      Cut Card จะ “แกว่ง” รอบ ๆ %penetration ในแต่ละ Shoe
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
   </div>
@@ -488,12 +490,10 @@ const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const BAC_VAL={A:1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':0,J:0,Q:0,K:0};
 const BURN_VAL={A:1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,J:10,Q:10,K:10};
 
-// ✅ เพิ่ม cutAt เพื่อให้ cut card “แกว่ง” เหมือนคาสิโน
 let shoe={deck:[],total:416,used:0,no:0,pen:60,cutAt:0,lastHand:null,burnInfo:null,ready:false};
 
 function isRedSuit(s){return s==='♥'||s==='♦';}
 
-// ✅ บังคับ Crypto RNG เท่านั้น (ไม่ fallback Math.random)
 function cryptoRandInt(maxExclusive){
   if(!(window.crypto && window.crypto.getRandomValues)){
     throw new Error("Crypto RNG not available");
@@ -503,24 +503,20 @@ function cryptoRandInt(maxExclusive){
   return a[0] % maxExclusive;
 }
 
-// float [0,1)
 function randFloat01(){
   if(!(window.crypto && window.crypto.getRandomValues)){
     throw new Error("Crypto RNG not available");
   }
   const a=new Uint32Array(1);
   window.crypto.getRandomValues(a);
-  return a[0] / 4294967296; // 2^32
+  return a[0] / 4294967296;
 }
 
-// ✅ สุ่มตำแหน่ง cut card ต่อ shoe (แกว่งรอบ penetration)
 function pickCutAt(total, penPercent){
   const target = Math.floor(total*(penPercent/100));
-
-  // ปรับ jitter ได้: 4% ของ shoe ~ 16 ใบ (416*0.04)
   const jitter = Math.floor(total*0.04);
-  const lo = Math.max(60, target - jitter);       // กันตัดตื้นเกิน
-  const hi = Math.min(total - 20, target + jitter); // กันลึกเกิน/เหลือไพ่น้อย
+  const lo = Math.max(60, target - jitter);
+  const hi = Math.min(total - 20, target + jitter);
   return lo + Math.floor(randFloat01() * (hi - lo + 1));
 }
 
@@ -549,7 +545,6 @@ function makeBurnRevealEl(card){
   const el=makeCardEl(card,false); el.classList.add('burn-reveal'); return el;
 }
 function shoeNeedCut(){
-  // ✅ ใช้ cutAt ที่สุ่มไว้ (เหมือนมี cut card วางจริง)
   return shoe.used>=shoe.cutAt || shoe.deck.length<6;
 }
 function shoeDraw(){
@@ -583,7 +578,6 @@ function initShoe(force=false){
   shoe.lastHand=null; shoe.burnInfo=null; shoe.ready=true;
   shoe.pen=parseInt(document.getElementById('shoe_pen').value)||60;
 
-  // ✅ สุ่มตำแหน่ง cut card ต่อ shoe
   shoe.cutAt = pickCutAt(shoe.total, shoe.pen);
 
   doBurnCeremony();
@@ -645,7 +639,6 @@ function refreshShoeUI(){
   document.getElementById('sb_fill').style.width=pct.toFixed(1)+'%';
   document.getElementById('sb_txt').innerText=`${shoe.used} / ${shoe.total} (${pct.toFixed(1)}%)`;
 
-  // ✅ แสดงตำแหน่ง cut card ตาม cutAt จริง (ไม่ใช่ %pen ตายตัว)
   document.getElementById('sb_cut').style.left=((shoe.cutAt/shoe.total)*100).toFixed(1)+'%';
 
   document.getElementById('sh_rem').innerText=shoe.total-shoe.used;
@@ -677,7 +670,6 @@ function refreshShoeUI(){
 }
 function onPenChange(){
   shoe.pen=parseInt(document.getElementById('shoe_pen').value)||60;
-  // สับใหม่เพื่อให้ cutAt สอดคล้องกับ penetration ที่เปลี่ยน (เหมือนเปลี่ยนตำแหน่ง cut card)
   if(document.getElementById('rng_method').value==='shoe') initShoe(true);
   refreshShoeUI();
 }
@@ -905,33 +897,44 @@ function generateOutcome(){
 }
 
 /* =========================
-   DEFAULT = BEST TRAIN ELIGIBLE t=5617
+   DEFAULT = LOW DRAW DOWN (คุม Max DD)
    ========================= */
 function restoreRecommended(){
+  // RNG / Shoe
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
 
+  // Strategy (คุม DD ดีสุดกับระบบเดิม)
   document.getElementById('strat_mode').value='something_else';
+
+  // Commission
   document.getElementById('commission_rate').value='0.9';
 
+  // Bankroll / Risk Caps
   document.getElementById('init_bank').value=20000.0;
-  document.getElementById('max_bet_cap').value=20000.0;
+  document.getElementById('max_bet_cap').value=2000.0; // ✅ ลด DD แรงสุด
 
-  document.getElementById('rebalance_val').value=6.927859299036649;
+  // Rebalance
+  document.getElementById('rebalance_val').value=10.0;
 
+  // Bet sizing
   document.getElementById('min_bet').value=100.0;
   document.getElementById('chip_size').value=100.0;
 
-  document.getElementById('target_profit').value=117.81914175857622;
-  document.getElementById('dragon_limit').value=9;
+  // Target
+  document.getElementById('target_profit').value=60.0;
 
-  document.getElementById('trail_start').value=41.87162455609199;
-  document.getElementById('trail_drop').value=5.5746567454643925;
+  // Dragon / Chaos
+  document.getElementById('dragon_limit').value=6;
+  document.getElementById('chaos_limit').value=5;
 
-  document.getElementById('chaos_limit').value=11;
+  // Trailing
+  document.getElementById('trail_start').value=30.0;
+  document.getElementById('trail_drop').value=3.0;
 
-  document.getElementById('surv_trigger').value=35.010806932018134;
-  document.getElementById('surv_div').value=2.9430496682874425;
+  // Survival
+  document.getElementById('surv_trigger').value=10.0;
+  document.getElementById('surv_div').value=3.01;
 
   syncSimSettings('top');
   onRngChange();
@@ -1034,6 +1037,129 @@ function applyTargetSniper(betAmount, side){
 }
 
 /* =========================
+   🧠 Policy AI (trained weights) — FULL INTEGRATION
+   ========================= */
+const TRAINED_POLICY = {
+  wP: {
+    c: -0.3928252531634952,
+    bias: 0.8708993699161368,
+    zig: 0.9898610254061753,
+    tieRate: -0.3955203431275083,
+    streakN: -0.13981681295704762,
+    lastP: 0.2532830015248164,
+    lastB: 0.07488143904492145
+  },
+  wB: {
+    c: -1.1508993524052586,
+    bias: -0.4321370196771435,
+    zig: -0.9614563873601566,
+    tieRate: 0.2576827616572196,
+    streakN: -0.41800751134256997,
+    lastP: 0.24814946837852042,
+    lastB: 0.3477249348305153
+  },
+  wW: {
+    c: -0.5528507363362684,
+    bias: 1.3951764069146138,
+    zig: -0.16996934097562105,
+    tieRate: -1.1134453873209744,
+    streakN: 1.0447036802114804,
+    lastP: 0.5488793440369264,
+    lastB: 1.0476893375084022
+  },
+  wBet: {
+    c: -0.09726322155264133,
+    bias: 0.18954046370849825,
+    zig: 1.504729716051429,
+    tieRate: -0.012070932803854961,
+    streakN: -1.0543141676408292,
+    lastP: 0.44867125798250074,
+    lastB: -0.2892945454527314
+  },
+  kellyLike: 0.5475672311517564,
+  maxFrac: 0.11942176903440395
+};
+
+function _sigmoid(x){
+  if(x > 60) return 1;
+  if(x < -60) return 0;
+  return 1 / (1 + Math.exp(-x));
+}
+function _dot(w, f){
+  return (w.c||0)       * (f.c||0) +
+         (w.bias||0)    * (f.bias||0) +
+         (w.zig||0)     * (f.zig||0) +
+         (w.tieRate||0) * (f.tieRate||0) +
+         (w.streakN||0) * (f.streakN||0) +
+         (w.lastP||0)   * (f.lastP||0) +
+         (w.lastB||0)   * (f.lastB||0);
+}
+function _computePolicyFeatures(){
+  const h = state.history || [];
+  const N = h.length;
+
+  const W = Math.min(30, N);
+  const slice = h.slice(-W);
+
+  const last = (N > 0) ? h[N-1] : null;
+  const lastP = (last === 'P') ? 1 : 0;
+  const lastB = (last === 'B') ? 1 : 0;
+
+  let streak = (N > 0) ? 1 : 0;
+  if(N >= 2){
+    for(let i=N-2;i>=0;i--){
+      if(h[i] === last) streak++;
+      else break;
+    }
+  }
+  const streakN = (N===0) ? 0 : Math.min(1, Math.log(1+streak) / Math.log(1+15));
+
+  let zigCnt = 0;
+  for(let i=0;i<slice.length-1;i++){
+    if(slice[i] !== slice[i+1]) zigCnt++;
+  }
+  const zig = (slice.length <= 1) ? 0 : zigCnt/(slice.length-1);
+
+  let ties = 0;
+  for(const r of slice) if(r === 'T') ties++;
+  const tieRate = (slice.length === 0) ? 0 : ties/slice.length;
+
+  let p=0, b=0;
+  for(const r of slice){
+    if(r === 'P') p++;
+    else if(r === 'B') b++;
+  }
+  const denom = p+b;
+  const bias = (denom === 0) ? 0 : (p-b)/denom;
+
+  return { c:1, bias, zig, tieRate, streakN, lastP, lastB };
+}
+function policyDecide(){
+  const f = _computePolicyFeatures();
+  const pol = TRAINED_POLICY;
+
+  const LP = _dot(pol.wP, f);
+  const LB = _dot(pol.wB, f);
+  const LW = _dot(pol.wW, f);
+
+  let action = 'WAIT';
+  let best = LW;
+  if(LP > best){ best = LP; action = 'P'; }
+  if(LB > best){ best = LB; action = 'B'; }
+
+  const r = _sigmoid(_dot(pol.wBet, f));
+
+  const left = getBankrollLeft();
+  const maxFrac = Math.max(0, Math.min(1, pol.maxFrac || 0));
+  const kellyLike = Math.max(0, Math.min(2, pol.kellyLike || 0));
+
+  let bet = left * maxFrac * kellyLike * r;
+  bet = roundToChip(bet);
+
+  return { action, bet, debug:{ f, LP, LB, LW, r } };
+}
+
+/* =========================
    ✅ something_else = engine.py 1:1 (ตามเวอร์ชันเว็บนี้)
    ========================= */
 function processResult(res,isSim=false){
@@ -1079,6 +1205,15 @@ function processResult(res,isSim=false){
     }else{
       if(rawP>rawB){ netBet=rawP-rawB; netSide='P'; }
       else if(rawB>rawP){ netBet=rawB-rawP; netSide='B'; }
+    }
+  }else if(stratMode==='policy_ai'){
+    const d = policyDecide();
+    if(d.action==='WAIT'){
+      netSide = null;
+      netBet  = 0;
+    }else{
+      netSide = d.action;
+      netBet  = d.bet;
     }
   }else{
     const lastRes=state.history.length>0?state.history[state.history.length-1]:null;
@@ -1185,6 +1320,16 @@ function updateUI(){
       else if(nextB>nextP){ netAmt=nextB-nextP; netSide="BANKER"; sideClass="side-b"; }
       formula=`Something Else: diff>${threshold} => Offset (P${nextP} vs B${nextB})`;
     }
+  }else if(stratMode==='policy_ai'){
+    const d = policyDecide();
+    if(d.action==='WAIT'){
+      netSide="WAIT"; netAmt=0; sideClass="side-n";
+    }else if(d.action==='P'){
+      netSide="PLAYER"; netAmt=d.bet; sideClass="side-p";
+    }else{
+      netSide="BANKER"; netAmt=d.bet; sideClass="side-b";
+    }
+    formula=`Policy AI: LP=${d.debug.LP.toFixed(2)} LB=${d.debug.LB.toFixed(2)} LW=${d.debug.LW.toFixed(2)} r=${d.debug.r.toFixed(2)}`;
   }else{
     const lastRes=state.history.length>0?state.history[state.history.length-1]:null;
     let trendSide="PLAYER";
