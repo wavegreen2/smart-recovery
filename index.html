@@ -346,10 +346,10 @@
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
         <select id="chaos_limit" onchange="updateUI()">
-  <option value="5">5/10</option>
-  <option value="9" selected>9/10</option>
-  <option value="11">Disable</option>
-</select>
+          <option value="5">5/10</option>
+          <option value="9" selected>9/10</option>
+          <option value="11">Disable</option>
+        </select>
       </div>
     </div>
 
@@ -416,7 +416,7 @@
         </table>
       </div>
       <div class="muted" style="font-size:.68rem;margin-top:6px;line-height:1.5">
-        * บันทึกเมื่อ: Net Profit ≥ 0.01 หรือ BankrollLeft &lt; MinBet/≤ 0 แล้วเริ่ม session ใหม่อัตโนมัติ
+        * บันทึกเมื่อ: ถึง Target Profit หรือ Trailing Stop ทำงาน หรือ BankrollLeft &lt; MinBet/≤ 0 แล้วเริ่ม session ใหม่อัตโนมัติ
       </div>
     </div>
 
@@ -918,6 +918,43 @@ function checkAndEndSessionIfNeeded(isSim){
   return false;
 }
 
+/* ===== NEW: Session End Rules (Optimize-style) =====
+   - End session when Cycle Profit >= Target Profit
+   - End session when Trailing Stop hits
+*/
+function checkAndEndSessionByTargetOrTrailing(isSim){
+  const targetProfit = parseFloat(document.getElementById('target_profit').value) || 0;
+
+  // ----- Target Profit (Cycle) -----
+  const cycleProfit = state.realBalance - state.cycleStartBalance;
+  if(targetProfit > 0 && cycleProfit >= targetProfit){
+    closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`);
+    if(!isSim) updateUI();
+    return true;
+  }
+
+  // ----- Trailing Stop -----
+  const trailStart=parseFloat(document.getElementById('trail_start').value);
+  const trailDrop=parseFloat(document.getElementById('trail_drop').value);
+
+  // update HWM after reaching start
+  if(state.realBalance>=trailStart && state.realBalance>state.highWaterMark){
+    state.highWaterMark=state.realBalance;
+  }
+
+  // if active, check drop
+  if(state.highWaterMark>=trailStart){
+    const cutLine=state.highWaterMark*(1-(trailDrop/100));
+    if(state.realBalance<=cutLine){
+      closeSessionAndRestart(`Trailing Stop Hit (HWM ${state.highWaterMark.toFixed(2)} → Cut ${cutLine.toFixed(2)})`);
+      if(!isSim) updateUI();
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function syncSimSettings(source){
   if(source==='top'){
     document.getElementById('sim_hands_bot').value=document.getElementById('sim_hands').value;
@@ -1073,7 +1110,6 @@ function processResult(res,isSim=false){
   const maxBetCap=parseFloat(document.getElementById('max_bet_cap').value);
   const chaosLimit=parseInt(document.getElementById('chaos_limit').value);
   const dragonLimit=parseInt(document.getElementById('dragon_limit').value);
-  const targetProfit=parseFloat(document.getElementById('target_profit').value);
   const commRate=parseFloat(document.getElementById('commission_rate').value)||0;
 
   const chaosCount=checkChaos();
@@ -1168,41 +1204,11 @@ function processResult(res,isSim=false){
   }
   // ===== /NEW =====
 
-  // ===== SESSION RULE: กำไรเมื่อ Net Profit >= 0.01 => ปิด session เก็บ Net+Comm =====
-  if(state.realBalance >= 0.01){
-    closeSessionAndRestart("Profit >= 0.01 (Net Profit)");
-    if(!isSim) updateUI();
-    return;
-  }
+  // ===== SESSION RULE: Target OR Trailing => ปิด session + บันทึก =====
+  if(checkAndEndSessionByTargetOrTrailing(isSim)) return;
 
   // ===== SESSION RULE: ทุนต่ำกว่า minBet / ทุนหมด => ปิด session =====
   if(checkAndEndSessionIfNeeded(isSim)) return;
-
-  // (ยังคง logic เดิมไว้) Target cycle reset / trailing
-  const cycleProfit = state.realBalance - state.cycleStartBalance;
-  if(targetProfit>0 && cycleProfit>=targetProfit){
-    state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-    state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-    state.cycleStartBalance=state.realBalance;
-    state.highWaterMark=state.realBalance;
-    state.targetReached=false;
-  }
-
-  const trailStart=parseFloat(document.getElementById('trail_start').value);
-  const trailDrop=parseFloat(document.getElementById('trail_drop').value);
-  if(state.realBalance>=trailStart && state.realBalance>state.highWaterMark){
-    state.highWaterMark=state.realBalance;
-  }
-  if(state.highWaterMark>=trailStart){
-    const cutLine=state.highWaterMark*(1-(trailDrop/100));
-    if(state.realBalance<=cutLine){
-      state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-      state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-      state.highWaterMark=state.realBalance;
-      state.cycleStartBalance=state.realBalance;
-      state.targetReached=false;
-    }
-  }
 
   if(!isSim) updateUI();
 }
@@ -1315,7 +1321,7 @@ function updateUI(){
   renderSessionHistory();
   renderBigRoad();
   updateChart();
-  updateLifetimeUI(); // ===== NEW =====
+  updateLifetimeUI();
   refreshShoeUI();
 }
 
@@ -1486,9 +1492,3 @@ window.onload=function(){
 
 </body>
 </html>
-
-
-
-
-
-
