@@ -258,14 +258,13 @@
     <div class="section-title">⚙️ ตั้งค่า (Settings)</div>
 <div class="form-group">
   <label>โหมดกลยุทธ์ (Strategy Mode)</label>
- <select id="strat_mode" onchange="updateUI()">
+  <select id="strat_mode" onchange="updateUI()">
   <option value="offset">⚖️ Offset (สมดุล P-B)</option>
   <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
-  <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
+  <option value="follow_last" selected>🌊 Follow Last (ตามตัวติด)</option>
   <option value="something_else">🧪 Something Else (Engine)</option>
-  <option value="policy_ai" selected>🧠 Policy AI (trained weights)</option>
+  <option value="policy_ai">🧠 Policy AI (trained weights)</option>
 </select>
-
 
 </div>
 
@@ -966,7 +965,7 @@ function restoreRecommended(){
   document.getElementById('shoe_pen').value='60';
 
   // Strategy (คุม DD ดีสุดกับระบบเดิม)
-  document.getElementById('strat_mode').value='policy_ai';
+  document.getElementById('strat_mode').value='follow_last';
 
 
   // Commission
@@ -1619,4 +1618,3 @@ window.onload=function(){
 </script>
 </body>
 </html>
-
