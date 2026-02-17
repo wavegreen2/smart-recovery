@@ -336,7 +336,7 @@
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
         <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="10"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="3.0"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.01"></div>
       </div>
     </div>
 
@@ -473,7 +473,7 @@
       ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br/>
       rng=shoe, strat=something_else, comm=0.9, minbet=10, chip=10, target=6,
       max_bet_cap=10000, dragon=6, chaos=5/10, trail_start=30, trail_drop=3,
-      surv_trigger=10, surv_div=4, pen=60, rebalance=10
+      surv_trigger=10, surv_div=2.01, pen=60, rebalance=10
       <br/><br/>
       Cut Card จะ “แกว่ง” รอบ ๆ %penetration ในแต่ละ Shoe
     </div>
@@ -934,7 +934,7 @@ function restoreRecommended(){
 
   // Survival
   document.getElementById('surv_trigger').value=10.0;
-  document.getElementById('surv_div').value=3.0;
+  document.getElementById('surv_div').value=2.01;
 
   syncSimSettings('top');
   onRngChange();
