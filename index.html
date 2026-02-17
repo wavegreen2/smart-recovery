@@ -256,16 +256,18 @@
     </div>
 
     <div class="section-title">⚙️ ตั้งค่า (Settings)</div>
-    <div class="form-group">
-      <label>โหมดกลยุทธ์ (Strategy Mode)</label>
-      <select id="strat_mode" onchange="updateUI()">
-        <option value="offset">⚖️ Offset (สมดุล P-B)</option>
-        <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
-        <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
-        <option value="something_else" selected>🧪 Something Else (Engine)</option>
-        <option value="policy_ai">🧠 Policy AI (trained weights)</option>
-      </select>
-    </div>
+<div class="form-group">
+  <label>โหมดกลยุทธ์ (Strategy Mode)</label>
+  <select id="strat_mode" onchange="updateUI()">
+  <option value="offset">⚖️ Offset (สมดุล P-B)</option>
+  <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
+  <option value="follow_last" selected>🌊 Follow Last (ตามตัวติด)</option>
+  <option value="something_else">🧪 Something Else (Engine)</option>
+  <option value="policy_ai">🧠 Policy AI (trained weights)</option>
+</select>
+
+</div>
+
 
     <div class="comm-box">
       <div class="comm-title">
@@ -688,6 +690,12 @@ function onRngChange(){
 /* =========================
    Core System + Commission + Sessions + Bankroll Cap
    ========================= */
+
+// ✅ AutoSim Undo control (snapshot throttling)
+const AUTO_UNDO_EVERY = 25;     // ซิมทุก 25 มือ เก็บ snapshot 1 ครั้ง (ปรับได้)
+const UNDO_STACK_LIMIT = 500;   // จำกัดจำนวน snapshot กันเมมบวม
+let autoHandCounter = 0;
+
 let state={
   realBalance:0, history:[], maxDrawdown:0, maxBet:0,
   highWaterMark:0, targetReached:false, survivalActive:false,
@@ -695,7 +703,10 @@ let state={
   pStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0},
   bStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0},
   graphData:[0], graphLabels:[0],
-  commTurnover:0, commTotal:0, commHands:0
+  commTurnover:0, commTotal:0, commHands:0,
+
+  // ✅ NEW: Big Road history รวมทุก session (ไม่ถูกล้างเมื่อบันทึก session)
+  roadHistory:[]
 };
 
 let lifetime = { net:0, comm:0, maxBet:0, highWater:0, maxDrawdown:0 };
@@ -798,6 +809,7 @@ function startNewSession(){
   sessionNo+=1;
   sessionStartTs=Date.now();
 
+  // ✅ รีเซ็ตเฉพาะ runtime ของ session ปัจจุบัน (ไม่ล้าง roadHistory / ไม่ล้าง undoStack)
   state.realBalance=0; state.history=[]; state.maxDrawdown=0; state.maxBet=0;
   state.highWaterMark=0; state.targetReached=false; state.survivalActive=false;
   state.cycleStartBalance=0;
@@ -805,9 +817,56 @@ function startNewSession(){
   state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
   state.graphData=[0]; state.graphLabels=[0];
   state.commTurnover=0; state.commTotal=0; state.commHands=0;
-  undoStack=[];
+
+  // ❌ อย่าล้าง undoStack เพื่อให้ Undo ยังย้อนข้าม session ได้
+  // undoStack=[];
 }
-function closeSessionAndRestart(reason){
+
+// ✅ saveState/undo ต้องเก็บ session meta ด้วย เพื่อ Undo ย้อนข้ามจุดปิด session ได้
+function saveState(){
+  undoStack.push({
+    state: JSON.parse(JSON.stringify(state)),
+    lifetime: JSON.parse(JSON.stringify(lifetime)),
+    sessionHistory: JSON.parse(JSON.stringify(sessionHistory)),
+    sessionNo,
+    sessionStartTs,
+    simRoundCount,
+    simSuccessCount
+  });
+  if(undoStack.length > UNDO_STACK_LIMIT) undoStack.shift();
+}
+function undo(){
+  if(undoStack.length===0) return;
+  const snap=undoStack.pop();
+  state=snap.state;
+  lifetime=snap.lifetime;
+  sessionHistory=snap.sessionHistory || [];
+  sessionNo=snap.sessionNo || 0;
+  sessionStartTs=snap.sessionStartTs || Date.now();
+  simRoundCount = snap.simRoundCount || 0;
+  simSuccessCount = snap.simSuccessCount || 0;
+  updateUI();
+}
+
+// ✅ helper: push outcome ทั้ง session history (logic) + roadHistory (รวมทุก session)
+function pushOutcome(res){
+  state.history.push(res);
+  state.roadHistory = state.roadHistory || [];
+  state.roadHistory.push(res);
+}
+
+// ✅ helper: autosim snapshot throttling
+function maybeSaveSimSnapshot(){
+  autoHandCounter++;
+  if(autoHandCounter % AUTO_UNDO_EVERY === 0){
+    saveState();
+  }
+}
+
+function closeSessionAndRestart(reason, isSim=false){
+  // ✅ สำคัญ: หากปิด session ระหว่าง AutoSim ให้ save snapshot ก่อนเปลี่ยน state/sessionHistory
+  if(isSim) saveState();
+
   const net=state.realBalance;
   const comm=state.commTotal;
   const netPlusComm=net+comm;
@@ -829,16 +888,17 @@ function closeSessionAndRestart(reason){
   startNewSession();
   renderSessionHistory();
 }
+
 function checkAndEndSessionIfNeeded(isSim){
   const left=getBankrollLeft();
   const minBet=getMinBet();
   if(left<=0){
-    closeSessionAndRestart("Bankroll Empty (<= 0)");
+    closeSessionAndRestart("Bankroll Empty (<= 0)", isSim);
     if(!isSim) updateUI();
     return true;
   }
   if(left<minBet){
-    closeSessionAndRestart("Bankroll < MinBet");
+    closeSessionAndRestart("Bankroll < MinBet", isSim);
     if(!isSim) updateUI();
     return true;
   }
@@ -849,7 +909,7 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
 
   const cycleProfit=state.realBalance-state.cycleStartBalance;
   if(targetProfit>0 && cycleProfit>=targetProfit){
-    closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`);
+    closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`, isSim);
     if(!isSim) updateUI();
     return true;
   }
@@ -863,7 +923,7 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
   if(state.highWaterMark>=trailStart){
     const cutLine=state.highWaterMark*(1-(trailDrop/100));
     if(state.realBalance<=cutLine){
-      closeSessionAndRestart(`Trailing Stop Hit (HWM ${state.highWaterMark.toFixed(2)} → Cut ${cutLine.toFixed(2)})`);
+      closeSessionAndRestart(`Trailing Stop Hit (HWM ${state.highWaterMark.toFixed(2)} → Cut ${cutLine.toFixed(2)})`, isSim);
       if(!isSim) updateUI();
       return true;
     }
@@ -905,7 +965,8 @@ function restoreRecommended(){
   document.getElementById('shoe_pen').value='60';
 
   // Strategy (คุม DD ดีสุดกับระบบเดิม)
-  document.getElementById('strat_mode').value='something_else';
+  document.getElementById('strat_mode').value='follow_last';
+
 
   // Commission
   document.getElementById('commission_rate').value='0.9';
@@ -1164,7 +1225,10 @@ function policyDecide(){
    ========================= */
 function processResult(res,isSim=false){
   if(checkAndEndSessionIfNeeded(isSim)) return;
+
+  // ✅ Manual = snapshot ทุกมือ, AutoSim = snapshot เป็นช่วงๆ
   if(!isSim) saveState();
+  else maybeSaveSimSnapshot();
 
   let commAdded=0;
   let netDelta=0;
@@ -1181,7 +1245,7 @@ function processResult(res,isSim=false){
   const isDragon=dragonCount>=dragonLimit;
 
   if(isChaos || isDragon){
-    state.history.push(res);
+    pushOutcome(res);
     state.graphData.push(state.realBalance);
     state.graphLabels.push(state.history.length);
     if(!isSim) updateUI();
@@ -1262,7 +1326,7 @@ function processResult(res,isSim=false){
     state.bStrat.bal += (avg - state.bStrat.bal)*k;
   }
 
-  state.history.push(res);
+  pushOutcome(res);
   state.graphData.push(state.realBalance);
   state.graphLabels.push(state.history.length);
 
@@ -1339,7 +1403,7 @@ function updateUI(){
     netSide=trendSide;
     netAmt=Math.max(nextP,nextB);
     sideClass=(trendSide==="PLAYER")?'side-p':'side-b';
-    formula=(stratMode==='anti_last')?'Anti Last':'Follow Last';
+    formula=(stratMode==='Anti Last')?'Anti Last':'Follow Last';
   }
 
   if(netAmt>0) netAmt=roundToChip(netAmt);
@@ -1423,7 +1487,8 @@ function renderBigRoad(){
   let matrix=[], col=0, row=0, last=null;
   const setCell=(c,r,v)=>{ if(!matrix[c]) matrix[c]=[]; matrix[c][r]=v; };
 
-  state.history.forEach(res=>{
+  // ✅ Big Road ใช้ roadHistory (รวมทุก session) ไม่ถูกเคลียร์ตอนบันทึก session
+  (state.roadHistory || []).forEach(res=>{
     if(last===null){ setCell(col,row,res); last=res; return; }
     if(res===last){
       if(row<5 && (!matrix[col] || matrix[col][row+1]===undefined)) row++;
@@ -1483,17 +1548,6 @@ function updateChart(){
   }
 }
 
-function saveState(){
-  undoStack.push({ state: JSON.parse(JSON.stringify(state)), lifetime: JSON.parse(JSON.stringify(lifetime)) });
-  if(undoStack.length>30) undoStack.shift();
-}
-function undo(){
-  if(undoStack.length===0) return;
-  const snap=undoStack.pop();
-  state=snap.state;
-  lifetime=snap.lifetime;
-  updateUI();
-}
 function resetAll(){
   if(confirm("ต้องการรีเซ็ตระบบใช่หรือไม่?")) location.reload();
 }
@@ -1503,7 +1557,7 @@ function closeGuideModal(){ document.getElementById('guideModal').style.display=
 
 function runSimulation(){
   const n=parseInt(document.getElementById('sim_hands').value)||1;
-  saveState();
+  saveState(); // manual simulate: snapshot ก่อนวิ่ง
   for(let i=0;i<n;i++) processResult(generateOutcome(), true);
   updateUI();
 }
@@ -1518,6 +1572,8 @@ function toggleAutoSim(){
   document.getElementById('btn_stop_sim_bot').style.display='inline-block';
   document.getElementById('sim_stats_display').style.display='block';
   document.getElementById('sim_stats_display_bot').style.display='block';
+
+  autoHandCounter = 0;
 
   if(simRoundCount===0){
     simRoundCount=1; simSuccessCount=0;
