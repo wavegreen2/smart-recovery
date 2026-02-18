@@ -1024,8 +1024,13 @@ function resetCycle(reason){
   state.commTurnover = 0;
   state.commHands = 0;
   state.maxBet = 0;
-  const resetRoad = document.getElementById('reset_road_on_cycle').value === 'yes';
-  if(resetRoad) state.roadAll = [];
+
+  // ===== CHANGE (ตามที่ขอ): เก็บ Big Road score ต่อเนื่องเสมอ ไม่เคลียร์ roadAll เมื่อจบ cycle =====
+  // เดิมจะเคลียร์เมื่อ reset_road_on_cycle === 'yes'
+  // ตอนนี้ "ไม่ต้องเคลียร์สกอร์ big road" => ไม่แตะต้อง state.roadAll ที่นี่
+  // const resetRoad = document.getElementById('reset_road_on_cycle').value === 'yes';
+  // if(resetRoad) state.roadAll = [];
+
   simSuccessCount += 1;
   renderSessionHistory();
   updateUI();
