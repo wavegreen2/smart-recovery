@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baccarat AI: Ultimate V3.4 (UI เดิม) — 5 Strategies (incl OFFSET) + Netting + Central Staker + Cycles</title>
+  <title>Baccarat AI: Ultimate V3.4 (UI เดิม) — 5 Strategies + Netting (count/weight default=weight) + Central Staker + Cycles</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -133,7 +133,7 @@
     .mini-card.placeholder{visibility:hidden}
     .shoe-newbtn{background:linear-gradient(135deg,#ffd700,#f39c12);color:#2c3e50;border:none;padding:8px 10px;border-radius:6px;font-weight:900;cursor:pointer;font-size:.75rem;white-space:nowrap}
 
-    /* ===== History ===== */
+    /* ===== Session/Cycle History ===== */
     .sess-box{background:#ffffff;border:1px solid #e8e8e8;border-radius:10px;padding:10px}
     .sess-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
     .sess-head .t{font-weight:900;color:var(--primary);font-size:.8rem}
@@ -168,7 +168,7 @@
 <div class="container">
   <div class="sidebar">
     <div class="section-title" style="justify-content:center;border-bottom:none">
-      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 UI เดิม — 5 Strategies (OFFSET กลับมาแล้ว) + Netting + Central Staker + Cycles</span>
+      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 UI เดิม — 5 Strategies + Netting (count/weight) + Central Staker + Cycles</span>
     </div>
 
     <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
@@ -286,15 +286,15 @@
         </div>
       </div>
 
-      <div class="section-title" style="margin-top:8px;">🗳️ Strategy Votes (5) — แบบเดิม</div>
+      <div class="section-title" style="margin-top:8px;">🗳️ Strategy Votes (5)</div>
 
       <div class="chk-row">
-        <input type="checkbox" id="use_offset" checked onchange="updateUI()" />
-        <label for="use_offset" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">1) Offset (สมดุล P-B)</label>
+        <input type="checkbox" id="use_follow_last" checked onchange="updateUI()" />
+        <label for="use_follow_last" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">1) Follow Last</label>
       </div>
       <div class="form-group">
-        <label>Weight (Offset)</label>
-        <input type="number" id="w_offset" value="1.0" step="0.01" oninput="updateUI()" />
+        <label>Weight (Follow Last)</label>
+        <input type="number" id="w_follow_last" value="1.0" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -307,35 +307,36 @@
       </div>
 
       <div class="chk-row">
-        <input type="checkbox" id="use_follow_last" checked onchange="updateUI()" />
-        <label for="use_follow_last" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">3) Follow Last</label>
+        <input type="checkbox" id="use_always_banker" checked onchange="updateUI()" />
+        <label for="use_always_banker" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">3) Always Banker</label>
       </div>
       <div class="form-group">
-        <label>Weight (Follow Last)</label>
-        <input type="number" id="w_follow_last" value="1.0" step="0.01" oninput="updateUI()" />
+        <label>Weight (Always Banker)</label>
+        <input type="number" id="w_always_banker" value="1.0" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
-        <input type="checkbox" id="use_something_else" checked onchange="updateUI()" />
-        <label for="use_something_else" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">4) Something Else (Engine)</label>
+        <input type="checkbox" id="use_always_player" onchange="updateUI()" />
+        <label for="use_always_player" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">4) Always Player</label>
       </div>
       <div class="form-group">
-        <label>Weight (Something Else)</label>
-        <input type="number" id="w_something_else" value="1.0" step="0.01" oninput="updateUI()" />
+        <label>Weight (Always Player)</label>
+        <input type="number" id="w_always_player" value="0.8" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
         <input type="checkbox" id="use_policy_ai" onchange="updateUI()" />
-        <label for="use_policy_ai" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">5) Policy AI (trained weights)</label>
+        <label for="use_policy_ai" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">5) Policy AI (vote)</label>
       </div>
       <div class="form-group">
-        <label>Weight (Policy AI)</label>
-        <input type="number" id="w_policy_ai" value="1.0" step="0.01" oninput="updateUI()" />
+        <label>Weight (Policy AI vote)</label>
+        <input type="number" id="w_policy_ai" value="1.2" step="0.01" oninput="updateUI()" />
+        <div class="mini-note">Policy AI จะโหวต P/B/WAIT จาก pattern ล่าสุด (ไม่มีผลต่อ bet โดยตรง นอกจาก netting)</div>
       </div>
 
       <div class="mini-note">
-        Offset/SomethingElse ใช้ “P-Engine vs B-Engine” แบบ V3.4 (คืนมาแล้ว) เพื่อโหวตฝั่ง<br/>
-        (เดิมพันจริงยังคำนวณจาก Central Staker × f(net_strength))
+        - โหมด <b>count</b>: นับ 1 เสียงต่อกลยุทธ์<br/>
+        - โหมด <b>weight</b>: รวม weight แล้ว net เป็น strength
       </div>
     </div>
 
@@ -347,7 +348,7 @@
       <div class="form-group">
         <label>อัตราค่าคอม / โรลลิ่ง (%)</label>
         <input type="number" id="commission_rate" value="0.9" step="0.01" min="0" oninput="updateUI()">
-        <div style="font-size:.6rem;color:var(--comm);margin-top:2px;">*คิดจากยอดเดิมพันทุกมือที่มีการเดิมพันจริง และ “ไม่ใช่ Tie”</div>
+        <div style="font-size:.6rem;color:var(--comm);margin-top:2px;">*คิดจากยอดเดิมพันทุกมือที่มีการเดิมพันจริง และ “ไม่ใช่ Tie” (Tie = Δ0 และไม่คิด turnover/rebate)</div>
       </div>
       <div class="comm-grid">
         <div class="comm-stat"><div class="lb">ยอดเดิมพันสะสม (cycle นี้)</div><div class="vl" id="comm_turnover">0</div></div>
@@ -369,11 +370,11 @@
     </div>
 
     <div class="target-box">
-      <div class="target-title">🎯 Target Profit (ต่อ cycle) + Bet Reduction</div>
+      <div class="target-title">🎯 Target Profit (เป้ากำไรต่อ cycle) + Bet Reduction</div>
       <div class="form-group">
         <label>Reset Cycle if Profit >=</label>
         <input type="number" id="target_profit" value="0.01" step="0.01" oninput="updateUI()">
-        <div class="mini-note">มี Target Sniper ลด bet เพื่อไม่ให้ชนะแล้วกำไรเกิน target (ตาม chip/min bet)</div>
+        <div class="mini-note">มี “Target Sniper” ปรับลด bet ให้ถ้าชนะแล้วกำไรจะไม่เกินเป้า (ตาม chip/min bet)</div>
       </div>
     </div>
 
@@ -397,7 +398,7 @@
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
-      <span class="monitor-label">Cycle Profit / Cycle HWM</span>
+      <span class="monitor-label">Cycle Profit / Cycle HWM (เฉพาะ cycle นี้)</span>
       <div id="target_status_display" class="monitor-val">0 / 0</div>
       <div class="cycle-monitor">
         <span>Cycle Profit / Target:</span>
@@ -431,10 +432,10 @@
       </div>
     </div>
 
-    <div class="section-title">🧠 Monitors</div>
+    <div class="section-title">🧠 Central Staker Monitor</div>
     <div class="brain-monitor">
       <div class="brain-col">
-        <div class="brain-head txt-p">CENTRAL STAKER</div>
+        <div class="brain-head txt-p">STAKER BAL</div>
         <div class="brain-val txt-p" id="mon_bal">0</div>
         <div class="brain-info" id="mon_info">Wait:0 | Stg:0 | CL:0</div>
       </div>
@@ -510,10 +511,11 @@
     <div class="modal-icon" style="width:100%;text-align:center;">📖</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำอธิบายสั้น</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      - คืน <b>OFFSET</b> กลับมาแล้ว (รวมเป็น 5 กลยุทธ์แบบ V3.4 เดิม)<br/>
-      - Offset / Something Else ใช้ P-Engine vs B-Engine เพื่อโหวตฝั่ง<br/>
-      - Bet จริง = Central Staker × f(net_strength)<br/>
-      - มี Target Sniper ลด bet เพื่อไม่ให้กำไรเกิน target (เท่าที่ chip/min bet อนุญาต)
+      - มี <b>5 กลยุทธ์</b> ให้โหวต (เปิด/ปิด + weight)<br/>
+      - Netting: count/weight (default=weight)<br/>
+      - Bet = Central Staker (base) × f(net_strength)<br/>
+      - Tie = Δ0 และไม่คิด turnover/commission<br/>
+      - มี “Target Sniper” ลด bet เพื่อไม่ให้ชนะแล้วกำไรเกิน target (ตาม chip/min bet)
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
   </div>
@@ -685,7 +687,7 @@ function onRngChange(){
 }
 
 /* =========================
-   Core System
+   Core System: Central Staker + Netting + Target Sniper + Lifetime
    ========================= */
 const UNDO_STACK_LIMIT = 500;
 const MAX_STAGE = 30;
@@ -697,10 +699,12 @@ let isAutoRunning=false;
 let simRoundCount=0;
 let simSuccessCount=0;
 let autoTimer=null;
+
 let cycleHistory=[];
 let cycleNo=0;
 let cycleStartTs=Date.now();
 
+// Lifetime aggregation (restore)
 let lifetime = { net:0, comm:0, maxBet:0, highWater:0, maxDrawdown:0 };
 function lifetimeEquity(){ return lifetime.net + lifetime.comm; }
 
@@ -723,11 +727,7 @@ let state={
 
   staker:{bal:0,wait:1,stage:0,initBet:0,cons_loss:0, equity_high_cycle:0},
   lastNet:{side:'WAIT', strength:0, p:0, b:0, p_cnt:0, b_cnt:0},
-  commTotalStart:0,
-
-  // ✅ restore dual engines for OFFSET / SomethingElse vote
-  pStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0},
-  bStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0}
+  commTotalStart:0
 };
 
 function getBankroll(){ return parseFloat(document.getElementById('init_bank').value)||0; }
@@ -807,10 +807,10 @@ function calculateDivisor(deficit, minBet){
   return baseDiv;
 }
 
-// ---- Central Staker ----
 function resetStaker(){
   state.staker = {bal:0,wait:1,stage:0,initBet:0,cons_loss:0, equity_high_cycle:0};
 }
+
 function stakerProposeBaseBet(){
   const s=state.staker;
   const minBet=getMinBet();
@@ -825,7 +825,11 @@ function stakerProposeBaseBet(){
       const cl = Math.min(200, Math.max(0, s.cons_loss||0));
       div = div * Math.pow(1.04, cl);
       bet = (div<=0) ? 0 : ((deficit + minBet) / div);
-    }else bet = minBet;
+    }else{
+      bet = minBet;
+    }
+  }else{
+    bet = 0;
   }
   if(!Number.isFinite(bet) || bet<=0) return 0;
   bet = roundToChip(bet);
@@ -833,12 +837,14 @@ function stakerProposeBaseBet(){
   if(maxBetCap>0) bet = Math.min(bet, maxBetCap);
   return bet;
 }
+
 function stakerUpdateOnResult(netSide, bet, res){
   const s=state.staker;
   const cp=getCycleProfit();
   if(cp > (s.equity_high_cycle||0)) s.equity_high_cycle = cp;
   if(bet<=0 || netSide==='WAIT') return;
   if(res==='T') return;
+
   const isWin = (netSide==='P' && res==='P') || (netSide==='B' && res==='B');
   if(isWin){
     s.wait = Math.max(1, (s.wait||0) + 1);
@@ -848,6 +854,7 @@ function stakerUpdateOnResult(netSide, bet, res){
     if(s.stage===0){ s.initBet=bet; s.stage=1; }
     else s.stage = Math.min(MAX_STAGE, (s.stage||0)+1);
   }else{
+    // keep betting after losses
     s.wait = 1;
     s.cons_loss=(s.cons_loss||0)+1;
     s.bal -= bet;
@@ -855,154 +862,65 @@ function stakerUpdateOnResult(netSide, bet, res){
   }
 }
 
-// ---- Dual engines (restored) for OFFSET / SomethingElse votes ----
-function getRawBet(strat){
-  const minBet=getMinBet();
-  const maxBetCap=parseFloat(document.getElementById('max_bet_cap').value)||0;
-  let bet=0;
-  if(strat.stage > MAX_STAGE) strat.stage = MAX_STAGE;
-  if(strat.stage>=1){
-    bet=strat.initBet*Math.pow(2, Math.max(0, strat.stage-1));
-  }else if(strat.wait>=1){
-    const deficit=Math.abs(strat.bal);
-    if(deficit>0){
-      let div=calculateDivisor(deficit,minBet);
-      const cl = Math.min(200, (strat.cons_loss||0));
-      div=div*Math.pow(1.04, cl);
-      bet=(div<=0)?0:((deficit+minBet)/div);
-    }else bet=minBet;
-  }
-  if(!Number.isFinite(bet) || bet<=0) return 0;
-  bet = roundToChip(bet);
-  if(maxBetCap>0) bet = Math.min(bet, maxBetCap);
-  return bet;
-}
-function updateAI(strat,side,res,rawBet){
-  if(res==='T') return;
-  const isWin=(side==='P'&&res==='P')||(side==='B'&&res==='B');
-  if(isWin){
-    strat.wait++; strat.cons_loss=0;
-    strat.bal += (side==='P') ? rawBet : (rawBet*0.95);
-    if(rawBet>0){
-      if(strat.stage===0){ strat.initBet=rawBet; strat.stage=1; }
-      else strat.stage = Math.min((strat.stage||0) + 1, MAX_STAGE);
-    }
-  }else{
-    strat.wait=0;
-    strat.cons_loss=(strat.cons_loss||0)+1;
-    if(rawBet>0){ strat.bal-=rawBet; strat.stage=0; }
-  }
-}
-function resetDualEngines(){
-  state.pStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-  state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
-}
-
-// ---- Policy AI (trained weights) ----
-const TRAINED_POLICY = {
-  wP: { c:-0.3928252531634952, bias:0.8708993699161368, zig:0.9898610254061753, tieRate:-0.3955203431275083, streakN:-0.13981681295704762, lastP:0.2532830015248164, lastB:0.07488143904492145 },
-  wB: { c:-1.1508993524052586, bias:-0.4321370196771435, zig:-0.9614563873601566, tieRate:0.2576827616572196, streakN:-0.41800751134256997, lastP:0.24814946837852042, lastB:0.3477249348305153 },
-  wW: { c:-0.5528507363362684, bias:1.3951764069146138, zig:-0.16996934097562105, tieRate:-1.1134453873209744, streakN:1.0447036802114804, lastP:0.5488793440369264, lastB:1.0476893375084022 }
-};
-function _sigmoid(x){ if(x > 60) return 1; if(x < -60) return 0; return 1 / (1 + Math.exp(-x)); }
-function _dot(w, f){
-  return (w.c||0)*(f.c||0)+(w.bias||0)*(f.bias||0)+(w.zig||0)*(f.zig||0)+(w.tieRate||0)*(f.tieRate||0)+(w.streakN||0)*(f.streakN||0)+(w.lastP||0)*(f.lastP||0)+(w.lastB||0)*(f.lastB||0);
-}
-function _computePolicyFeatures(){
-  const h = state.history || [];
-  const N = h.length;
-  const W = Math.min(30, N);
-  const slice = h.slice(-W);
-  const last = (N > 0) ? h[N-1] : null;
-  const lastP = (last === 'P') ? 1 : 0;
-  const lastB = (last === 'B') ? 1 : 0;
-  let streak = (N > 0) ? 1 : 0;
-  if(N >= 2){
-    for(let i=N-2;i>=0;i--){
-      if(h[i] === last) streak++;
-      else break;
-    }
-  }
-  const streakN = (N===0) ? 0 : Math.min(1, Math.log(1+streak) / Math.log(1+15));
-  let zigCnt = 0;
-  for(let i=0;i<slice.length-1;i++) if(slice[i] !== slice[i+1]) zigCnt++;
-  const zig = (slice.length <= 1) ? 0 : zigCnt/(slice.length-1);
-  let ties = 0;
-  for(const r of slice) if(r === 'T') ties++;
-  const tieRate = (slice.length === 0) ? 0 : ties/slice.length;
-  let p=0, b=0;
-  for(const r of slice){ if(r === 'P') p++; else if(r === 'B') b++; }
-  const denom = p+b;
-  const bias = (denom === 0) ? 0 : (p-b)/denom;
-  return { c:1, bias, zig, tieRate, streakN, lastP, lastB };
-}
-function policyVote(){
-  const f=_computePolicyFeatures();
-  const LP=_dot(TRAINED_POLICY.wP,f);
-  const LB=_dot(TRAINED_POLICY.wB,f);
-  const LW=_dot(TRAINED_POLICY.wW,f);
-  let action='WAIT';
-  let best=LW;
-  if(LP>best){ best=LP; action='P'; }
-  if(LB>best){ best=LB; action='B'; }
-  const w=parseFloat(document.getElementById('w_policy_ai').value)||1;
-  return { side: action, w, dbg:{LP,LB,LW,r:_sigmoid(best)} };
-}
-
-function lastNonTie(){
-  for(let i=state.history.length-1;i>=0;i--){
-    const x=state.history[i];
+// --- Policy AI vote (simple lightweight version) ---
+function lastNonTie(history){
+  for(let i=history.length-1;i>=0;i--){
+    const x=history[i];
     if(x==='P' || x==='B') return x;
   }
   return null;
 }
-
-// ---- Strategy votes (5) ----
-function voteOffset(){
-  const w=parseFloat(document.getElementById('w_offset').value)||1;
-  const rawP=getRawBet(state.pStrat);
-  const rawB=getRawBet(state.bStrat);
-  if(rawP===0 && rawB===0) return {side:'WAIT', w:0, dbg:{rawP,rawB}};
-  if(rawP>rawB) return {side:'P', w, dbg:{rawP,rawB}};
-  if(rawB>rawP) return {side:'B', w, dbg:{rawP,rawB}};
-  return {side:'WAIT', w:0, dbg:{rawP,rawB}};
-}
-function voteSomethingElse(){
-  const w=parseFloat(document.getElementById('w_something_else').value)||1;
-  const rawP=getRawBet(state.pStrat);
-  const rawB=getRawBet(state.bStrat);
-  const diff=Math.abs(rawP-rawB);
-  const threshold=Math.max(getMinBet(), 2*getChip());
-  if(rawP===0 && rawB===0) return {side:'WAIT', w:0, dbg:{rawP,rawB,threshold}};
-  if(diff<=threshold){
-    // แบบเดิม: diff น้อย => BANKER
-    return {side:'B', w, dbg:{rawP,rawB,threshold}};
+function policyVote(history){
+  // simple heuristic: bias + zigzag -> vote
+  const N = history.length;
+  if(N < 6) return {side:'WAIT', w:0};
+  const W = Math.min(30, N);
+  const slice = history.slice(-W);
+  let p=0,b=0,zig=0,prev=null;
+  for(const r of slice){
+    if(r==='P') p++;
+    else if(r==='B') b++;
+    if(prev && r!=='T' && prev!=='T' && r!==prev) zig++;
+    prev=r;
   }
-  // diff มาก => offset
-  if(rawP>rawB) return {side:'P', w, dbg:{rawP,rawB,threshold}};
-  if(rawB>rawP) return {side:'B', w, dbg:{rawP,rawB,threshold}};
-  return {side:'WAIT', w:0, dbg:{rawP,rawB,threshold}};
+  const denom = (p+b)||1;
+  const bias = (p-b)/denom;
+  const zigRate = (slice.length>1) ? zig/(slice.length-1) : 0;
+  // if zigzag high -> follow last; else -> follow bias
+  if(zigRate > 0.55){
+    const last=lastNonTie(history);
+    if(!last) return {side:'WAIT', w:0};
+    return {side:last, w:parseFloat(document.getElementById('w_policy_ai').value)||1.2};
+  }
+  if(Math.abs(bias) < 0.12) return {side:'WAIT', w:0};
+  return {side:(bias>0?'P':'B'), w:parseFloat(document.getElementById('w_policy_ai').value)||1.2};
 }
-function voteAntiLast(){
-  const last=lastNonTie();
+
+// ---- Vote strategies (5) ----
+function stratFollowLast(history){
+  const last = lastNonTie(history);
   if(!last) return {side:'WAIT', w:0};
-  const w=parseFloat(document.getElementById('w_anti_last').value)||1;
-  return {side:(last==='P'?'B':'P'), w};
+  return {side:last, w:parseFloat(document.getElementById('w_follow_last').value)||1};
 }
-function voteFollowLast(){
-  const last=lastNonTie();
+function stratAntiLast(history){
+  const last = lastNonTie(history);
   if(!last) return {side:'WAIT', w:0};
-  const w=parseFloat(document.getElementById('w_follow_last').value)||1;
-  return {side:last, w};
+  return {side:(last==='P'?'B':'P'), w:parseFloat(document.getElementById('w_anti_last').value)||1};
+}
+function stratAlwaysBanker(){
+  return {side:'B', w:parseFloat(document.getElementById('w_always_banker').value)||1.0};
+}
+function stratAlwaysPlayer(){
+  return {side:'P', w:parseFloat(document.getElementById('w_always_player').value)||0.8};
 }
 
 function getVotes(){
   const votes=[];
-  if(document.getElementById('use_offset').checked) votes.push(voteOffset());
-  if(document.getElementById('use_anti_last').checked) votes.push(voteAntiLast());
-  if(document.getElementById('use_follow_last').checked) votes.push(voteFollowLast());
-  if(document.getElementById('use_something_else').checked) votes.push(voteSomethingElse());
-  if(document.getElementById('use_policy_ai').checked) votes.push(policyVote());
+  if(document.getElementById('use_follow_last').checked) votes.push(stratFollowLast(state.history));
+  if(document.getElementById('use_anti_last').checked) votes.push(stratAntiLast(state.history));
+  if(document.getElementById('use_always_banker').checked) votes.push(stratAlwaysBanker());
+  if(document.getElementById('use_always_player').checked) votes.push(stratAlwaysPlayer());
+  if(document.getElementById('use_policy_ai').checked) votes.push(policyVote(state.history));
   return votes;
 }
 
@@ -1020,9 +938,10 @@ function netVotes(votes){
   let side='WAIT';
   if(strength>=minStrength && p!==b) side = (p>b) ? 'P' : 'B';
   state.lastNet = {side, strength, p, b, p_cnt, b_cnt};
-  return {side, strength, p, b};
+  return {side, strength, p, b, p_cnt, b_cnt};
 }
 
+// f(net_strength) step function
 function strengthMultiplier(strength){
   if(strength <= 0) return 0.0;
   if(strength < 1.0) return 0.0;
@@ -1032,19 +951,24 @@ function strengthMultiplier(strength){
   return 2.0;
 }
 
+// Target Sniper (bet reduction): if win would exceed target profit, reduce bet to not exceed (as much as possible under chip/min bet)
 function applyTargetSniper(bet, side){
   const targetProfit=parseFloat(document.getElementById('target_profit').value)||0;
   if(targetProfit<=0) return bet;
   if(bet<=0) return bet;
+
   const cp=getCycleProfit();
   const needed = targetProfit - cp;
-  if(needed<=0) return 0;
+  if(needed<=0) return 0; // already at/above target => stop betting
   const chip=getChip();
   const minBet=getMinBet();
+
   let reqBet = needed;
   if(side==='B') reqBet = needed / 0.95;
-  let adj = Math.floor(reqBet / chip) * chip; // floor -> ไม่ให้กำไรเกิน
-  if(adj < minBet) return minBet;
+
+  // floor to chip to ensure profit <= needed (avoid exceeding target)
+  let adj = Math.floor(reqBet / chip) * chip;
+  if(adj < minBet) return minBet; // can't go smaller than min bet
   return adj;
 }
 
@@ -1053,45 +977,24 @@ function computeRecommendation(){
   const net=netVotes(votes);
   const base=stakerProposeBaseBet();
   const mult=strengthMultiplier(net.strength);
+
   let side='WAIT', bet=0;
   if(net.side==='P' || net.side==='B'){
-    side=net.side;
+    side = net.side;
     bet = roundToChip(base * mult);
+
+    // apply target sniper BEFORE caps (so it can reduce)
     bet = applyTargetSniper(bet, side);
+
     const maxBetCap=parseFloat(document.getElementById('max_bet_cap').value)||0;
     if(maxBetCap>0) bet = Math.min(bet, maxBetCap);
+
     bet = capBetToBankroll(bet);
     if(bet<=0) side='WAIT';
   }
-  const formula = `Net(${document.getElementById('net_mode').value}) P=${state.lastNet.p.toFixed(2)} B=${state.lastNet.b.toFixed(2)} | str=${state.lastNet.strength.toFixed(2)} | base=${base.toFixed(0)} × f=${mult.toFixed(2)}`;
-  return {side, bet, formula};
-}
 
-function applyCommission(bet, res){
-  if(bet<=0) return 0;
-  if(res==='T') return 0;
-  const commRate=parseFloat(document.getElementById('commission_rate').value)||0;
-  state.commTurnover += bet;
-  state.commHands += 1;
-  const comm = (commRate>0) ? bet*(commRate/100) : 0;
-  state.commTotal += comm;
-  return comm;
-}
-function settleBet(netSide, bet, res){
-  if(bet<=0 || netSide==='WAIT') return 0;
-  if(res==='T') return 0;
-  if(netSide==='P') return (res==='P') ? bet : -bet;
-  if(netSide==='B') return (res==='B') ? (bet*0.95) : -bet;
-  return 0;
-}
-function updateLifetime(netDelta, commAdded, bet){
-  lifetime.net += netDelta;
-  lifetime.comm += commAdded;
-  if(bet>lifetime.maxBet) lifetime.maxBet = bet;
-  const eq = lifetimeEquity();
-  if(eq > lifetime.highWater) lifetime.highWater = eq;
-  const dd = eq - lifetime.highWater;
-  if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown = dd;
+  const formula = `Net(${document.getElementById('net_mode').value}) P=${net.p.toFixed(2)} B=${net.b.toFixed(2)} | str=${net.strength.toFixed(2)} | base=${base.toFixed(0)} × f=${mult.toFixed(2)}`;
+  return {side, bet, formula, net};
 }
 
 function pushOutcome(res){ state.history.push(res); state.roadAll.push(res); }
@@ -1116,7 +1019,6 @@ function resetCycle(reason){
   cycleStartTs = Date.now();
   state.history = [];
   resetStaker();
-  resetDualEngines();
   state.cycleStartBalance = state.realBalance;
   state.commTotalStart = state.commTotal;
   state.commTurnover = 0;
@@ -1154,21 +1056,45 @@ function checkBustAndStop(){
   return false;
 }
 
+function settleBet(netSide, bet, res){
+  if(bet<=0 || netSide==='WAIT') return 0;
+  if(res==='T') return 0;
+  if(netSide==='P') return (res==='P') ? bet : -bet;
+  if(netSide==='B') return (res==='B') ? (bet*0.95) : -bet;
+  return 0;
+}
+
+function applyCommission(bet, res){
+  if(bet<=0) return 0;
+  if(res==='T') return 0;
+  const commRate=parseFloat(document.getElementById('commission_rate').value)||0;
+  state.commTurnover += bet;
+  state.commHands += 1;
+  const comm = (commRate>0) ? bet*(commRate/100) : 0;
+  state.commTotal += comm;
+  return comm;
+}
+
+function updateLifetime(netDelta, commAdded, bet){
+  lifetime.net += netDelta;
+  lifetime.comm += commAdded;
+  if(bet>lifetime.maxBet) lifetime.maxBet = bet;
+  const eq = lifetimeEquity();
+  if(eq > lifetime.highWater) lifetime.highWater = eq;
+  const dd = eq - lifetime.highWater; // <=0
+  if(dd < lifetime.maxDrawdown) lifetime.maxDrawdown = dd;
+}
+
 function processResult(res, isSim=false){
   if(checkBustAndStop()) return;
   if(!isSim) saveState();
 
-  // snapshot raw bets (for dual engines update)
-  const rawP=getRawBet(state.pStrat);
-  const rawB=getRawBet(state.bStrat);
-
-  // recommendation (central staker)
   const rec = computeRecommendation();
   const netSide = rec.side;
   const bet = rec.bet;
 
   const commAdded = applyCommission(bet, res);
-  const netDelta  = settleBet(netSide, bet, res);
+  const netDelta = settleBet(netSide, bet, res);
   state.realBalance += netDelta;
 
   // run equity HWM/DD
@@ -1177,23 +1103,22 @@ function processResult(res, isSim=false){
   const dd = eqNow - (state.equityHigh||0);
   if(dd < (state.maxDDEquity||0)) state.maxDDEquity = dd;
 
-  // update central staker
+  // staker update
   stakerUpdateOnResult(netSide, bet, res);
 
-  // update dual engines (always, like V3.4)
-  updateAI(state.pStrat,'P',res,rawP);
-  updateAI(state.bStrat,'B',res,rawB);
-
-  // history
+  // history/road
   pushOutcome(res);
 
   // chart
   state.graphData.push(getEquity());
   state.graphLabels.push(state.graphLabels.length);
+
   if(bet > state.maxBet) state.maxBet = bet;
 
   // lifetime
-  if(bet>0 && res!=='T') updateLifetime(netDelta, commAdded, bet);
+  if(bet>0 && res!=='T'){
+    updateLifetime(netDelta, commAdded, bet);
+  }
 
   const targetProfit=parseFloat(document.getElementById('target_profit').value)||0;
   if(targetProfit>0 && getCycleProfit() >= targetProfit){
@@ -1426,20 +1351,23 @@ function generateOutcome(){
 function restoreRecommended(){
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
+
   document.getElementById('net_mode').value='weight';
   document.getElementById('min_strength').value=1.0;
   document.getElementById('reset_road_on_cycle').value='yes';
 
-  document.getElementById('use_offset').checked=true;
-  document.getElementById('w_offset').value=1.0;
-  document.getElementById('use_anti_last').checked=false;
-  document.getElementById('w_anti_last').value=1.0;
   document.getElementById('use_follow_last').checked=true;
   document.getElementById('w_follow_last').value=1.0;
-  document.getElementById('use_something_else').checked=false;
-  document.getElementById('w_something_else').value=1.0;
-  document.getElementById('use_policy_ai').checked=false;
-  document.getElementById('w_policy_ai').value=1.0;
+  document.getElementById('use_anti_last').checked= false;
+  document.getElementById('w_anti_last').value=1.0;
+  document.getElementById('use_always_banker').checked= true;
+  document.getElementById('w_always_banker').value=1.0;
+
+  document.getElementById('use_always_player').checked= false;
+  document.getElementById('w_always_player').value=0.8;
+
+  document.getElementById('use_policy_ai').checked= true;
+  document.getElementById('w_policy_ai').value=1.2;
 
   document.getElementById('commission_rate').value='0.9';
   document.getElementById('init_bank').value=500000.0;
@@ -1512,9 +1440,11 @@ window.onload=function(){
   state.cycleStartBalance = state.realBalance;
   state.commTotalStart = state.commTotal;
   resetStaker();
-  resetDualEngines();
+
+  // init lifetime highwater from 0
   lifetime.highWater = lifetimeEquity();
   lifetime.maxDrawdown = 0;
+
   onRngChange();
   renderSessionHistory();
   updateUI();
