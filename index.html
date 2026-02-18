@@ -265,23 +265,23 @@
       <div class="feature-title" style="color:var(--primary);">🧠 Netting (Multi-Strategy)</div>
 
       <div class="form-group">
-        <label>Netting Mode (2 โหมด, default = weight)</label>
+        <label>Netting Mode (2 โหมด, default = count)</label>
         <select id="net_mode" onchange="updateUI()">
-          <option value="weight" selected>weight (sum weights)</option>
-          <option value="count">count (ignore weights)</option>
+          <option value="weight">weight (sum weights)</option>
+          <option value="count" selected>count (ignore weights)</option>
         </select>
       </div>
 
       <div class="dual-input">
         <div class="form-group">
           <label>min_strength (ต่ำกว่า = WAIT)</label>
-          <input type="number" id="min_strength" value="0.67" step="0.01" oninput="updateUI()" />
+          <input type="number" id="min_strength" value="0.2" step="0.01" oninput="updateUI()" />
         </div>
         <div class="form-group">
           <label>Reset Road เมื่อจบ cycle</label>
           <select id="reset_road_on_cycle" onchange="updateUI()">
-            <option value="yes">Yes</option>
-            <option value="no" selected>No (สะสม Big Road ต่อ)</option>
+            <option value="yes" selected>Yes</option>
+            <option value="no">No (สะสม Big Road ต่อ)</option>
           </select>
         </div>
       </div>
@@ -294,7 +294,7 @@
       </div>
       <div class="form-group">
         <label>Weight (Offset)</label>
-        <input type="number" id="w_offset" value="1.64" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_offset" value="0.34" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -303,16 +303,16 @@
       </div>
       <div class="form-group">
         <label>Weight (Anti Last)</label>
-        <input type="number" id="w_anti_last" value="2.9" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_anti_last" value="1.42" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
-        <input type="checkbox" id="use_follow_last" onchange="updateUI()" />
+        <input type="checkbox" id="use_follow_last" checked onchange="updateUI()" />
         <label for="use_follow_last" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">3) Follow Last</label>
       </div>
       <div class="form-group">
         <label>Weight (Follow Last)</label>
-        <input type="number" id="w_follow_last" value="0.83" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_follow_last" value="0.55" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -321,7 +321,7 @@
       </div>
       <div class="form-group">
         <label>Weight (Something Else)</label>
-        <input type="number" id="w_something_else" value="1.51" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_something_else" value="1.33" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -330,7 +330,7 @@
       </div>
       <div class="form-group">
         <label>Weight (Policy AI)</label>
-        <input type="number" id="w_policy_ai" value="3.0" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_policy_ai" value="1.01" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="mini-note">
@@ -380,20 +380,20 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="0.0" step="0.01" oninput="updateUI()"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.3" step="0.01" oninput="updateUI()"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="16.39" step="0.01" oninput="updateUI()"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="3.09" step="0.01" oninput="updateUI()"></div>
       </div>
     </div>
 
-    <div class="form-group"><label>เงินทุนเริ่มต้น (Bankroll)</label><input type="number" id="init_bank" value="2881866" oninput="updateUI()"></div>
-    <div class="form-group"><label>Max Bet</label><input type="number" id="max_bet_cap" value="44199" oninput="updateUI()"></div>
+    <div class="form-group"><label>เงินทุนเริ่มต้น (Bankroll)</label><input type="number" id="init_bank" value="9984988.0" oninput="updateUI()"></div>
+    <div class="form-group"><label>Max Bet</label><input type="number" id="max_bet_cap" value="125873.0" oninput="updateUI()"></div>
 
     <div class="dual-input">
       <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5" oninput="updateUI()"></div>
       <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold" oninput="updateUI()"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (DEFAULT: BEST)</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (DEFAULT)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
@@ -483,7 +483,7 @@
       <div class="stat-card"><div class="stat-label">Max Drawdown (run)</div><div class="stat-value" id="disp_dd">0</div></div>
       <div class="stat-card loss"><div class="stat-label">Max Bet (cycle)</div><div class="stat-value" id="disp_maxbet">0</div></div>
       <div class="stat-card"><div class="stat-label">Hands (cycle)</div><div class="stat-value" id="disp_hands">0</div></div>
-      <div class="stat-card pre"><div class="stat-label">Net Mode</div><div class="stat-value" id="disp_mode">weight</div></div>
+      <div class="stat-card pre"><div class="stat-label">Net Mode</div><div class="stat-value" id="disp_mode">count</div></div>
       <div class="stat-card pre"><div class="stat-label">Net Strength</div><div class="stat-value" id="disp_strength">0</div></div>
       <div class="stat-card comm"><div class="stat-label">Commission (cycle)</div><div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0</div></div>
     </div>
@@ -725,7 +725,7 @@ let state={
   lastNet:{side:'WAIT', strength:0, p:0, b:0, p_cnt:0, b_cnt:0},
   commTotalStart:0,
 
-  // restore dual engines for OFFSET / SomethingElse vote
+  // ✅ restore dual engines for OFFSET / SomethingElse vote
   pStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0},
   bStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0}
 };
@@ -1117,7 +1117,7 @@ function resetCycle(reason){
   cycleNo += 1;
   cycleStartTs = Date.now();
 
-  // Reset Road on cycle
+  // Reset Road on cycle (Yes/No)
   const rr = (document.getElementById('reset_road_on_cycle')?.value || 'no');
   if(rr === 'yes'){
     state.roadAll = [];
@@ -1431,36 +1431,39 @@ function generateOutcome(){
   return Math.random()<0.4932?'P':'B';
 }
 
-// ✅ DEFAULT = BEST PARAMS (PASSED STAGE C) ตามที่คุณให้มา
+// ✅ DEFAULT = BEST PARAMS (ตามที่คุณให้มา)
 function restoreRecommended(){
-  // FIXED
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
-  document.getElementById('commission_rate').value='0.9';
-  document.getElementById('target_profit').value=0.01;
-  document.getElementById('min_bet').value=5.0;
-  document.getElementById('chip_size').value=5.0;
 
   // BEST PARAMS
-  document.getElementById('init_bank').value=2881866.0;
-  document.getElementById('max_bet_cap').value=44199.0;
-  document.getElementById('min_strength').value=0.67;
-  document.getElementById('net_mode').value='weight';
-  document.getElementById('reset_road_on_cycle').value='no';
-  document.getElementById('surv_div').value=2.3000000000000003;
-  document.getElementById('surv_trigger').value=0.0;
+  document.getElementById('net_mode').value='count';
+  document.getElementById('min_strength').value=0.2;
+  document.getElementById('reset_road_on_cycle').value='yes';
+
+  document.getElementById('use_offset').checked=true;
+  document.getElementById('w_offset').value=0.34;
 
   document.getElementById('use_anti_last').checked=false;
-  document.getElementById('use_follow_last').checked=false;
-  document.getElementById('use_offset').checked=true;
-  document.getElementById('use_policy_ai').checked=true;
-  document.getElementById('use_something_else').checked=false;
+  document.getElementById('w_anti_last').value=1.42;
 
-  document.getElementById('w_anti_last').value=2.9;
-  document.getElementById('w_follow_last').value=0.8300000000000001;
-  document.getElementById('w_offset').value=1.6400000000000001;
-  document.getElementById('w_policy_ai').value=3.0;
-  document.getElementById('w_something_else').value=1.51;
+  document.getElementById('use_follow_last').checked=true;
+  document.getElementById('w_follow_last').value=0.55;
+
+  document.getElementById('use_something_else').checked=false;
+  document.getElementById('w_something_else').value=1.33;
+
+  document.getElementById('use_policy_ai').checked=true;
+  document.getElementById('w_policy_ai').value=1.01;
+
+  document.getElementById('init_bank').value=9984988.0;
+  document.getElementById('max_bet_cap').value=125873.0;
+
+  document.getElementById('surv_trigger').value=16.39;
+  document.getElementById('surv_div').value=3.09;
+
+  // คงค่าอื่นตามเดิมของ UI (ถ้าต้องการให้ BEST คุมด้วย บอกมาได้)
+  // commission_rate, min_bet, chip_size, target_profit, ฯลฯ
 
   syncSimSettings('top');
   onRngChange();
@@ -1516,7 +1519,7 @@ function autoPlayStep(){
 }
 
 window.onload=function(){
-  restoreRecommended();
+  restoreRecommended(); // ✅ โหลดมาปุ๊บ = BEST PARAMS เป็นค่าเริ่มต้น
   state.equityHigh = getEquity();
   state.maxDDEquity = 0;
   cycleNo = 1;
