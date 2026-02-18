@@ -1099,6 +1099,7 @@ function pushOutcome(res){ state.history.push(res); state.roadAll.push(res); }
 function resetCycle(reason){
   const cp=getCycleProfit();
   const commCycle = state.commTotal - (state.commTotalStart||0);
+
   cycleHistory.push({
     cycleNo,
     reason,
@@ -1112,8 +1113,19 @@ function resetCycle(reason){
     betHands: state.commHands,
     bankrollLeft: getBankrollLeft()
   });
+
   cycleNo += 1;
   cycleStartTs = Date.now();
+
+  // ===== ✅ FIX: ทำให้ “Reset Road เมื่อจบ cycle” ใช้งานได้จริง =====
+  // - yes: ล้าง Big Road (roadAll)
+  // - no : สะสมต่อ (ไม่ทำอะไร)
+  const rr = (document.getElementById('reset_road_on_cycle')?.value || 'no');
+  if(rr === 'yes'){
+    state.roadAll = [];
+  }
+  // ================================================================
+
   state.history = [];
   resetStaker();
   resetDualEngines();
@@ -1123,7 +1135,6 @@ function resetCycle(reason){
   state.commHands = 0;
   state.maxBet = 0;
 
-  // ✅ CHANGE (ตามที่โค้ดเดิมของคุณทำไว้): เก็บ Big Road ไว้เสมอหลังจบ cycle
   simSuccessCount += 1;
   renderSessionHistory();
   updateUI();
