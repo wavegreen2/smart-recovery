@@ -275,7 +275,7 @@
       <div class="dual-input">
         <div class="form-group">
           <label>min_strength (ต่ำกว่า = WAIT)</label>
-          <input type="number" id="min_strength" value="0.45" step="0.01" oninput="updateUI()" />
+          <input type="number" id="min_strength" value="0.67" step="0.01" oninput="updateUI()" />
         </div>
         <div class="form-group">
           <label>Reset Road เมื่อจบ cycle</label>
@@ -289,21 +289,21 @@
       <div class="section-title" style="margin-top:8px;">🗳️ Strategy Votes (5) — แบบเดิม</div>
 
       <div class="chk-row">
-        <input type="checkbox" id="use_offset" onchange="updateUI()" />
+        <input type="checkbox" id="use_offset" checked onchange="updateUI()" />
         <label for="use_offset" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">1) Offset (สมดุล P-B)</label>
       </div>
       <div class="form-group">
         <label>Weight (Offset)</label>
-        <input type="number" id="w_offset" value="2.54" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_offset" value="1.64" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
-        <input type="checkbox" id="use_anti_last" checked onchange="updateUI()" />
+        <input type="checkbox" id="use_anti_last" onchange="updateUI()" />
         <label for="use_anti_last" style="margin:0;font-size:.78rem;font-weight:800;color:#2c3e50">2) Anti Last</label>
       </div>
       <div class="form-group">
         <label>Weight (Anti Last)</label>
-        <input type="number" id="w_anti_last" value="2.46" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_anti_last" value="2.9" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -312,7 +312,7 @@
       </div>
       <div class="form-group">
         <label>Weight (Follow Last)</label>
-        <input type="number" id="w_follow_last" value="0.63" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_follow_last" value="0.83" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -321,7 +321,7 @@
       </div>
       <div class="form-group">
         <label>Weight (Something Else)</label>
-        <input type="number" id="w_something_else" value="0.37" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_something_else" value="1.51" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="chk-row">
@@ -330,7 +330,7 @@
       </div>
       <div class="form-group">
         <label>Weight (Policy AI)</label>
-        <input type="number" id="w_policy_ai" value="1.06" step="0.01" oninput="updateUI()" />
+        <input type="number" id="w_policy_ai" value="3.0" step="0.01" oninput="updateUI()" />
       </div>
 
       <div class="mini-note">
@@ -380,20 +380,20 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="24.05" step="0.01" oninput="updateUI()"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="1.61" step="0.01" oninput="updateUI()"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="0.0" step="0.01" oninput="updateUI()"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.3" step="0.01" oninput="updateUI()"></div>
       </div>
     </div>
 
-    <div class="form-group"><label>เงินทุนเริ่มต้น (Bankroll)</label><input type="number" id="init_bank" value="514502" oninput="updateUI()"></div>
-    <div class="form-group"><label>Max Bet</label><input type="number" id="max_bet_cap" value="51964" oninput="updateUI()"></div>
+    <div class="form-group"><label>เงินทุนเริ่มต้น (Bankroll)</label><input type="number" id="init_bank" value="2881866" oninput="updateUI()"></div>
+    <div class="form-group"><label>Max Bet</label><input type="number" id="max_bet_cap" value="44199" oninput="updateUI()"></div>
 
     <div class="dual-input">
       <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5" oninput="updateUI()"></div>
       <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold" oninput="updateUI()"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (DEFAULT)</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (DEFAULT: BEST)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
@@ -725,7 +725,7 @@ let state={
   lastNet:{side:'WAIT', strength:0, p:0, b:0, p_cnt:0, b_cnt:0},
   commTotalStart:0,
 
-  // ✅ restore dual engines for OFFSET / SomethingElse vote
+  // restore dual engines for OFFSET / SomethingElse vote
   pStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0},
   bStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0}
 };
@@ -1099,6 +1099,7 @@ function pushOutcome(res){ state.history.push(res); state.roadAll.push(res); }
 function resetCycle(reason){
   const cp=getCycleProfit();
   const commCycle = state.commTotal - (state.commTotalStart||0);
+
   cycleHistory.push({
     cycleNo,
     reason,
@@ -1112,8 +1113,16 @@ function resetCycle(reason){
     betHands: state.commHands,
     bankrollLeft: getBankrollLeft()
   });
+
   cycleNo += 1;
   cycleStartTs = Date.now();
+
+  // Reset Road on cycle
+  const rr = (document.getElementById('reset_road_on_cycle')?.value || 'no');
+  if(rr === 'yes'){
+    state.roadAll = [];
+  }
+
   state.history = [];
   resetStaker();
   resetDualEngines();
@@ -1123,7 +1132,6 @@ function resetCycle(reason){
   state.commHands = 0;
   state.maxBet = 0;
 
-  // ✅ CHANGE (ตามที่โค้ดเดิมของคุณทำไว้): เก็บ Big Road ไว้เสมอหลังจบ cycle
   simSuccessCount += 1;
   renderSessionHistory();
   updateUI();
@@ -1423,39 +1431,36 @@ function generateOutcome(){
   return Math.random()<0.4932?'P':'B';
 }
 
-// ✅ DEFAULT = BEST PARAMS (ตามที่คุณให้มา)
+// ✅ DEFAULT = BEST PARAMS (PASSED STAGE C) ตามที่คุณให้มา
 function restoreRecommended(){
+  // FIXED
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
-
-  document.getElementById('net_mode').value='weight';
-  document.getElementById('min_strength').value=0.45;
-  document.getElementById('reset_road_on_cycle').value='no';
-
-  document.getElementById('use_offset').checked=false;
-  document.getElementById('w_offset').value=2.54;
-
-  document.getElementById('use_anti_last').checked=true;
-  document.getElementById('w_anti_last').value=2.46;
-
-  document.getElementById('use_follow_last').checked=false;
-  document.getElementById('w_follow_last').value=0.63;
-
-  document.getElementById('use_something_else').checked=false;
-  document.getElementById('w_something_else').value=0.37;
-
-  document.getElementById('use_policy_ai').checked=true;
-  document.getElementById('w_policy_ai').value=1.06;
-
   document.getElementById('commission_rate').value='0.9';
-  document.getElementById('init_bank').value=514502.0;
-  document.getElementById('max_bet_cap').value=51964.0;
+  document.getElementById('target_profit').value=0.01;
   document.getElementById('min_bet').value=5.0;
   document.getElementById('chip_size').value=5.0;
 
-  document.getElementById('target_profit').value=0.01;
-  document.getElementById('surv_trigger').value=24.05;
-  document.getElementById('surv_div').value=1.61;
+  // BEST PARAMS
+  document.getElementById('init_bank').value=2881866.0;
+  document.getElementById('max_bet_cap').value=44199.0;
+  document.getElementById('min_strength').value=0.67;
+  document.getElementById('net_mode').value='weight';
+  document.getElementById('reset_road_on_cycle').value='no';
+  document.getElementById('surv_div').value=2.3000000000000003;
+  document.getElementById('surv_trigger').value=0.0;
+
+  document.getElementById('use_anti_last').checked=false;
+  document.getElementById('use_follow_last').checked=false;
+  document.getElementById('use_offset').checked=true;
+  document.getElementById('use_policy_ai').checked=true;
+  document.getElementById('use_something_else').checked=false;
+
+  document.getElementById('w_anti_last').value=2.9;
+  document.getElementById('w_follow_last').value=0.8300000000000001;
+  document.getElementById('w_offset').value=1.6400000000000001;
+  document.getElementById('w_policy_ai').value=3.0;
+  document.getElementById('w_something_else').value=1.51;
 
   syncSimSettings('top');
   onRngChange();
