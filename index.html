@@ -310,7 +310,7 @@
       <div class="dual-input">
         <div class="form-group">
           <label>min_strength (ต่ำกว่า = WAIT)</label>
-          <input type="number" id="min_strength" value="0.01" step="0.01" oninput="updateUI()" />
+          <input type="number" id="min_strength" value="4.03" step="0.01" oninput="updateUI()" />
         </div>
         <div class="form-group">
           <label>Reset Road เมื่อจบ cycle</label>
@@ -2145,15 +2145,15 @@ function restoreRecommended(){
   document.getElementById('max_wait_hands').value=String(FIXED.MAX_WAIT_HANDS);
   document.getElementById('init_bank').value = 1000000.0;
   document.getElementById('max_bet_cap').value = 250000.0;
-  document.getElementById('min_strength').value = 0.01;
+  document.getElementById('min_strength').value = 4.03;
   document.getElementById('net_mode').value = 'weight';
   document.getElementById('reset_road_on_cycle').value = 'yes';
   document.getElementById('enable_survival').checked = false;
   document.getElementById('surv_div').value = 6.11;
   document.getElementById('surv_trigger').value = 99.0;
-  document.getElementById('use_anti_last').checked = false;
-  document.getElementById('use_follow_last').checked = false;
-  document.getElementById('use_offset').checked = false;
+  document.getElementById('use_anti_last').checked = true;
+  document.getElementById('use_follow_last').checked = true;
+  document.getElementById('use_offset').checked = true;
   document.getElementById('use_policy_ai').checked = true;
   document.getElementById('use_something_else').checked = true;
   document.getElementById('w_anti_last').value = 0.96;
