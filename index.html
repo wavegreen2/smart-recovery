@@ -487,7 +487,7 @@
       </div>
 
       <div class="chk-row" style="margin-bottom:6px;">
-        <input type="checkbox" id="use_dynamic_target" onchange="updateUI()" checked />
+        <input type="checkbox" id="use_dynamic_target" onchange="updateUI()" unchecked />
         <label for="use_dynamic_target" style="margin:0;font-size:.78rem;font-weight:900;color:#2c3e50">
           ใช้ Dynamic Target (% ของทุน) — default ON
         </label>
@@ -2171,7 +2171,7 @@ function restoreRecommended(){
   document.getElementById('x_reset_after_trigger').value = 'none';
   document.getElementById('x_stop_on_pass').checked = true;
   document.getElementById('target_profit').value = 1000;
-  document.getElementById('use_dynamic_target').checked = true;
+  document.getElementById('use_dynamic_target').checked = false;
   document.getElementById('target_pct').value = 1;
   document.getElementById('signal_source').value = 'per_mode';
   document.getElementById('kelly_p_source').value = 'logistic';
