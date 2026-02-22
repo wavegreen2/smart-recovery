@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)https://wavegreen2.github.io/smart-recovery/ -->
-<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Baccarat AI: Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — LOW DD DEFAULT + Casino CutCard</title>
-  <script src="./Baccarat AI_ Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — LOW DD DEFAULT + Casino CutCard_files/chart.js.ดาวน์โหลด"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
@@ -172,14 +172,14 @@
     <div class="section-title">🧪 จำลองผล (Top)</div>
     <div class="form-group">
       <label>ระบบสุ่ม (RNG Algorithm)</label>
-      <select id="rng_method" onchange="onRngChange(); syncSimSettings(&#39;top&#39;)">
+      <select id="rng_method" onchange="onRngChange(); syncSimSettings('top')">
         <option value="math">🎲 Standard (Math.random)</option>
         <option value="crypto">🔒 Crypto Secure</option>
-        <option value="shoe" selected="">🃏 Real 8-Deck Shoe</option>
+        <option value="shoe" selected>🃏 Real 8-Deck Shoe</option>
       </select>
     </div>
 
-    <div class="shoe-ui active" id="shoe_ui">
+    <div class="shoe-ui" id="shoe_ui">
       <div class="shoe-hdr">
         <div>
           <div class="t">🃏 8-Deck Shoe — Casino Real</div>
@@ -187,33 +187,33 @@
         </div>
         <select id="shoe_pen" onchange="onPenChange()">
           <option value="50">ใช้ไพ่ 50%</option>
-          <option value="60" selected="">ใช้ไพ่ 60%</option>
+          <option value="60" selected>ใช้ไพ่ 60%</option>
           <option value="70">ใช้ไพ่ 70%</option>
           <option value="80">ใช้ไพ่ 80%</option>
         </select>
       </div>
 
       <div class="shoe-bar">
-        <div class="shoe-bar-fill" id="sb_fill" style="width: 2.6%;"></div>
-        <div class="shoe-cut" id="sb_cut" style="left: 62.5%;"></div>
-        <div class="shoe-bar-txt" id="sb_txt">11 / 416 (2.6%)</div>
+        <div class="shoe-bar-fill" id="sb_fill"></div>
+        <div class="shoe-cut" id="sb_cut" style="left:60%"></div>
+        <div class="shoe-bar-txt" id="sb_txt">0 / 416 (0.0%)</div>
       </div>
 
       <div class="shoe-grid">
-        <div class="shoe-bx"><div class="lb">คงเหลือ</div><div class="vl" id="sh_rem">405</div></div>
-        <div class="shoe-bx"><div class="lb">ใช้แล้ว</div><div class="vl" id="sh_used">11</div></div>
-        <div class="shoe-bx"><div class="lb">Shoe #</div><div class="vl" id="sh_no">1</div></div>
+        <div class="shoe-bx"><div class="lb">คงเหลือ</div><div class="vl" id="sh_rem">416</div></div>
+        <div class="shoe-bx"><div class="lb">ใช้แล้ว</div><div class="vl" id="sh_used">0</div></div>
+        <div class="shoe-bx"><div class="lb">Shoe #</div><div class="vl" id="sh_no">0</div></div>
       </div>
 
-      <div class="burn-box" id="burn_box" style="display: block;">
+      <div class="burn-box" id="burn_box" style="display:none">
         <div class="bt">🔥 Burn Card Ceremony</div>
         <div class="burn-row">
           <span style="color:#ffd7d7;font-size:.65rem">ไพ่หงาย:</span>
-          <span id="burn_card_slot"><div class="mini-card red burn-reveal"><div class="cr">K</div><div class="cs">♥</div></div></span>
-          <span id="burn_label" style="color:#ffd7d7;font-size:.7rem;font-weight:900">K♥ → ทิ้งคว่ำ 10 ใบ</span>
+          <span id="burn_card_slot"></span>
+          <span id="burn_label" style="color:#ffd7d7;font-size:.7rem;font-weight:900"></span>
         </div>
-        <div class="burn-row" id="burn_down_row" style="margin-top:4px"><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div><div class="mini-card down"></div></div>
-        <div class="burn-note" id="burn_note">ธรรมเนียมบาคาร่า:<br>- หงายไพ่ใบแรกดูแต้ม<br>- ทิ้งไพ่ใบถัดไปแบบคว่ำตามแต้ม<br>A=1, 2-9=ตามเลข, 10/J/Q/K=10<br>รวมไพ่ถูกดึงออก: 11 ใบ</div>
+        <div class="burn-row" id="burn_down_row" style="margin-top:4px"></div>
+        <div class="burn-note" id="burn_note"></div>
       </div>
 
       <div class="deal-area" id="deal_area" style="display:none">
@@ -238,13 +238,13 @@
     </div>
 
     <div class="form-group">
-      <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา" oninput="syncSimSettings(&#39;top&#39;)">
+      <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา" oninput="syncSimSettings('top')" />
       <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
 
       <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
-      <select id="sim_speed" onchange="syncSimSettings(&#39;top&#39;)">
+      <select id="sim_speed" onchange="syncSimSettings('top')">
         <option value="0">🚀 ทันที (Instant)</option>
-        <option value="20" selected="">⚡ เร็ว (Fast)</option>
+        <option value="20" selected>⚡ เร็ว (Fast)</option>
       </select>
 
       <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 Auto Sim</button>
@@ -261,7 +261,7 @@
   <select id="strat_mode" onchange="updateUI()">
   <option value="offset">⚖️ Offset (สมดุล P-B)</option>
   <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
-  <option value="follow_last" selected="">🌊 Follow Last (ตามตัวติด)</option>
+  <option value="follow_last" selected>🌊 Follow Last (ตามตัวติด)</option>
   <option value="something_else">🧪 Something Else (Engine)</option>
   <option value="policy_ai">🧠 Policy AI (trained weights)</option>
 </select>
@@ -281,9 +281,9 @@
       </div>
       <div class="comm-grid">
         <div class="comm-stat"><div class="lb">ยอดเดิมพันสะสม</div><div class="vl" id="comm_turnover">0</div></div>
-        <div class="comm-stat"><div class="lb">ค่าคอมสะสม</div><div class="vl" id="comm_total">0.00</div></div>
+        <div class="comm-stat"><div class="lb">ค่าคอมสะสม</div><div class="vl" id="comm_total">0</div></div>
         <div class="comm-stat"><div class="lb">มือที่เดิมพัน</div><div class="vl" id="comm_hands">0</div></div>
-        <div class="comm-stat"><div class="lb">Net + คอม</div><div class="vl" id="comm_net_plus">0.00</div></div>
+        <div class="comm-stat"><div class="lb">Net + คอม</div><div class="vl" id="comm_net_plus">0</div></div>
       </div>
     </div>
 
@@ -291,9 +291,9 @@
     <div class="comm-box" style="border-color:#cfe2ff;background:#f7fbff">
       <div class="comm-title" style="color:#1d4ed8"><span>Lifetime Stats</span></div>
       <div class="comm-grid">
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net Profit รวมทั้งหมด</div><div class="vl" id="all_net" style="color: var(--success);">0.00</div></div>
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net + Commission รวมทั้งหมด</div><div class="vl" id="all_net_comm" style="color: var(--success);">0.00</div></div>
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_dd" style="color: var(--danger);">0.00</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net Profit รวมทั้งหมด</div><div class="vl" id="all_net">0</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net + Commission รวมทั้งหมด</div><div class="vl" id="all_net_comm">0</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_dd">0</div></div>
         <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Bet สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_bet">0</div></div>
       </div>
     </div>
@@ -301,7 +301,7 @@
     <div class="target-box">
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
       <div class="form-group">
-        <label>Reset Cycle if Profit &gt;=</label>
+        <label>Reset Cycle if Profit >=</label>
         <input type="number" id="target_profit" value="6">
       </div>
     </div>
@@ -309,7 +309,7 @@
     <div class="feature-box" style="border-color: var(--dragon);">
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
-        <label>Stop if Streak &gt;=</label>
+        <label>Stop if Streak >=</label>
         <input type="number" id="dragon_limit" value="6">
       </div>
     </div>
@@ -327,7 +327,7 @@
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
         <select id="chaos_limit" onchange="updateUI()">
-          <option value="5" selected="">5/10</option>
+          <option value="5" selected>5/10</option>
           <option value="9">9/10</option>
           <option value="11">Disable</option>
         </select>
@@ -356,15 +356,15 @@
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
       <span class="monitor-label">กำไรสุทธิ / High Water Mark</span>
-      <div id="target_status_display" class="monitor-val">0.00 / 0.00</div>
+      <div id="target_status_display" class="monitor-val">0 / 0</div>
       <div class="cycle-monitor">
         <span>Cycle Profit:</span>
-        <span id="cycle_profit_disp" style="color:var(--target);font-weight:bold;">0.00 / 6</span>
+        <span id="cycle_profit_disp" style="color:var(--target);font-weight:bold;">0</span>
       </div>
-      <div style="font-size:.6rem;color:#bdc3c7;margin-top:4px;" id="trailing_info">Waiting</div>
+      <div style="font-size:.6rem;color:#bdc3c7;margin-top:4px;" id="trailing_info">Trailing Inactive</div>
       <div style="font-size:.7rem;color:#d7f7e6;margin-top:8px;">
-        ทุนคงเหลือ (รวมค่าคอม): <b id="bankroll_left_disp" style="color: rgb(215, 247, 230);">20,000.00</b><br>
-        Session #: <b id="session_no_disp">1</b> | Sessions Saved: <b id="session_saved_disp">0</b>
+        ทุนคงเหลือ (รวมค่าคอม): <b id="bankroll_left_disp">0</b><br/>
+        Session #: <b id="session_no_disp">0</b> | Sessions Saved: <b id="session_saved_disp">0</b>
       </div>
     </div>
 
@@ -383,7 +383,9 @@
               <th>#</th><th>Reason</th><th>Hands</th><th>Net+Comm</th><th>Comm</th><th>Turn</th><th>Left</th><th>Time</th>
             </tr>
           </thead>
-          <tbody id="session_table_body"><tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr></tbody>
+          <tbody id="session_table_body">
+            <tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr>
+          </tbody>
         </table>
       </div>
       <div class="muted" style="font-size:.68rem;margin-top:6px;line-height:1.5">
@@ -396,33 +398,33 @@
       <div class="brain-col">
         <div class="brain-head txt-p">PLAYER AI</div>
         <div class="brain-val txt-p" id="mon_p_req">0</div>
-        <div class="brain-info" id="mon_p_info">Wait:0 | Stg:0</div>
+        <div class="brain-info" id="mon_p_info">Wait:0</div>
       </div>
       <div class="brain-col">
         <div class="brain-head txt-b">BANKER AI</div>
         <div class="brain-val txt-b" id="mon_b_req">0</div>
-        <div class="brain-info" id="mon_b_info">Wait:0 | Stg:0</div>
+        <div class="brain-info" id="mon_b_info">Wait:0</div>
       </div>
     </div>
 
     <div class="section-title">🧪 จำลองผล (Bottom)</div>
     <div class="form-group">
       <label>ระบบสุ่ม</label>
-      <select id="rng_method_bot" onchange="onRngChange(); syncSimSettings(&#39;bot&#39;)">
+      <select id="rng_method_bot" onchange="onRngChange(); syncSimSettings('bot')">
         <option value="math">🎲 Standard</option>
         <option value="crypto">🔒 Crypto</option>
-        <option value="shoe" selected="">🃏 Real Shoe</option>
+        <option value="shoe" selected>🃏 Real Shoe</option>
       </select>
     </div>
 
     <div class="form-group">
-      <input type="number" id="sim_hands_bot" value="1" oninput="syncSimSettings(&#39;bot&#39;)">
+      <input type="number" id="sim_hands_bot" value="1" oninput="syncSimSettings('bot')">
       <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
 
       <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
-      <select id="sim_speed_bot" onchange="syncSimSettings(&#39;bot&#39;)">
+      <select id="sim_speed_bot" onchange="syncSimSettings('bot')">
         <option value="0">🚀 ทันที</option>
-        <option value="20" selected="">⚡ เร็ว</option>
+        <option value="20" selected>⚡ เร็ว</option>
       </select>
 
       <button class="btn-action btn-auto" id="btn_auto_sim_bot" onclick="toggleAutoSim()">🚀 Auto Sim</button>
@@ -438,30 +440,30 @@
 
   <div class="main-content">
     <div class="stats-grid">
-      <div class="stat-card profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="disp_net" style="color: var(--success);">0.00</div></div>
-      <div class="stat-card comm"><div class="stat-label">Net + Commission</div><div class="stat-value" id="disp_net_comm" style="color:var(--comm);">0.00</div></div>
-      <div class="stat-card"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="disp_dd">0.00</div></div>
+      <div class="stat-card profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="disp_net">0</div></div>
+      <div class="stat-card comm"><div class="stat-label">Net + Commission</div><div class="stat-value" id="disp_net_comm" style="color:var(--comm);">0</div></div>
+      <div class="stat-card"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="disp_dd">0</div></div>
       <div class="stat-card loss"><div class="stat-label">Max Bet</div><div class="stat-value" id="disp_maxbet">0</div></div>
       <div class="stat-card"><div class="stat-label">Hands</div><div class="stat-value" id="disp_hands">0</div></div>
-      <div class="stat-card pre"><div class="stat-label">Dragon</div><div class="stat-value" id="disp_dragon">1</div></div>
-      <div class="stat-card pre"><div class="stat-label">Chaos</div><div class="stat-value" id="disp_chaos">0/5</div></div>
-      <div class="stat-card comm"><div class="stat-label">Commission Total</div><div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0.00</div></div>
+      <div class="stat-card pre"><div class="stat-label">Dragon</div><div class="stat-value" id="disp_dragon">0</div></div>
+      <div class="stat-card pre"><div class="stat-label">Chaos</div><div class="stat-value" id="disp_chaos">0</div></div>
+      <div class="stat-card comm"><div class="stat-label">Commission Total</div><div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0</div></div>
     </div>
 
-    <div class="road-scroll-wrapper"><div class="big-road-grid" id="road_container"><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div><div class="big-road-cell"></div></div></div>
+    <div class="road-scroll-wrapper"><div class="big-road-grid" id="road_container"></div></div>
 
     <div class="bet-panel">
-      <div class="offset-formula" id="formula_disp">Follow Last</div>
+      <div class="offset-formula" id="formula_disp">Strategy: Something Else</div>
       <div class="rec-amount" id="rec_amount">0</div>
-      <div class="rec-side side-p" id="rec_side">PLAYER</div>
+      <div class="rec-side side-n" id="rec_side">WAIT</div>
       <div class="controls">
-        <button class="btn-ctrl btn-p" onclick="processResult(&#39;P&#39;)">PLAYER</button>
-        <button class="btn-ctrl btn-b" onclick="processResult(&#39;B&#39;)">BANKER</button>
+        <button class="btn-ctrl btn-p" onclick="processResult('P')">PLAYER</button>
+        <button class="btn-ctrl btn-b" onclick="processResult('B')">BANKER</button>
         <button class="btn-ctrl btn-u" onclick="undo()">UNDO</button>
       </div>
     </div>
 
-    <div class="chart-box"><canvas id="profitChart" width="800" height="267" style="display: block; box-sizing: border-box; height: 267.5px; width: 800px;"></canvas></div>
+    <div class="chart-box"><canvas id="profitChart"></canvas></div>
   </div>
 </div>
 
@@ -470,11 +472,11 @@
     <div class="modal-icon" style="width:100%;text-align:center;">💰</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br>
+      ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br/>
       rng=shoe, strat=something_else, comm=0.9, minbet=10, chip=10, target=6,
       max_bet_cap=10000, dragon=6, chaos=5/10, trail_start=30, trail_drop=3,
       surv_trigger=10, surv_div=2.01, pen=60, rebalance=10
-      <br><br>
+      <br/><br/>
       Cut Card จะ “แกว่ง” รอบ ๆ %penetration ในแต่ละ Shoe
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
@@ -1614,43 +1616,5 @@ window.onload=function(){
   updateUI();
 };
 </script>
-
-
-<div id="give-freely-root-ejkiikneibegknkgimmihdpcbcedgmpo" class="give-freely-root" data-extension-id="ejkiikneibegknkgimmihdpcbcedgmpo" data-extension-name="Volume Booster" style="display: block;"><template shadowrootmode="open"><style>
-  :host {
-    all: initial;
-  }
-
-  .gf-scroll-remove::-webkit-scrollbar {
-    border-radius-bottom-right: 15px;
-  }
-
-  button {
-    cursor: pointer;
-    transition: transform 0.1s ease;
-  }
-
-  button:active {
-    transform: scale(0.98);
-  }
-
-  .give-freely-close-button:hover {
-    opacity: 0.7;
-  }
-
-  input[type="radio"] {
-    margin-right: 8px;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #e5e5e5;
-    margin: 1em 0;
-  }
-
-  @media (max-width: 600px), (max-height: 480px) {
-    #give-freely-checkout-popup {
-      display: none !important;
-    }
-  }
-</style><div><div class="gf-app"></div></div></template></div></body></html>
+</body>
+</html>
