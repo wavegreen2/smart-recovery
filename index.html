@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baccarat AI: Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — LOW DD DEFAULT + Casino CutCard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Baccarat AI: Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — DEFAULT v4</title>
+
+  <!-- Chart.js (ใช้ไฟล์เดิมของคุณ หรือเปลี่ยนเป็น CDN ได้) -->
+  <script src="./Baccarat AI_ Ultimate V3.4 (FULL + Shoe + Comm + Sessions) — LOW DD DEFAULT + Casino CutCard_files/chart.js.ดาวน์โหลด"></script>
 
   <style>
     :root{
@@ -164,7 +166,7 @@
 <div class="container">
   <div class="sidebar">
     <div class="section-title" style="justify-content:center;border-bottom:none">
-      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS (DEFAULT: LOW DRAW DOWN + Casino CutCard)</span>
+      <span class="badge-ult" style="font-size:.8rem;padding:5px 10px;">V3.4 FULL: SHOE + COMM + SESSIONS (DEFAULT v4)</span>
     </div>
 
     <button class="btn-reset" onclick="resetAll()">รีเซ็ตทั้งหมด (Hard Reset)</button>
@@ -179,30 +181,38 @@
       </select>
     </div>
 
-    <div class="shoe-ui" id="shoe_ui">
+    <div class="shoe-ui active" id="shoe_ui">
       <div class="shoe-hdr">
         <div>
           <div class="t">🃏 8-Deck Shoe — Casino Real</div>
           <div class="sub">Burn Card + Cut Card (Penetration)</div>
         </div>
+
         <select id="shoe_pen" onchange="onPenChange()">
+          <option value="40">ใช้ไพ่ 40%</option>
+          <option value="45">ใช้ไพ่ 45%</option>
           <option value="50">ใช้ไพ่ 50%</option>
+          <option value="55">ใช้ไพ่ 55%</option>
           <option value="60" selected>ใช้ไพ่ 60%</option>
+          <option value="65">ใช้ไพ่ 65%</option>
           <option value="70">ใช้ไพ่ 70%</option>
+          <option value="75">ใช้ไพ่ 75%</option>
           <option value="80">ใช้ไพ่ 80%</option>
+          <option value="85">ใช้ไพ่ 85%</option>
+          <option value="90">ใช้ไพ่ 90%</option>
         </select>
       </div>
 
       <div class="shoe-bar">
-        <div class="shoe-bar-fill" id="sb_fill"></div>
-        <div class="shoe-cut" id="sb_cut" style="left:60%"></div>
+        <div class="shoe-bar-fill" id="sb_fill" style="width: 0%;"></div>
+        <div class="shoe-cut" id="sb_cut" style="left: 62.5%;"></div>
         <div class="shoe-bar-txt" id="sb_txt">0 / 416 (0.0%)</div>
       </div>
 
       <div class="shoe-grid">
         <div class="shoe-bx"><div class="lb">คงเหลือ</div><div class="vl" id="sh_rem">416</div></div>
         <div class="shoe-bx"><div class="lb">ใช้แล้ว</div><div class="vl" id="sh_used">0</div></div>
-        <div class="shoe-bx"><div class="lb">Shoe #</div><div class="vl" id="sh_no">0</div></div>
+        <div class="shoe-bx"><div class="lb">Shoe #</div><div class="vl" id="sh_no">1</div></div>
       </div>
 
       <div class="burn-box" id="burn_box" style="display:none">
@@ -238,13 +248,21 @@
     </div>
 
     <div class="form-group">
-      <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา" oninput="syncSimSettings('top')" />
+      <input type="number" id="sim_hands" value="1" placeholder="จำนวนตา" oninput="syncSimSettings('top')">
       <button class="btn-action btn-sim" onclick="runSimulation()">จำลองผล (Simulate)</button>
 
       <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
       <select id="sim_speed" onchange="syncSimSettings('top')">
         <option value="0">🚀 ทันที (Instant)</option>
-        <option value="20" selected>⚡ เร็ว (Fast)</option>
+        <option value="1">1 ms</option>
+        <option value="5">5 ms</option>
+        <option value="10">10 ms</option>
+        <option value="20" selected>20 ms</option>
+        <option value="50">50 ms</option>
+        <option value="100">100 ms</option>
+        <option value="200">200 ms</option>
+        <option value="500">500 ms</option>
+        <option value="1000">1000 ms</option>
       </select>
 
       <button class="btn-action btn-auto" id="btn_auto_sim" onclick="toggleAutoSim()">🚀 Auto Sim</button>
@@ -256,18 +274,16 @@
     </div>
 
     <div class="section-title">⚙️ ตั้งค่า (Settings)</div>
-<div class="form-group">
-  <label>โหมดกลยุทธ์ (Strategy Mode)</label>
-  <select id="strat_mode" onchange="updateUI()">
-  <option value="offset">⚖️ Offset (สมดุล P-B)</option>
-  <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
-  <option value="follow_last" selected>🌊 Follow Last (ตามตัวติด)</option>
-  <option value="something_else">🧪 Something Else (Engine)</option>
-  <option value="policy_ai">🧠 Policy AI (trained weights)</option>
-</select>
-
-</div>
-
+    <div class="form-group">
+      <label>โหมดกลยุทธ์ (Strategy Mode)</label>
+      <select id="strat_mode" onchange="updateUI()">
+        <option value="offset">⚖️ Offset (สมดุล P-B)</option>
+        <option value="anti_last">⚡ Anti Last (สวนตัวติด)</option>
+        <option value="follow_last">🌊 Follow Last (ตามตัวติด)</option>
+        <option value="something_else">🧪 Something Else (Engine)</option>
+        <option value="policy_ai" selected>🧠 Policy AI (trained weights)</option>
+      </select>
+    </div>
 
     <div class="comm-box">
       <div class="comm-title">
@@ -276,14 +292,15 @@
       </div>
       <div class="form-group">
         <label>อัตราค่าคอม / โรลลิ่ง (%)</label>
+        <!-- NOTE: ชุดล่าสุดไม่ระบุ commission_rate => คงค่าเดิม -->
         <input type="number" id="commission_rate" value="0.9" step="0.01" min="0" oninput="updateUI()">
         <div style="font-size:.6rem;color:var(--comm);margin-top:2px;">*คิดจากยอดเดิมพันทุกมือที่มีการเดิมพันจริง</div>
       </div>
       <div class="comm-grid">
         <div class="comm-stat"><div class="lb">ยอดเดิมพันสะสม</div><div class="vl" id="comm_turnover">0</div></div>
-        <div class="comm-stat"><div class="lb">ค่าคอมสะสม</div><div class="vl" id="comm_total">0</div></div>
+        <div class="comm-stat"><div class="lb">ค่าคอมสะสม</div><div class="vl" id="comm_total">0.00</div></div>
         <div class="comm-stat"><div class="lb">มือที่เดิมพัน</div><div class="vl" id="comm_hands">0</div></div>
-        <div class="comm-stat"><div class="lb">Net + คอม</div><div class="vl" id="comm_net_plus">0</div></div>
+        <div class="comm-stat"><div class="lb">Net + คอม</div><div class="vl" id="comm_net_plus">0.00</div></div>
       </div>
     </div>
 
@@ -291,9 +308,9 @@
     <div class="comm-box" style="border-color:#cfe2ff;background:#f7fbff">
       <div class="comm-title" style="color:#1d4ed8"><span>Lifetime Stats</span></div>
       <div class="comm-grid">
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net Profit รวมทั้งหมด</div><div class="vl" id="all_net">0</div></div>
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net + Commission รวมทั้งหมด</div><div class="vl" id="all_net_comm">0</div></div>
-        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_dd">0</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net Profit รวมทั้งหมด</div><div class="vl" id="all_net" style="color: var(--success);">0.00</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Net + Commission รวมทั้งหมด</div><div class="vl" id="all_net_comm" style="color: var(--success);">0.00</div></div>
+        <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Drawdown สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_dd" style="color: var(--danger);">0.00</div></div>
         <div class="comm-stat" style="background:rgba(29,78,216,.06)"><div class="lb">Max Bet สูงสุดตั้งแต่ต้น</div><div class="vl" id="all_max_bet">0</div></div>
       </div>
     </div>
@@ -301,24 +318,24 @@
     <div class="target-box">
       <div class="target-title">🎯 Target Profit (เป้ากำไรต่อรอบ)</div>
       <div class="form-group">
-        <label>Reset Cycle if Profit >=</label>
-        <input type="number" id="target_profit" value="6">
+        <label>Reset Cycle if Profit &gt;=</label>
+        <input type="number" id="target_profit" value="0.01812566932973366" step="0.0000001">
       </div>
     </div>
 
     <div class="feature-box" style="border-color: var(--dragon);">
       <div class="feature-title" style="color: var(--dragon);">🐉 Dragon Logic (ตัดมังกร)</div>
       <div class="form-group">
-        <label>Stop if Streak >=</label>
-        <input type="number" id="dragon_limit" value="6">
+        <label>Stop if Streak &gt;=</label>
+        <input type="number" id="dragon_limit" value="7">
       </div>
     </div>
 
     <div class="feature-box">
       <div class="feature-title">🔒 Trailing Stop</div>
       <div class="dual-input">
-        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="30"></div>
-        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="3"></div>
+        <div class="form-group"><label>Start (Profit)</label><input type="number" id="trail_start" value="7.984494056742626" step="0.0000001"></div>
+        <div class="form-group"><label>Drop (%)</label><input type="number" id="trail_drop" value="5.296903182308629" step="0.0000001"></div>
       </div>
     </div>
 
@@ -327,9 +344,18 @@
       <div class="form-group">
         <label>Zigzag Limit (Last 10)</label>
         <select id="chaos_limit" onchange="updateUI()">
-          <option value="5" selected>5/10</option>
+          <option value="0">0/10</option>
+          <option value="1">1/10</option>
+          <option value="2">2/10</option>
+          <option value="3">3/10</option>
+          <option value="4">4/10</option>
+          <option value="5">5/10</option>
+          <option value="6">6/10</option>
+          <option value="7">7/10</option>
+          <option value="8">8/10</option>
           <option value="9">9/10</option>
-          <option value="11">Disable</option>
+          <option value="10">10/10</option>
+          <option value="11" selected>Disable</option>
         </select>
       </div>
     </div>
@@ -337,34 +363,35 @@
     <div class="feature-box" id="survival_box">
       <div class="feature-title">🛡️ Survival Mode</div>
       <div class="dual-input">
-        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="10"></div>
-        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="2.01"></div>
+        <div class="form-group"><label>Trigger DD%</label><input type="number" id="surv_trigger" value="14.102822658592816" step="0.0000001"></div>
+        <div class="form-group"><label>Div Multiplier</label><input type="number" id="surv_div" value="1.5855970570476532" step="0.0000001"></div>
       </div>
     </div>
 
-    <div class="form-group"><label>เงินทุน (Bankroll)</label><input type="number" id="init_bank" value="20000"></div>
-    <div class="form-group"><label>Max Bet</label><input type="number" id="max_bet_cap" value="10000"></div>
-    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="10" step="0.01"></div>
+    <!-- ✅ ปรับตามที่ขอ -->
+    <div class="form-group"><label>เงินทุน (Bankroll)</label><input type="number" id="init_bank" value="200000"></div>
+    <div class="form-group"><label>Max Bet</label><input type="number" id="max_bet_cap" value="75000"></div>
+    <div class="form-group"><label>Rebalance Adaptivity</label><input type="number" id="rebalance_val" value="12.40427910151264" step="0.01"></div>
 
     <div class="dual-input">
-      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="10"></div>
-      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="10" style="border:2px solid var(--primary);font-weight:bold"></div>
+      <div class="form-group"><label>Min Bet</label><input type="number" id="min_bet" value="5"></div>
+      <div class="form-group"><label style="color:var(--primary);">Chip Unit</label><input type="number" id="chip_size" value="5" style="border:2px solid var(--primary);font-weight:bold"></div>
     </div>
 
-    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (LOW DD DEFAULT)</button>
+    <button class="btn-restore" onclick="restoreRecommended()">↺ คืนค่า (DEFAULT v4)</button>
 
     <div class="section-title">🎯 สถานะ (Status)</div>
     <div class="monitor-box">
       <span class="monitor-label">กำไรสุทธิ / High Water Mark</span>
-      <div id="target_status_display" class="monitor-val">0 / 0</div>
+      <div id="target_status_display" class="monitor-val">0.00 / 0.00</div>
       <div class="cycle-monitor">
         <span>Cycle Profit:</span>
-        <span id="cycle_profit_disp" style="color:var(--target);font-weight:bold;">0</span>
+        <span id="cycle_profit_disp" style="color:var(--target);font-weight:bold;">0.0000 / 0.01812566932973366</span>
       </div>
-      <div style="font-size:.6rem;color:#bdc3c7;margin-top:4px;" id="trailing_info">Trailing Inactive</div>
+      <div style="font-size:.6rem;color:#bdc3c7;margin-top:4px;" id="trailing_info">Waiting</div>
       <div style="font-size:.7rem;color:#d7f7e6;margin-top:8px;">
-        ทุนคงเหลือ (รวมค่าคอม): <b id="bankroll_left_disp">0</b><br/>
-        Session #: <b id="session_no_disp">0</b> | Sessions Saved: <b id="session_saved_disp">0</b>
+        ทุนคงเหลือ (รวมค่าคอม): <b id="bankroll_left_disp" style="color:#d7f7e6;">200,000.00</b><br>
+        Session #: <b id="session_no_disp">1</b> | Sessions Saved: <b id="session_saved_disp">0</b>
       </div>
     </div>
 
@@ -383,9 +410,7 @@
               <th>#</th><th>Reason</th><th>Hands</th><th>Net+Comm</th><th>Comm</th><th>Turn</th><th>Left</th><th>Time</th>
             </tr>
           </thead>
-          <tbody id="session_table_body">
-            <tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr>
-          </tbody>
+          <tbody id="session_table_body"><tr><td colspan="8" class="muted" style="padding:10px">ยังไม่มี session ที่บันทึก</td></tr></tbody>
         </table>
       </div>
       <div class="muted" style="font-size:.68rem;margin-top:6px;line-height:1.5">
@@ -398,12 +423,12 @@
       <div class="brain-col">
         <div class="brain-head txt-p">PLAYER AI</div>
         <div class="brain-val txt-p" id="mon_p_req">0</div>
-        <div class="brain-info" id="mon_p_info">Wait:0</div>
+        <div class="brain-info" id="mon_p_info">Wait:0 | Stg:0</div>
       </div>
       <div class="brain-col">
         <div class="brain-head txt-b">BANKER AI</div>
         <div class="brain-val txt-b" id="mon_b_req">0</div>
-        <div class="brain-info" id="mon_b_info">Wait:0</div>
+        <div class="brain-info" id="mon_b_info">Wait:0 | Stg:0</div>
       </div>
     </div>
 
@@ -424,7 +449,15 @@
       <label style="margin-top:10px;">ความเร็ว Auto Sim:</label>
       <select id="sim_speed_bot" onchange="syncSimSettings('bot')">
         <option value="0">🚀 ทันที</option>
-        <option value="20" selected>⚡ เร็ว</option>
+        <option value="1">1 ms</option>
+        <option value="5">5 ms</option>
+        <option value="10">10 ms</option>
+        <option value="20" selected>20 ms</option>
+        <option value="50">50 ms</option>
+        <option value="100">100 ms</option>
+        <option value="200">200 ms</option>
+        <option value="500">500 ms</option>
+        <option value="1000">1000 ms</option>
       </select>
 
       <button class="btn-action btn-auto" id="btn_auto_sim_bot" onclick="toggleAutoSim()">🚀 Auto Sim</button>
@@ -440,22 +473,24 @@
 
   <div class="main-content">
     <div class="stats-grid">
-      <div class="stat-card profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="disp_net">0</div></div>
-      <div class="stat-card comm"><div class="stat-label">Net + Commission</div><div class="stat-value" id="disp_net_comm" style="color:var(--comm);">0</div></div>
-      <div class="stat-card"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="disp_dd">0</div></div>
+      <div class="stat-card profit"><div class="stat-label">Net Profit</div><div class="stat-value" id="disp_net" style="color: var(--success);">0.00</div></div>
+      <div class="stat-card comm"><div class="stat-label">Net + Commission</div><div class="stat-value" id="disp_net_comm" style="color:var(--comm);">0.00</div></div>
+      <div class="stat-card"><div class="stat-label">Max Drawdown</div><div class="stat-value" id="disp_dd">0.00</div></div>
       <div class="stat-card loss"><div class="stat-label">Max Bet</div><div class="stat-value" id="disp_maxbet">0</div></div>
       <div class="stat-card"><div class="stat-label">Hands</div><div class="stat-value" id="disp_hands">0</div></div>
-      <div class="stat-card pre"><div class="stat-label">Dragon</div><div class="stat-value" id="disp_dragon">0</div></div>
-      <div class="stat-card pre"><div class="stat-label">Chaos</div><div class="stat-value" id="disp_chaos">0</div></div>
-      <div class="stat-card comm"><div class="stat-label">Commission Total</div><div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0</div></div>
+      <div class="stat-card pre"><div class="stat-label">Dragon</div><div class="stat-value" id="disp_dragon">1</div></div>
+      <div class="stat-card pre"><div class="stat-label">Chaos</div><div class="stat-value" id="disp_chaos">0/Disable</div></div>
+      <div class="stat-card comm"><div class="stat-label">Commission Total</div><div class="stat-value" id="disp_comm_total" style="color:var(--comm);">0.00</div></div>
     </div>
 
-    <div class="road-scroll-wrapper"><div class="big-road-grid" id="road_container"></div></div>
+    <div class="road-scroll-wrapper">
+      <div class="big-road-grid" id="road_container"></div>
+    </div>
 
     <div class="bet-panel">
-      <div class="offset-formula" id="formula_disp">Strategy: Something Else</div>
+      <div class="offset-formula" id="formula_disp">Policy AI</div>
       <div class="rec-amount" id="rec_amount">0</div>
-      <div class="rec-side side-n" id="rec_side">WAIT</div>
+      <div class="rec-side side-p" id="rec_side">WAIT</div>
       <div class="controls">
         <button class="btn-ctrl btn-p" onclick="processResult('P')">PLAYER</button>
         <button class="btn-ctrl btn-b" onclick="processResult('B')">BANKER</button>
@@ -472,12 +507,11 @@
     <div class="modal-icon" style="width:100%;text-align:center;">💰</div>
     <div class="modal-text-th" style="color:var(--comm); text-align:center;">คำแนะนำการใช้งาน</div>
     <div style="font-size:.9rem;line-height:1.8;color:#2c3e50;margin-top:10px;">
-      ค่าเริ่มต้นถูกตั้งเป็นชุด <b>LOW DRAW DOWN</b> (เน้นคุม Max DD):<br/>
-      rng=shoe, strat=something_else, comm=0.9, minbet=10, chip=10, target=6,
-      max_bet_cap=10000, dragon=6, chaos=5/10, trail_start=30, trail_drop=3,
-      surv_trigger=10, surv_div=2.01, pen=60, rebalance=10
-      <br/><br/>
-      Cut Card จะ “แกว่ง” รอบ ๆ %penetration ในแต่ละ Shoe
+      ค่าเริ่มต้น (DEFAULT v4):<br>
+      rng=shoe, strat=policy_ai, target=0.01812566932973366 (หน่วยเงิน),
+      dragon=7, chaos=Disable, trail_start=7.984494056742626, trail_drop=5.296903182308629,
+      surv_trigger=14.102822658592816, surv_div=1.5855970570476532, pen=60, rebalance=12.40427910151264<br>
+      bankroll=200000, max_bet=75000, min_bet=5, chip=5
     </div>
     <button class="btn-modal-ack" style="background:var(--comm);" onclick="closeGuideModal()">เข้าใจแล้ว ✓</button>
   </div>
@@ -690,10 +724,8 @@ function onRngChange(){
 /* =========================
    Core System + Commission + Sessions + Bankroll Cap
    ========================= */
-
-// ✅ AutoSim Undo control (snapshot throttling)
-const AUTO_UNDO_EVERY = 25;     // ซิมทุก 25 มือ เก็บ snapshot 1 ครั้ง (ปรับได้)
-const UNDO_STACK_LIMIT = 500;   // จำกัดจำนวน snapshot กันเมมบวม
+const AUTO_UNDO_EVERY = 25;
+const UNDO_STACK_LIMIT = 500;
 let autoHandCounter = 0;
 
 let state={
@@ -704,8 +736,6 @@ let state={
   bStrat:{bal:0,wait:0,stage:0,initBet:0,cons_loss:0},
   graphData:[0], graphLabels:[0],
   commTurnover:0, commTotal:0, commHands:0,
-
-  // ✅ NEW: Big Road history รวมทุก session (ไม่ถูกล้างเมื่อบันทึก session)
   roadHistory:[]
 };
 
@@ -809,7 +839,6 @@ function startNewSession(){
   sessionNo+=1;
   sessionStartTs=Date.now();
 
-  // ✅ รีเซ็ตเฉพาะ runtime ของ session ปัจจุบัน (ไม่ล้าง roadHistory / ไม่ล้าง undoStack)
   state.realBalance=0; state.history=[]; state.maxDrawdown=0; state.maxBet=0;
   state.highWaterMark=0; state.targetReached=false; state.survivalActive=false;
   state.cycleStartBalance=0;
@@ -817,12 +846,8 @@ function startNewSession(){
   state.bStrat={bal:0,wait:0,stage:0,initBet:0,cons_loss:0};
   state.graphData=[0]; state.graphLabels=[0];
   state.commTurnover=0; state.commTotal=0; state.commHands=0;
-
-  // ❌ อย่าล้าง undoStack เพื่อให้ Undo ยังย้อนข้าม session ได้
-  // undoStack=[];
 }
 
-// ✅ saveState/undo ต้องเก็บ session meta ด้วย เพื่อ Undo ย้อนข้ามจุดปิด session ได้
 function saveState(){
   undoStack.push({
     state: JSON.parse(JSON.stringify(state)),
@@ -848,14 +873,12 @@ function undo(){
   updateUI();
 }
 
-// ✅ helper: push outcome ทั้ง session history (logic) + roadHistory (รวมทุก session)
 function pushOutcome(res){
   state.history.push(res);
   state.roadHistory = state.roadHistory || [];
   state.roadHistory.push(res);
 }
 
-// ✅ helper: autosim snapshot throttling
 function maybeSaveSimSnapshot(){
   autoHandCounter++;
   if(autoHandCounter % AUTO_UNDO_EVERY === 0){
@@ -864,7 +887,6 @@ function maybeSaveSimSnapshot(){
 }
 
 function closeSessionAndRestart(reason, isSim=false){
-  // ✅ สำคัญ: หากปิด session ระหว่าง AutoSim ให้ save snapshot ก่อนเปลี่ยน state/sessionHistory
   if(isSim) saveState();
 
   const net=state.realBalance;
@@ -909,7 +931,7 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
 
   const cycleProfit=state.realBalance-state.cycleStartBalance;
   if(targetProfit>0 && cycleProfit>=targetProfit){
-    closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(2)})`, isSim);
+    closeSessionAndRestart(`Target Profit Reached (Cycle +${cycleProfit.toFixed(8)})`, isSim);
     if(!isSim) updateUI();
     return true;
   }
@@ -923,7 +945,7 @@ function checkAndEndSessionByTargetOrTrailing(isSim){
   if(state.highWaterMark>=trailStart){
     const cutLine=state.highWaterMark*(1-(trailDrop/100));
     if(state.realBalance<=cutLine){
-      closeSessionAndRestart(`Trailing Stop Hit (HWM ${state.highWaterMark.toFixed(2)} → Cut ${cutLine.toFixed(2)})`, isSim);
+      closeSessionAndRestart(`Trailing Stop Hit (HWM ${state.highWaterMark.toFixed(8)} → Cut ${cutLine.toFixed(8)})`, isSim);
       if(!isSim) updateUI();
       return true;
     }
@@ -957,45 +979,35 @@ function generateOutcome(){
 }
 
 /* =========================
-   DEFAULT = LOW DRAW DOWN (คุม Max DD)
+   ✅ DEFAULT v4 (params + bankroll + caps + chip/min)
    ========================= */
 function restoreRecommended(){
-  // RNG / Shoe
   document.getElementById('rng_method').value='shoe';
   document.getElementById('shoe_pen').value='60';
 
-  // Strategy (คุม DD ดีสุดกับระบบเดิม)
-  document.getElementById('strat_mode').value='follow_last';
+  document.getElementById('strat_mode').value='policy_ai';
 
+  // commission_rate: ชุดนี้ไม่ได้ระบุ => คงค่าเดิมใน input
+  // document.getElementById('commission_rate').value='0.9';
 
-  // Commission
-  document.getElementById('commission_rate').value='0.9';
+  document.getElementById('target_profit').value='0.01812566932973366';
 
-  // Bankroll / Risk Caps
-  document.getElementById('init_bank').value=20000.0;
-  document.getElementById('max_bet_cap').value=10000.0; // ✅ ลด DD แรงสุด
+  document.getElementById('dragon_limit').value='7';
+  document.getElementById('chaos_limit').value='11'; // Disable
 
-  // Rebalance
-  document.getElementById('rebalance_val').value=10.0;
+  document.getElementById('trail_start').value='7.984494056742626';
+  document.getElementById('trail_drop').value='5.296903182308629';
 
-  // Bet sizing
-  document.getElementById('min_bet').value=10.0;
-  document.getElementById('chip_size').value=10.0;
+  document.getElementById('surv_trigger').value='14.102822658592816';
+  document.getElementById('surv_div').value='1.5855970570476532';
 
-  // Target
-  document.getElementById('target_profit').value=6.0;
+  document.getElementById('rebalance_val').value='12.40427910151264';
 
-  // Dragon / Chaos
-  document.getElementById('dragon_limit').value=6;
-  document.getElementById('chaos_limit').value=5;
-
-  // Trailing
-  document.getElementById('trail_start').value=30.0;
-  document.getElementById('trail_drop').value=3.0;
-
-  // Survival
-  document.getElementById('surv_trigger').value=10.0;
-  document.getElementById('surv_div').value=2.01;
+  // ✅ Bankroll / Caps / Chip-Min
+  document.getElementById('init_bank').value='200000';
+  document.getElementById('max_bet_cap').value='75000';
+  document.getElementById('min_bet').value='5';
+  document.getElementById('chip_size').value='5';
 
   syncSimSettings('top');
   onRngChange();
@@ -1098,47 +1110,15 @@ function applyTargetSniper(betAmount, side){
 }
 
 /* =========================
-   🧠 Policy AI (trained weights) — FULL INTEGRATION
+   🧠 Policy AI (trained weights)
    ========================= */
 const TRAINED_POLICY = {
-  wP: {
-    c: -0.3928252531634952,
-    bias: 0.8708993699161368,
-    zig: 0.9898610254061753,
-    tieRate: -0.3955203431275083,
-    streakN: -0.13981681295704762,
-    lastP: 0.2532830015248164,
-    lastB: 0.07488143904492145
-  },
-  wB: {
-    c: -1.1508993524052586,
-    bias: -0.4321370196771435,
-    zig: -0.9614563873601566,
-    tieRate: 0.2576827616572196,
-    streakN: -0.41800751134256997,
-    lastP: 0.24814946837852042,
-    lastB: 0.3477249348305153
-  },
-  wW: {
-    c: -0.5528507363362684,
-    bias: 1.3951764069146138,
-    zig: -0.16996934097562105,
-    tieRate: -1.1134453873209744,
-    streakN: 1.0447036802114804,
-    lastP: 0.5488793440369264,
-    lastB: 1.0476893375084022
-  },
-  wBet: {
-    c: -0.09726322155264133,
-    bias: 0.18954046370849825,
-    zig: 1.504729716051429,
-    tieRate: -0.012070932803854961,
-    streakN: -1.0543141676408292,
-    lastP: 0.44867125798250074,
-    lastB: -0.2892945454527314
-  },
-  kellyLike: 0.5475672311517564,
-  maxFrac: 0.11942176903440395
+  wP: { c:-0.3928252531634952, bias:0.8708993699161368, zig:0.9898610254061753, tieRate:-0.3955203431275083, streakN:-0.13981681295704762, lastP:0.2532830015248164, lastB:0.07488143904492145 },
+  wB: { c:-1.1508993524052586, bias:-0.4321370196771435, zig:-0.9614563873601566, tieRate:0.2576827616572196, streakN:-0.41800751134256997, lastP:0.24814946837852042, lastB:0.3477249348305153 },
+  wW: { c:-0.5528507363362684, bias:1.3951764069146138, zig:-0.16996934097562105, tieRate:-1.1134453873209744, streakN:1.0447036802114804, lastP:0.5488793440369264, lastB:1.0476893375084022 },
+  wBet:{ c:-0.09726322155264133, bias:0.18954046370849825, zig:1.504729716051429, tieRate:-0.012070932803854961, streakN:-1.0543141676408292, lastP:0.44867125798250074, lastB:-0.2892945454527314 },
+  kellyLike:0.5475672311517564,
+  maxFrac:0.11942176903440395
 };
 
 function _sigmoid(x){
@@ -1220,13 +1200,9 @@ function policyDecide(){
   return { action, bet, debug:{ f, LP, LB, LW, r } };
 }
 
-/* =========================
-   ✅ something_else = engine.py 1:1 (ตามเวอร์ชันเว็บนี้)
-   ========================= */
 function processResult(res,isSim=false){
   if(checkAndEndSessionIfNeeded(isSim)) return;
 
-  // ✅ Manual = snapshot ทุกมือ, AutoSim = snapshot เป็นช่วงๆ
   if(!isSim) saveState();
   else maybeSaveSimSnapshot();
 
@@ -1429,11 +1405,11 @@ function updateUI(){
   document.getElementById('mon_p_info').innerText=`Wait:${state.pStrat.wait} | Stg:${state.pStrat.stage}`;
   document.getElementById('mon_b_info').innerText=`Wait:${state.bStrat.wait} | Stg:${state.bStrat.stage}`;
 
-  document.getElementById('target_status_display').innerText=`${state.realBalance.toFixed(2)} / ${state.highWaterMark.toFixed(2)}`;
+  document.getElementById('target_status_display').innerText=`${state.realBalance.toFixed(4)} / ${state.highWaterMark.toFixed(4)}`;
 
   const cycleProfit=state.realBalance-state.cycleStartBalance;
   const targetProfit=parseFloat(document.getElementById('target_profit').value)||0;
-  document.getElementById('cycle_profit_disp').innerText=`${cycleProfit.toFixed(2)} / ${targetProfit}`;
+  document.getElementById('cycle_profit_disp').innerText=`${cycleProfit.toFixed(8)} / ${targetProfit}`;
 
   const trailStart=parseFloat(document.getElementById('trail_start').value);
   document.getElementById('trailing_info').innerText = state.highWaterMark>=trailStart ? 'Active' : 'Waiting';
@@ -1445,7 +1421,8 @@ function updateUI(){
   document.getElementById('disp_dd').innerText=state.maxDrawdown.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('disp_maxbet').innerText=state.maxBet.toLocaleString();
   document.getElementById('disp_hands').innerText=state.history.length;
-  document.getElementById('disp_chaos').innerText=`${chaosCount}/${chaosLimit}`;
+
+  document.getElementById('disp_chaos').innerText = (chaosLimit===11) ? `${chaosCount}/Disable` : `${chaosCount}/${chaosLimit}`;
   document.getElementById('disp_dragon').innerText=dragonCount;
 
   if(state.survivalActive) document.getElementById('survival_box').classList.add('survival-active');
@@ -1487,7 +1464,6 @@ function renderBigRoad(){
   let matrix=[], col=0, row=0, last=null;
   const setCell=(c,r,v)=>{ if(!matrix[c]) matrix[c]=[]; matrix[c][r]=v; };
 
-  // ✅ Big Road ใช้ roadHistory (รวมทุก session) ไม่ถูกเคลียร์ตอนบันทึก session
   (state.roadHistory || []).forEach(res=>{
     if(last===null){ setCell(col,row,res); last=res; return; }
     if(res===last){
@@ -1557,7 +1533,7 @@ function closeGuideModal(){ document.getElementById('guideModal').style.display=
 
 function runSimulation(){
   const n=parseInt(document.getElementById('sim_hands').value)||1;
-  saveState(); // manual simulate: snapshot ก่อนวิ่ง
+  saveState();
   for(let i=0;i<n;i++) processResult(generateOutcome(), true);
   updateUI();
 }
@@ -1607,7 +1583,6 @@ function autoPlayStep(){
   autoTimer=setTimeout(autoPlayStep, speed);
 }
 
-/* ===== Boot ===== */
 window.onload=function(){
   restoreRecommended();
   startNewSession();
@@ -1616,5 +1591,6 @@ window.onload=function(){
   updateUI();
 };
 </script>
+
 </body>
 </html>
