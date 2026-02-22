@@ -280,8 +280,8 @@
         <div class="form-group">
           <label>Reset Road เมื่อจบ cycle</label>
           <select id="reset_road_on_cycle" onchange="updateUI()">
-            <option value="yes" selected>Yes</option>
-            <option value="no">No (สะสม Big Road ต่อ)</option>
+            <option value="yes">Yes</option>
+            <option value="no" selected>No (สะสม Big Road ต่อ)</option>
           </select>
         </div>
       </div>
@@ -1428,7 +1428,7 @@ function restoreRecommended(){
   document.getElementById('shoe_pen').value='60';
   document.getElementById('net_mode').value='weight';
   document.getElementById('min_strength').value=1.0;
-  document.getElementById('reset_road_on_cycle').value='yes';
+  document.getElementById('reset_road_on_cycle').value='no';
 
   document.getElementById('use_offset').checked=true;
   document.getElementById('w_offset').value=1.0;
