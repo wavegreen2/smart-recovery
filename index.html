@@ -1632,37 +1632,38 @@ function settleSinglePortNetBet(side, bet, result, rebateRate, manualBankerSix =
 ========================================================= */
 
 function getVirtualBetInfo() {
-    const minChip = parseFloat(document.getElementById("min-chip")?.value) || 5;
-    const minBet = getEffectiveMinBet();
+    const sessionBaseBet = getEffectiveMinBet();
     const rawBaseMinBet = getRawBaseMinBet();
 
     let cable = "NEG";
-    let index = state.negIndex;
+    let index = Number(state.negIndex || 0);
     let units = NEG_SEQ[Math.min(index, NEG_SEQ.length - 1)];
 
     if (state.lastOutcome === "W") {
         cable = "WIN";
-        index = state.winIndex;
+        index = Number(state.winIndex || 0);
         units = WIN_SEQ[Math.min(index, WIN_SEQ.length - 1)];
     }
 
-    let bet = units * minChip;
-    if (bet < minBet) bet = minBet;
+    // สำคัญ:
+    // ใช้ sessionBaseBet เป็นฐาน แล้วคูณ Sequence
+    let bet = units * sessionBaseBet;
 
     return {
         cable,
         index,
         units,
         bet,
-        effectiveMinBet: minBet,
+        effectiveMinBet: sessionBaseBet,
+        sessionBaseBet,
         rawBaseMinBet,
-        levellerActive: isLevellerAutoMode() && minBet > rawBaseMinBet
+        levellerActive: isLevellerAutoMode() && sessionBaseBet > rawBaseMinBet
     };
 }
 
+
 function getSimBetInfo(side) {
-    const minChip = parseFloat(document.getElementById("min-chip")?.value) || 5;
-    const minBet = getEffectiveMinBet();
+    const sessionBaseBet = getEffectiveMinBet();
 
     const isBanker = side === "B";
 
@@ -1688,15 +1689,9 @@ function getSimBetInfo(side) {
         units = WIN_SEQ[Math.min(index, WIN_SEQ.length - 1)];
     }
 
-    // ยอดดิบ ใช้สำหรับวัดแรงกดดัน Simulation
-    const rawBet = units * minChip;
-
-    // ยอดหลัง floor ใช้แสดง / อ้างอิงเท่านั้น
-    let bet = rawBet;
-
-    if (bet < minBet) {
-        bet = minBet;
-    }
+    // ใช้ Base Bet ทั้ง Session × Sequence
+    const rawBet = units * sessionBaseBet;
+    const bet = rawBet;
 
     return {
         side,
@@ -1705,17 +1700,15 @@ function getSimBetInfo(side) {
         index,
         units,
 
-        // ยอดหลัง Min Bet floor
         bet,
-
-        // ยอดดิบก่อน floor ใช้เลือกฝั่ง
         rawBet,
 
-        // ชื่อชัดเจน ใช้ใน chooseSide
-        pressureBet: rawBet
+        // ใช้ตัวเดียวกันเป็น pressure สำหรับเลือกฝั่ง
+        pressureBet: rawBet,
+
+        sessionBaseBet
     };
 }
-
 
 function chooseSideBySimulation() {
     const bankerSim = getSimBetInfo("B");
@@ -2122,8 +2115,10 @@ ddBetStatTotalWaitBeforeBet: state.ddBetStatTotalWaitBeforeBet || 0,
         baccaratType: isSuperSixMode() ? "super6" : "classic",
 
         sessionLockedMinBet: Number(state.sessionLockedMinBet || 0),
-        levellerDivisor: getLevellerDivisor(),
-        levellerAuto: isLevellerAutoMode(),
+sessionBaseBet: Number(state.sessionLockedMinBet || 0),
+levellerDivisor: getLevellerDivisor(),
+levellerAuto: isLevellerAutoMode(),
+
 
         endedAt: new Date().toISOString()
     });
@@ -2407,6 +2402,8 @@ if (virtualBet > 0 && result !== "T") {
         virtualCable: pending.realBetInfo.cable,
 virtualIndex: pending.realBetInfo.index + 1,
 virtualUnits: pending.realBetInfo.units,
+sessionBaseBet: pending.realBetInfo.sessionBaseBet || pending.realBetInfo.effectiveMinBet || 0,
+
 
 simBankerBet: pending.bankerSim.bet,
 simBankerPressureBet: pending.bankerSim.pressureBet,
@@ -2645,7 +2642,7 @@ const isCapped = actualBet > 0 && calculatedBet > actualBet;
     `เลือก ${pending.virtualSideLabel} | ` +
     `Real ${pending.realBetInfo.cable}#${pending.realBetInfo.index + 1} ` +
     `(${pending.realBetInfo.units}u) | ` +
-    `Min ${Number(state.sessionLockedMinBet || getEffectiveMinBet()).toFixed(0)}` +
+    `Base ${Number(state.sessionLockedMinBet || getEffectiveMinBet()).toFixed(0)}` +
     (isCapped ? ` | Cap ${calculatedBet.toFixed(0)}→${actualBet.toFixed(0)}` : "");
 
 
@@ -3026,7 +3023,11 @@ function resultClass(result) {
 }
 
 function getLogPressureFallback(log, side) {
-    const minChip = parseFloat(document.getElementById("min-chip")?.value) || 5;
+    const baseBet =
+        Number(log.sessionBaseBet || 0) ||
+        Number(log.sessionLockedMinBet || 0) ||
+        Number(state.sessionLockedMinBet || 0) ||
+        getEffectiveMinBet();
 
     if (side === "B") {
         if (Number(log.simBankerPressureBet || 0) > 0) {
@@ -3034,7 +3035,7 @@ function getLogPressureFallback(log, side) {
         }
 
         if (Number(log.simBankerUnits || 0) > 0) {
-            return Number(log.simBankerUnits || 0) * minChip;
+            return Number(log.simBankerUnits || 0) * baseBet;
         }
 
         return 0;
@@ -3045,12 +3046,11 @@ function getLogPressureFallback(log, side) {
     }
 
     if (Number(log.simPlayerUnits || 0) > 0) {
-        return Number(log.simPlayerUnits || 0) * minChip;
+        return Number(log.simPlayerUnits || 0) * baseBet;
     }
 
     return 0;
 }
-
 
 function rowHtml(log) {
     const sideClass =
@@ -4559,5 +4559,7 @@ updateCapitalRequirementInfo();
     saveState();
 });
 </script>
+
+
 </body>
 </html>
