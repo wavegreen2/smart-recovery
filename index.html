@@ -265,6 +265,17 @@
             <input type="number" id="rebate-rate" value="1.0" min="0" max="10" step="0.1"
                 class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-amber-400 font-bold text-center">
         </div>
+<div class="col-span-3">
+    <label class="block text-[10px] text-slate-400 mb-1 font-medium">
+        Strategy Mode เลือกแนวทาง
+    </label>
+
+    <select id="strategy-mode"
+    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-emerald-300 font-bold text-center">
+    <option value="bestRoi" selected>Best ROI - Leveller 40 / ทุน 1,000,000 × Min Chip</option>
+    <option value="bestDrawdown">Best Drawdown - Leveller 500 / ทุน 600,000 × Min Chip</option>
+</select>
+</div>
 
         <!-- ซ่อน Wait VL จากหน้าหลัก แต่ยังคงค่าไว้ให้ logic ใช้ -->
         <input type="hidden" id="wait-virtual-lose" value="0">
@@ -507,16 +518,17 @@ oninput="saveSettings();"
             Leveller Divisor ตัวหาร
         </label>
 
-        <select id="leveller-divisor"
-            class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-purple-300 font-bold text-center">
-            <option value="10">10</option>
-            <option value="50" selected>50</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1,000</option>
-            <option value="5000">5,000</option>
-            <option value="10000">10,000</option>
-        </select>
+       <select id="leveller-divisor"
+    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-purple-300 font-bold text-center">
+    <option value="10">10</option>
+    <option value="40" selected>40</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="500">500</option>
+    <option value="1000">1,000</option>
+    <option value="5000">5,000</option>
+    <option value="10000">10,000</option>
+</select>
     </div>
 </div>
 
@@ -982,10 +994,25 @@ const VIRTUAL_ONLY_MODE = true;
 // DEFAULT AUTO MONEY MANAGEMENT
 // =========================================================
 const DEFAULT_LEVELLER_AUTO = true;
-const DEFAULT_LEVELLER_DIVISOR = 50;
+const DEFAULT_STRATEGY_MODE = "bestRoi";
 
-// ทุนขั้นต่ำแนะนำ = Min Chip × 600,000 หน่วย
-const CAPITAL_UNIT_MULTIPLIER = 600000;
+const STRATEGY_CONFIG = {
+    bestRoi: {
+        label: "Best ROI",
+        levellerDivisor: 40,
+        capitalMultiplier: 1000000
+    },
+    bestDrawdown: {
+        label: "Best Drawdown",
+        levellerDivisor: 500,
+        capitalMultiplier: 600000
+    }
+};
+
+const DEFAULT_LEVELLER_DIVISOR = STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE].levellerDivisor;
+
+// ทุนขั้นต่ำแนะนำ จะเปลี่ยนตาม Strategy Mode
+const CAPITAL_UNIT_MULTIPLIER = STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE].capitalMultiplier;
 
 // Max Bet อัตโนมัติ = Min Chip × 30,000 หน่วย
 const MAX_BET_UNIT_MULTIPLIER = 30000;
@@ -1231,9 +1258,36 @@ function getMinChipValue() {
     const minChip = parseFloat(document.getElementById("min-chip")?.value);
     return Number.isFinite(minChip) && minChip > 0 ? minChip : 5;
 }
+function getStrategyMode() {
+    const el = document.getElementById("strategy-mode");
+    const mode = el?.value || DEFAULT_STRATEGY_MODE;
+
+    return STRATEGY_CONFIG[mode] ? mode : DEFAULT_STRATEGY_MODE;
+}
+
+function getStrategyConfig() {
+    return STRATEGY_CONFIG[getStrategyMode()] || STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE];
+}
+
+function applyStrategyModeToLeveller() {
+    const cfg = getStrategyConfig();
+
+    const levellerDivisorEl = document.getElementById("leveller-divisor");
+    if (levellerDivisorEl) {
+        levellerDivisorEl.value = String(cfg.levellerDivisor);
+    }
+
+    const levellerAutoEl = document.getElementById("leveller-auto");
+    if (levellerAutoEl) {
+        levellerAutoEl.checked = true;
+    }
+
+    return cfg;
+}
 
 function calculateRequiredCapitalFromMinChip() {
-    return getMinChipValue() * CAPITAL_UNIT_MULTIPLIER;
+    const cfg = getStrategyConfig();
+    return getMinChipValue() * cfg.capitalMultiplier;
 }
 
 function calculateAutoMaxBetFromMinChip() {
@@ -1241,6 +1295,7 @@ function calculateAutoMaxBetFromMinChip() {
 }
 
 function updateCapitalRequirementInfo() {
+    const cfg = getStrategyConfig();
     const minChip = getMinChipValue();
     const requiredCapital = calculateRequiredCapitalFromMinChip();
     const autoMaxBet = calculateAutoMaxBetFromMinChip();
@@ -1249,13 +1304,18 @@ function updateCapitalRequirementInfo() {
     if (!el) return;
 
     el.innerHTML =
+        `<span class="font-bold text-cyan-300">${cfg.label}</span> | ` +
+        `Leveller Divisor = ` +
+        `<span class="font-black text-purple-300">${formatNumber(cfg.levellerDivisor)}</span><br>` +
+
         `ถ้าใช้ <span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span> ` +
         `ต้องใช้ทุนขั้นต่ำคือ ` +
         `<span class="font-black text-emerald-300">${formatNumber(requiredCapital)} หน่วย</span> ` +
-        `<span class="text-slate-400">(600,000 × Min Chip)</span><br>` +
+        `<span class="text-slate-400">(${formatNumber(cfg.capitalMultiplier)} × Min Chip)</span><br>` +
+
         `Max Bet คือ ` +
         `<span class="font-black text-orange-300">${formatNumber(autoMaxBet)} หน่วย</span> ` +
-        `มีค่ามาจาก Min Chip ชิปขั้นต่ำ × 30,000 หน่วย ระยะยาวเจ้ามือชน่ะเสมอ เล่นเพื่อความบันเทิงเท่านั้น`;
+        `มีค่ามาจาก Min Chip ชิปขั้นต่ำ × 30,000 หน่วย ระยะยาวเจ้ามือชนะเสมอ เล่นเพื่อความบันเทิงเท่านั้น`;
 }
 
 
@@ -1324,11 +1384,9 @@ function isLevellerAutoMode() {
     return true;
 }
 
-
 function getLevellerDivisor() {
-    const v = parseFloat(document.getElementById("leveller-divisor")?.value);
-    const allowed = [10, 50, 100, 500, 1000, 5000, 10000];
-    return allowed.includes(v) ? v : DEFAULT_LEVELLER_DIVISOR;
+    const cfg = getStrategyConfig();
+    return cfg.levellerDivisor;
 }
 
 function calculateLevellerMinBetNow() {
@@ -2116,6 +2174,8 @@ ddBetStatTotalWaitBeforeBet: state.ddBetStatTotalWaitBeforeBet || 0,
 
         sessionLockedMinBet: Number(state.sessionLockedMinBet || 0),
 sessionBaseBet: Number(state.sessionLockedMinBet || 0),
+strategyMode: getStrategyMode(),
+strategyLabel: getStrategyConfig().label,
 levellerDivisor: getLevellerDivisor(),
 levellerAuto: isLevellerAutoMode(),
 
@@ -3486,6 +3546,7 @@ function saveSettings() {
         };
 
         saveVal("min_chip_val", "min-chip");
+saveVal("strategy_mode_val", "strategy-mode");
         saveVal("min_bet_val", "min-bet");
         saveVal("rebate_rate_val", "rebate-rate");
         saveVal("target_profit_val", "target-profit");
@@ -3663,7 +3724,7 @@ function loadSettings() {
     };
 
     loadVal("min_chip_val", "min-chip", "5");
-
+loadVal("strategy_mode_val", "strategy-mode", DEFAULT_STRATEGY_MODE);
 
     loadVal("rebate_rate_val", "rebate-rate", "1.0");
     loadVal("target_profit_val", "target-profit", "50");
@@ -3691,11 +3752,7 @@ if (levellerEl) {
     levellerEl.checked = DEFAULT_LEVELLER_AUTO;
 }
 
-const levellerDivisorEl = document.getElementById("leveller-divisor");
-if (levellerDivisorEl) {
-    // ค่าเริ่มต้นและค่าบังคับ = 50
-    levellerDivisorEl.value = String(DEFAULT_LEVELLER_DIVISOR);
-}
+applyStrategyModeToLeveller();
 syncMinBetInput(true);
 updateCapitalRequirementInfo();}
 
@@ -3810,9 +3867,10 @@ function clearSavedState() {
         "super6_min_bet_val",
         "session_exit_port_val",
         "non_stop_auto_val",
-        "leveller_auto_val",
-        "leveller_divisor_val"
-    ].forEach(key => localStorage.removeItem(key));
+        "strategy_mode_val",
+    "leveller_auto_val",
+    "leveller_divisor_val"
+].forEach(key => localStorage.removeItem(key));
 
     autoSaveFailed = false;
 }
@@ -3966,6 +4024,7 @@ updateExternalResultsStatus();
     };
 
     setVal("min-chip", "5");
+setVal("strategy-mode", DEFAULT_STRATEGY_MODE);
     setVal("min-bet", "10");
     setVal("session-max-bet-cap", String(5 * MAX_BET_UNIT_MULTIPLIER));
     setVal("rebate-rate", "1.0");
@@ -3979,7 +4038,7 @@ updateExternalResultsStatus();
     setVal("super6-min-bet", "100");
     setVal("baccarat-type", "classic");
     setVal("rebate-mode", "fixed");
-    setVal("leveller-divisor", "50");
+    applyStrategyModeToLeveller();
     setVal("penetration-select", "60");
 
     const levellerAutoEl = document.getElementById("leveller-auto");
@@ -4489,6 +4548,7 @@ if (externalAutoInterval) {
 });
 
 [
+    "strategy-mode",
     "rebate-mode",
     "baccarat-type",
     "dead-chip-buyin-unit",
@@ -4504,13 +4564,23 @@ if (externalAutoInterval) {
     "session-trailing-dd",
     "session-max-bet-cap"
 ].forEach(id => {
+
     const el = document.getElementById(id);
     if (!el) return;
 
     const handler = () => {
+    if (id === "strategy-mode") {
+        applyStrategyModeToLeveller();
+    }
+
     syncMinBetInput(id === "min-chip");
 
-    if (id === "min-chip" || id === "leveller-divisor" || id === "leveller-auto") {
+    if (
+        id === "min-chip" ||
+        id === "strategy-mode" ||
+        id === "leveller-divisor" ||
+        id === "leveller-auto"
+    ) {
         state.sessionLockedMinBet = null;
         lockSessionMinBet(true);
         syncAutoSessionValuesFromMinBet();
@@ -4521,6 +4591,7 @@ if (externalAutoInterval) {
     updateUI(null);
     saveState();
 };
+
 
 
     el.addEventListener("input", handler);
@@ -4544,7 +4615,7 @@ window.addEventListener("DOMContentLoaded", () => {
     loadState();
 
     syncMinBetInput(true);
-updateCapitalRequirementInfo();
+    updateCapitalRequirementInfo();
 
 
     if (!state.sessionLockedMinBet || Number(state.sessionLockedMinBet) <= 0) {
