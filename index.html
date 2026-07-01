@@ -4003,7 +4003,10 @@ function clearSavedState() {
         STORAGE_KEY,
         "test_004_three_port_non_tie_filter_wait_v2",
         "test_004_two_team_shared_bankroll_v1",
-        "min_chip_val",
+
+        // ไม่ลบ min_chip_val และ strategy_mode_val
+        // เพื่อให้ Reset All จำค่า 2 ตัวนี้ไว้
+
         "min_bet_val",
         "classic_min_chip_val",
         "classic_min_bet_val",
@@ -4022,15 +4025,15 @@ function clearSavedState() {
         "super6_min_bet_val",
         "session_exit_port_val",
         "non_stop_auto_val",
-        "strategy_mode_val",
-    "leveller_auto_val",
-    "leveller_divisor_val"
-].forEach(key => localStorage.removeItem(key));
+
+        // ไม่ลบ strategy_mode_val
+
+        "leveller_auto_val",
+        "leveller_divisor_val"
+    ].forEach(key => localStorage.removeItem(key));
 
     autoSaveFailed = false;
 }
-
-
 
 /* =========================================================
    RESET SESSION / RESET ALL
@@ -4138,6 +4141,23 @@ function resetAll() {
         toggleAuto();
     }
 
+    // =====================================================
+    // จำค่า Setting ที่ต้องการเก็บไว้หลัง Reset
+    // =====================================================
+    const preservedMinChip =
+        document.getElementById("min-chip")?.value ||
+        localStorage.getItem("min_chip_val") ||
+        "5";
+
+    let preservedStrategyMode =
+        document.getElementById("strategy-mode")?.value ||
+        localStorage.getItem("strategy_mode_val") ||
+        DEFAULT_STRATEGY_MODE;
+
+    if (!STRATEGY_CONFIG[preservedStrategyMode]) {
+        preservedStrategyMode = DEFAULT_STRATEGY_MODE;
+    }
+
     suppressSave = true;
     autoSaveFailed = false;
 
@@ -4147,6 +4167,11 @@ function resetAll() {
         console.error("clear saved state failed:", e);
         try {
             localStorage.clear();
+
+            // กรณี fallback localStorage.clear()
+            // ต้องเขียนค่าที่ต้องจำกลับทันที
+            localStorage.setItem("min_chip_val", preservedMinChip);
+            localStorage.setItem("strategy_mode_val", preservedStrategyMode);
         } catch (err) {
             console.error("clear storage failed:", err);
         }
@@ -4155,33 +4180,43 @@ function resetAll() {
     suppressSave = false;
 
     state = getDefaultState();
-state.summaryChartLabels = ["Start"];
-state.summaryChartDataVirtual = [0];
+    state.summaryChartLabels = ["Start"];
+    state.summaryChartDataVirtual = [0];
 
     undoStack = [];
-externalResultsQueue = [];
-externalResultsIndex = 0;
-externalCurrentShoeId = null;
+    externalResultsQueue = [];
+    externalResultsIndex = 0;
+    externalCurrentShoeId = null;
 
-if (externalAutoInterval) {
-    clearInterval(externalAutoInterval);
-    externalAutoInterval = null;
-}
+    if (externalAutoInterval) {
+        clearInterval(externalAutoInterval);
+        externalAutoInterval = null;
+    }
 
-const externalTextArea = document.getElementById("external-results-input");
-if (externalTextArea) externalTextArea.value = "";
+    const externalTextArea = document.getElementById("external-results-input");
+    if (externalTextArea) externalTextArea.value = "";
 
-updateExternalResultsStatus();
+    updateExternalResultsStatus();
 
     const setVal = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.value = val;
     };
 
-    setVal("min-chip", "5");
-setVal("strategy-mode", DEFAULT_STRATEGY_MODE);
-    setVal("min-bet", "10");
-    setVal("session-max-bet-cap", String(5 * MAX_BET_UNIT_MULTIPLIER));
+    // =====================================================
+    // คืนค่าเฉพาะ 2 ตัวที่ต้องจำ
+    // =====================================================
+    setVal("min-chip", preservedMinChip);
+    setVal("strategy-mode", preservedStrategyMode);
+
+    const preservedMinChipNumber = parseFloat(preservedMinChip) || 5;
+
+    setVal("min-bet", String(Math.max(1, preservedMinChipNumber * 2)));
+    setVal("session-max-bet-cap", String(preservedMinChipNumber * MAX_BET_UNIT_MULTIPLIER));
+
+    // =====================================================
+    // ค่าอื่น Reset กลับค่าเริ่มต้นเหมือนเดิม
+    // =====================================================
     setVal("rebate-rate", "1.0");
     setVal("target-profit", "50");
     setVal("session-max-hands", "10000");
@@ -4193,18 +4228,21 @@ setVal("strategy-mode", DEFAULT_STRATEGY_MODE);
     setVal("super6-min-bet", "100");
     setVal("baccarat-type", "classic");
     setVal("rebate-mode", "fixed");
+
     applyStrategyModeToLeveller();
+
     setVal("penetration-select", "60");
 
     const levellerAutoEl = document.getElementById("leveller-auto");
-if (levellerAutoEl) levellerAutoEl.checked = true;
-
+    if (levellerAutoEl) levellerAutoEl.checked = true;
 
     const nonStopAutoEl = document.getElementById("non-stop-auto");
     if (nonStopAutoEl) nonStopAutoEl.checked = false;
 
     syncMinBetInput(true);
-updateCapitalRequirementInfo();
+    updateCapitalRequirementInfo();
+
+    state.sessionLockedMinBet = null;
     lockSessionMinBet(true);
     syncAutoSessionValuesFromMinBet();
 
@@ -4223,18 +4261,17 @@ updateCapitalRequirementInfo();
     }
 
     realShoe = {
-    deck: [],
-    total: 416,
-    used: 0,
-    no: 0,
-    cutAt: 249,
-    lastHand: null,
-    ready: false,
-    penetration: parseInt(document.getElementById("penetration-select")?.value || "60") || 60
-};
+        deck: [],
+        total: 416,
+        used: 0,
+        no: 0,
+        cutAt: 249,
+        lastHand: null,
+        ready: false,
+        penetration: parseInt(document.getElementById("penetration-select")?.value || "60") || 60
+    };
 
-initRealShoe(true);
-
+    initRealShoe(true);
 
     if (profitChart) {
         profitChart.data.labels = ["Start"];
