@@ -247,7 +247,6 @@
             </div>
         </div>
 
-        <!-- ซ่อน Min Bet จากหน้าหลัก แต่ยังคง id ไว้ให้ logic/save เดิมไม่พัง -->
         <input type="hidden" id="min-bet" value="10">
 
         <div>
@@ -255,7 +254,7 @@
                 Max Bet อัตโนมัติ
             </label>
             <input type="number" id="session-max-bet-cap" value="10000000" min="0" step="1" readonly
-    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-orange-400 font-bold text-center opacity-80 cursor-not-allowed">
+                class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-orange-400 font-bold text-center opacity-80 cursor-not-allowed">
         </div>
 
         <div>
@@ -265,19 +264,23 @@
             <input type="number" id="rebate-rate" value="1.0" min="0" max="10" step="0.1"
                 class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-amber-400 font-bold text-center">
         </div>
-<div class="col-span-3">
-    <label class="block text-[10px] text-slate-400 mb-1 font-medium">
-        Strategy Mode เลือกแนวทาง
-    </label>
 
-    <select id="strategy-mode"
-    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-emerald-300 font-bold text-center">
-    <option value="bestRoi" selected>Best ROI - Leveller 40 / ทุน 1,000,000 × Min Chip</option>
-    <option value="bestDrawdown">Best Drawdown - Leveller 500 / ทุน 600,000 × Min Chip</option>
-</select>
-</div>
+        <div class="col-span-3">
+            <label class="block text-[10px] text-slate-400 mb-1 font-medium">
+                Strategy Mode เลือกแนวทาง
+            </label>
 
-        <!-- ซ่อน Wait VL จากหน้าหลัก แต่ยังคงค่าไว้ให้ logic ใช้ -->
+            <select id="strategy-mode"
+                class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-emerald-300 font-bold text-center">
+                <option value="bestRoi" selected>
+                    Best ROI - เน้นเอากำไร-ตามทุนไว ใช้ทุนสูง / Leveller 40
+                </option>
+                <option value="bestDrawdown">
+                    Best Drawdown - เน้นรักษาทุน+ทำเทิร์น ใช้ทุนน้อยที่สุด / Leveller 1,000
+                </option>
+            </select>
+        </div>
+
         <input type="hidden" id="wait-virtual-lose" value="0">
     </div>
 
@@ -285,7 +288,28 @@
         class="bg-amber-950/30 border border-amber-500/30 rounded-xl px-3 py-2 text-[11px] text-amber-200 leading-relaxed">
         กำลังคำนวณทุนขั้นต่ำ...
     </div>
+
+    <div class="bg-slate-950/50 border border-emerald-500/20 rounded-xl px-3 py-2 text-[11px] text-slate-300 leading-relaxed space-y-1">
+        <div class="font-bold text-emerald-300">
+            📘 คู่มือ Strategy Mode
+        </div>
+
+        <div>
+            <span class="font-bold text-cyan-300">Best ROI</span> =
+            เน้นเอากำไร-ตามทุนไว ใช้ทุนสูง
+        </div>
+
+        <div>
+            <span class="font-bold text-orange-300">Best Drawdown</span> =
+            เน้นรักษาทุน+ทำเทิร์น ใช้ทุนน้อยที่สุด และใช้ Banker Only Mode
+        </div>
+
+        <div class="pt-1 border-t border-rose-500/20 font-bold text-rose-300">
+            ระยะยาวเจ้ามือชนะเสมอ เล่นเพื่อความบันเทิงเท่านั้น
+        </div>
+    </div>
 </div>
+
 
 
 
@@ -603,6 +627,12 @@ oninput="saveSettings();"
         <span class="text-slate-500">จำนวนตาทั้งหมด:</span>
         <span id="stat-hands" class="font-bold">0 ตา</span>
     </div>
+<div class="flex justify-between">
+    <span class="text-slate-500">ข้าม Player Signal:</span>
+    <span id="stat-skipped-player-signals" class="font-bold text-slate-300">
+        0 ครั้ง
+    </span>
+</div>
 
     <div class="flex justify-between">
         <span class="text-slate-500">Session:</span>
@@ -981,7 +1011,7 @@ oninput="saveSettings();"
    CONFIG
 ========================================================= */
 const BANKER_PAYOUT = 0.95;
-const STORAGE_KEY = "test_004_single_port_sim_selector_v1";
+const STORAGE_KEY = "test_004_single_port_sim_selector_v2";
 
 const DEFAULT_SESSION_MAX_HANDS = 10000;
 const DEFAULT_SESSION_MAX_BETS = 50;
@@ -994,18 +1024,22 @@ const VIRTUAL_ONLY_MODE = true;
 // DEFAULT AUTO MONEY MANAGEMENT
 // =========================================================
 const DEFAULT_LEVELLER_AUTO = true;
-const DEFAULT_STRATEGY_MODE = "bestRoi";
+const DEFAULT_STRATEGY_MODE = "bestDrawdown";
 
 const STRATEGY_CONFIG = {
     bestRoi: {
         label: "Best ROI",
+        description: "เน้นเอากำไร-ตามทุนไว ใช้ทุนสูง",
         levellerDivisor: 40,
-        capitalMultiplier: 1000000
+        capitalMultiplier: 1000000,
+        bankerOnly: false
     },
     bestDrawdown: {
         label: "Best Drawdown",
-        levellerDivisor: 500,
-        capitalMultiplier: 600000
+        description: "เน้นรักษาทุน+ทำเทิร์น ใช้ทุนน้อยที่สุด",
+        levellerDivisor: 1000,
+        capitalMultiplier: 140000,
+        bankerOnly: true
     }
 };
 
@@ -1198,6 +1232,9 @@ lastChosenSideLabel: "-",
         totalBankerNetBet: 0,
 totalPlayerNetBet: 0,
 
+// Best Drawdown Banker Only Mode: ถ้า Strategy เลือก Player จะข้ามเดิมพัน
+skippedPlayerSignals: 0,
+
 // =====================================================
 // Bet Frequency Stats ไม่นับ Tie
 // ใช้วัดว่าแทงบ่อยแค่ไหน และรอเดิมพันกี่มือ
@@ -1269,6 +1306,11 @@ function getStrategyConfig() {
     return STRATEGY_CONFIG[getStrategyMode()] || STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE];
 }
 
+function isBankerOnlyStrategyMode() {
+    const cfg = getStrategyConfig();
+    return Boolean(cfg.bankerOnly);
+}
+
 function applyStrategyModeToLeveller() {
     const cfg = getStrategyConfig();
 
@@ -1303,19 +1345,44 @@ function updateCapitalRequirementInfo() {
     const el = document.getElementById("capital-requirement-info");
     if (!el) return;
 
-    el.innerHTML =
-        `<span class="font-bold text-cyan-300">${cfg.label}</span> | ` +
-        `Leveller Divisor = ` +
-        `<span class="font-black text-purple-300">${formatNumber(cfg.levellerDivisor)}</span><br>` +
+    const modeDesc = cfg.description || "";
 
+    const modeBadge = cfg.bankerOnly
+        ? `<span class="font-bold text-orange-300">Banker Only Mode</span>`
+        : `<span class="font-bold text-blue-300">Simulation B/P Mode</span>`;
+
+    el.innerHTML =
+        `<div class="space-y-1">` +
+
+        `<div>` +
+        `<span class="font-bold text-cyan-300">${cfg.label}</span> | ` +
+        `${modeBadge} | ` +
+        `Leveller Divisor = ` +
+        `<span class="font-black text-purple-300">${formatNumber(cfg.levellerDivisor)}</span>` +
+        `</div>` +
+
+        `<div class="text-slate-200">` +
+        `${modeDesc}` +
+        `</div>` +
+
+        `<div>` +
         `ถ้าใช้ <span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span> ` +
         `ต้องใช้ทุนขั้นต่ำคือ ` +
         `<span class="font-black text-emerald-300">${formatNumber(requiredCapital)} หน่วย</span> ` +
-        `<span class="text-slate-400">(${formatNumber(cfg.capitalMultiplier)} × Min Chip)</span><br>` +
+        `<span class="text-slate-400">(${formatNumber(cfg.capitalMultiplier)} × Min Chip)</span>` +
+        `</div>` +
 
+        `<div>` +
         `Max Bet คือ ` +
         `<span class="font-black text-orange-300">${formatNumber(autoMaxBet)} หน่วย</span> ` +
-        `มีค่ามาจาก Min Chip ชิปขั้นต่ำ × 30,000 หน่วย ระยะยาวเจ้ามือชนะเสมอ เล่นเพื่อความบันเทิงเท่านั้น`;
+        `มีค่ามาจาก Min Chip ชิปขั้นต่ำ × 30,000 หน่วย` +
+        `</div>` +
+
+        `<div class="pt-1 border-t border-amber-500/20 font-bold text-rose-300">` +
+        `ระยะยาวเจ้ามือชนะเสมอ เล่นเพื่อความบันเทิงเท่านั้น` +
+        `</div>` +
+
+        `</div>`;
 }
 
 
@@ -1862,9 +1929,12 @@ function calculatePendingBetsBeforeHand() {
     // ยอดจำลองสำหรับเลือกฝั่ง
     const simChoice = chooseSideBySimulation();
 
+    const bankerOnlyMode = isBankerOnlyStrategyMode();
+
     let virtualBet = 0;
     let virtualSide = "-";
     let virtualSideLabel = "-";
+    let skippedPlayerSignal = false;
 
     if (
         selectionBeforeHand.shouldBet &&
@@ -1872,17 +1942,39 @@ function calculatePendingBetsBeforeHand() {
         simChoice.chosenSide !== "-"
     ) {
         const maxBetCap = getSessionMaxBetCap();
-
-        // ยอดที่ระบบคำนวณตาม progression จริง
         const calculatedBet = Number(realBetInfo.bet || 0);
 
-        // ถ้าเกิน Max Bet ให้แทงที่ Max Bet แทน ไม่หยุด ไม่เป็น 0
-        virtualBet = maxBetCap > 0
-            ? Math.min(calculatedBet, maxBetCap)
-            : calculatedBet;
+        if (bankerOnlyMode) {
+            // =====================================================
+            // Best Drawdown = Banker Only Mode
+            // ถ้า Strategy เลือก Banker → แทง
+            // ถ้า Strategy เลือก Player → ข้ามเดิมพัน
+            // =====================================================
+            if (simChoice.chosenSide === "B") {
+                virtualBet = maxBetCap > 0
+                    ? Math.min(calculatedBet, maxBetCap)
+                    : calculatedBet;
 
-        virtualSide = simChoice.chosenSide;
-        virtualSideLabel = simChoice.chosenSideLabel;
+                virtualSide = "B";
+                virtualSideLabel = "BANKER";
+            } else if (simChoice.chosenSide === "P") {
+                virtualBet = 0;
+                virtualSide = "-";
+                virtualSideLabel = "PLAYER SKIPPED";
+                skippedPlayerSignal = true;
+            }
+        } else {
+            // =====================================================
+            // Best ROI = Simulation B/P Mode
+            // แทงตามฝั่งที่ Simulation เลือก
+            // =====================================================
+            virtualBet = maxBetCap > 0
+                ? Math.min(calculatedBet, maxBetCap)
+                : calculatedBet;
+
+            virtualSide = simChoice.chosenSide;
+            virtualSideLabel = simChoice.chosenSideLabel;
+        }
     }
 
     return {
@@ -1894,7 +1986,14 @@ function calculatePendingBetsBeforeHand() {
         bankerSim: simChoice.bankerSim,
         playerSim: simChoice.playerSim,
 
-        simReason: simChoice.reason,
+        simReason: skippedPlayerSignal
+            ? "Best Drawdown เลือก Player → Banker Only ข้ามเดิมพัน"
+            : simChoice.reason,
+
+        rawChosenSide: simChoice.chosenSide,
+        rawChosenSideLabel: simChoice.chosenSideLabel,
+        skippedPlayerSignal,
+        bankerOnlyMode,
 
         virtualSide,
         virtualSideLabel,
@@ -1904,6 +2003,7 @@ function calculatePendingBetsBeforeHand() {
         newRealBet: 0
     };
 }
+
 /* =========================================================
    PORT / EXIT
 ========================================================= */
@@ -2098,6 +2198,8 @@ lastSimPlayerBet: Number((state.lastSimPlayerBet || 0).toFixed(2)),
 lastSimBankerPressureBet: Number((state.lastSimBankerPressureBet || 0).toFixed(2)),
 lastSimPlayerPressureBet: Number((state.lastSimPlayerPressureBet || 0).toFixed(2)),
 lastChosenSide: state.lastChosenSide || "-",
+lastChosenSideLabel: state.lastChosenSideLabel || "-",
+
 
 
         sessionVirtualBets: state.sessionVirtualBets || 0,
@@ -2112,6 +2214,7 @@ lastChosenSide: state.lastChosenSide || "-",
 
         totalBankerNetBet: Number((state.totalBankerNetBet || 0).toFixed(2)),
         totalPlayerNetBet: Number((state.totalPlayerNetBet || 0).toFixed(2)),
+skippedPlayerSignals: Number(state.skippedPlayerSignals || 0),
 betStatNonTieHands: state.betStatNonTieHands || 0,
 betStatBetHands: state.betStatBetHands || 0,
 betStatBetRate: Number(
@@ -2314,6 +2417,10 @@ if (maxBetCap > 0 && virtualBet > maxBetCap) {
 const manualBankerSix = rawResult === "B6";
 const result = rawResult === "B6" ? "B" : rawResult;
 
+if (pending.skippedPlayerSignal && result !== "T") {
+    state.skippedPlayerSignals = Number(state.skippedPlayerSignals || 0) + 1;
+}
+
 if (manualResult) {
     realShoe.lastHand = null;
 }
@@ -2356,11 +2463,21 @@ if (
     );
 }
 const didRealBetForStats =
+    result !== "T" &&
     pending.selectionBeforeHand.shouldBet &&
     virtualBet > 0 &&
     virtualSide !== "-";
 
 updateBetFrequencyStats(result, didRealBetForStats);
+
+const effectiveVirtualBetForLog =
+    result === "T" ? 0 : virtualBet;
+
+const effectiveVirtualSideForLog =
+    result === "T" ? "-" : virtualSide;
+
+const effectiveVirtualSideLabelForLog =
+    result === "T" ? "TIE - ไม่มีผล" : pending.virtualSideLabel;
 
 
    const virtualPeakBefore = Number(state.virtualPeakProfit || 0);
@@ -2397,8 +2514,16 @@ state.lastSimBankerPressureBet = pending.bankerSim.pressureBet || 0;
 state.lastSimPlayerPressureBet = pending.playerSim.pressureBet || 0;
 state.lastSimBankerCable = pending.bankerSim.cable || "-";
 state.lastSimPlayerCable = pending.playerSim.cable || "-";
-state.lastChosenSide = pending.virtualSide || "-";
-state.lastChosenSideLabel = pending.virtualSideLabel || "-";
+if (result !== "T") {
+    state.lastChosenSide = pending.skippedPlayerSignal
+        ? "P_SKIPPED"
+        : (pending.rawChosenSide || pending.virtualSide || "-");
+
+    state.lastChosenSideLabel = pending.skippedPlayerSignal
+        ? "PLAYER SKIPPED"
+        : (pending.rawChosenSideLabel || pending.virtualSideLabel || "-");
+}
+
 
 
 
@@ -2480,13 +2605,19 @@ simPlayerUnits: pending.playerSim.units,
 
 simReason: pending.simReason,
 
-netSide: virtualSide,
-netSideLabel: pending.virtualSideLabel,
+rawChosenSide: pending.rawChosenSide || "-",
+rawChosenSideLabel: pending.rawChosenSideLabel || "-",
+bankerOnlyMode: Boolean(pending.bankerOnlyMode),
+skippedPlayerSignalRaw: Boolean(pending.skippedPlayerSignal),
+skippedPlayerSignal: Boolean(pending.skippedPlayerSignal && result !== "T"),
+
+netSide: effectiveVirtualSideForLog,
+netSideLabel: effectiveVirtualSideLabelForLog,
 virtualCalculatedBet: pending.realBetInfo.bet,
-virtualBetCapped: Number(pending.realBetInfo.bet || 0) > Number(virtualBet || 0),
+virtualBetCapped: result !== "T" && Number(pending.realBetInfo.bet || 0) > Number(virtualBet || 0),
 virtualMaxBetCap: getSessionMaxBetCap(),
 
-virtualBet,
+virtualBet: effectiveVirtualBetForLog,
 virtualNet,
 virtualAccumProfit: state.virtualProfit,
 
@@ -2673,22 +2804,31 @@ const isCapped = actualBet > 0 && calculatedBet > actualBet;
         "selection-desc",
         `non_tie ล่าสุด: ${JSON.stringify(selection.nonTie.slice(0, 2))} | ` +
         `${selection.reason} | ` +
-        `${selection.shouldBet ? "จำลอง B/P แล้วเลือกฝั่งที่ไม้ใหญ่กว่า" : "ไม่แทง"} | ` +
+        `${selection.shouldBet 
+    ? (pending.bankerOnlyMode 
+        ? "Best Drawdown: จำลอง B/P แล้วแทงเฉพาะ Banker"
+        : "Best ROI: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า")
+    : "ไม่แทง"} | ` +
+
         `${isDeadChipMode() ? "💎 Dead Chip" : "💸 Fixed"} | ` +
         `${isSuperSixMode() ? "Super Six" : "Classic"}`
     );
 
-    const betText = pending.virtualBet > 0
+    const betText = pending.skippedPlayerSignal
+    ? "ข้าม PLAYER"
+    : pending.virtualBet > 0
         ? `${pending.virtualSideLabel} ${Number(pending.virtualBet).toFixed(0)} บาท`
         : "0 บาท";
 
-    let betColorClass = "text-lg font-black text-slate-400";
+let betColorClass = "text-lg font-black text-slate-400";
 
-    if (pending.virtualBet > 0 && pending.virtualSide === "B") {
-        betColorClass = "text-lg font-black text-red-400";
-    } else if (pending.virtualBet > 0 && pending.virtualSide === "P") {
-        betColorClass = "text-lg font-black text-blue-400";
-    }
+if (pending.skippedPlayerSignal) {
+    betColorClass = "text-lg font-black text-orange-300";
+} else if (pending.virtualBet > 0 && pending.virtualSide === "B") {
+    betColorClass = "text-lg font-black text-red-400";
+} else if (pending.virtualBet > 0 && pending.virtualSide === "P") {
+    betColorClass = "text-lg font-black text-blue-400";
+}
 
     const desc =
     `B ${Number(pending.bankerSim.bet || 0).toFixed(0)} ` +
@@ -2699,7 +2839,9 @@ const isCapped = actualBet > 0 && calculatedBet > actualBet;
     `P=${Number(pending.playerSim.pressureBet || 0).toFixed(0)} ` +
     `${pending.playerSim.cable}#${pending.playerSim.index + 1} | ` +
 
-    `เลือก ${pending.virtualSideLabel} | ` +
+    (pending.skippedPlayerSignal
+    ? `เลือก PLAYER → Banker Only ข้าม | `
+    : `เลือก ${pending.virtualSideLabel} | `) +
     `Real ${pending.realBetInfo.cable}#${pending.realBetInfo.index + 1} ` +
     `(${pending.realBetInfo.units}u) | ` +
     `Base ${Number(state.sessionLockedMinBet || getEffectiveMinBet()).toFixed(0)}` +
@@ -2813,10 +2955,12 @@ function makePortfolioStatBox(title, color, prefix) {
         <span class="text-slate-500">เลือกฝั่งล่าสุด:</span>
         <span class="font-bold ${
             state.lastChosenSide === "B"
-                ? "text-red-300"
-                : state.lastChosenSide === "P"
-                    ? "text-blue-300"
-                    : "text-slate-400"
+    ? "text-red-300"
+    : state.lastChosenSide === "P"
+        ? "text-blue-300"
+        : state.lastChosenSide === "P_SKIPPED"
+            ? "text-orange-300"
+            : "text-slate-400"
         }">
             ${state.lastChosenSideLabel || "-"}
         </span>
@@ -2940,6 +3084,10 @@ function updateUI(lastLog) {
     };
 
     setText("stat-hands", state.hands + " ตา");
+setText(
+    "stat-skipped-player-signals",
+    `${Number(state.skippedPlayerSignals || 0).toLocaleString()} ครั้ง`
+);
     setText("stat-session-no", "#" + (state.sessionNo || 1));
     setText("stat-session-non-tie", `${state.sessionNonTieHands || 0} non-tie`);
     setText("stat-session-hands", `${state.hands || 0}/${getSessionMaxHands()}`);
@@ -3174,16 +3322,23 @@ function rowHtml(log) {
                     </span>
                 </div>
 
-                <div>
-    <span class="${sideClass} font-bold">
-        แทงจริง: ${log.netSideLabel || "-"} ${Number(log.virtualBet || 0).toFixed(0)}
-    </span>
+             <div>
+    ${
+        log.skippedPlayerSignal
+            ? `<span class="text-slate-400 font-bold">
+                    Best Drawdown เลือก PLAYER → Banker Only ข้ามเดิมพัน
+               </span>`
+            : `<span class="${sideClass} font-bold">
+                    แทงจริง: ${log.netSideLabel || "-"} ${Number(log.virtualBet || 0).toFixed(0)}
+               </span>`
+    }
     ${
         log.virtualBetCapped
             ? `<span class="text-orange-400 text-[10px] font-bold"> capped from ${Number(log.virtualCalculatedBet || 0).toFixed(0)}</span>`
             : ""
     }
 </div>
+
 
                 <div class="text-[10px] text-slate-500">
                     Real ${log.virtualCable || "-"} ไม้ ${log.virtualIndex || "-"}
