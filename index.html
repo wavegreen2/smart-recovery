@@ -276,8 +276,9 @@
                     V1 - เดิมพันทั้ง BANKER-PLAYER เน้นทำกำไรไว / Leveller 40
                 </option>
                 <option value="bestDrawdown" selected>
-                    V2 - เดิมพัน BANKER เท่านั้น + เน้นสมดุล / Leveller 50
-                </option>
+    V2 - เดิมพัน BANKER เท่านั้น + เน้นสมดุล / Leveller 100
+</option>
+
             </select>
         </div>
 
@@ -544,9 +545,9 @@ oninput="saveSettings();"
        <select id="leveller-divisor"
     class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-purple-300 font-bold text-center">
     <option value="10">10</option>
-    <option value="40" selected>40</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
+    <option value="40">40</option>
+<option value="50">50</option>
+<option value="100" selected>100</option>
     <option value="500">500</option>
     <option value="1000">1,000</option>
     <option value="5000">5,000</option>
@@ -1035,13 +1036,13 @@ const STRATEGY_CONFIG = {
         fixedCapitalText: "ใช้ทุน 5,000,000 หน่วย จากสถิติการทดลอง 250,000 ขอน"
     },
     bestDrawdown: {
-        label: "V2",
-        description: "เดิมพัน BANKER เท่านั้น + เน้นสมดุล",
-        levellerDivisor: 50,
-        capitalMultiplier: 6600000,
-        bankerOnly: true,
-        fixedCapitalText: "ใช้ทุน 33,000,000 หน่วย จากสถิติการทดลอง 1,000,000 รอบ"
-    }
+    label: "V2",
+    description: "เดิมพัน BANKER เท่านั้น + เน้นสมดุล",
+    levellerDivisor: 100,
+    capitalMultiplier: 0,
+    bankerOnly: true,
+    fixedCapitalText: ""
+}
 };
 
 
@@ -1352,7 +1353,7 @@ function updateCapitalRequirementInfo() {
         ? `<span class="font-bold text-orange-300">Banker Only Mode</span>`
         : `<span class="font-bold text-blue-300">BANKER-PLAYER Mode</span>`;
 
-    const capitalText = cfg.fixedCapitalText || "-";
+    const capitalText = cfg.fixedCapitalText || "";
 
     el.innerHTML =
         `<div class="space-y-1">` +
@@ -1368,10 +1369,16 @@ function updateCapitalRequirementInfo() {
         `${modeDesc}` +
         `</div>` +
 
-        `<div>` +
-        `<span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span> | ` +
-        `<span class="font-black text-emerald-300">${capitalText}</span>` +
-        `</div>` +
+        (
+            capitalText
+                ? `<div>` +
+                  `<span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span> | ` +
+                  `<span class="font-black text-emerald-300">${capitalText}</span>` +
+                  `</div>`
+                : `<div>` +
+                  `<span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span>` +
+                  `</div>`
+        ) +
 
         `<div>` +
         `Max Bet อัตโนมัติ = ` +
