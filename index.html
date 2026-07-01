@@ -272,11 +272,11 @@
 
             <select id="strategy-mode"
                 class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-emerald-300 font-bold text-center">
-                <option value="bestRoi" selected>
-                    Best ROI - เน้นเอากำไร-ตามทุนไว ใช้ทุนสูง / Leveller 40
+                <option value="bestRoi">
+                    V1 - เดิมพันทั้ง BANKER-PLAYER เน้นทำกำไรไว / Leveller 40
                 </option>
-                <option value="bestDrawdown">
-                    Best Drawdown - เน้นรักษาทุน+ทำเทิร์น ใช้ทุนน้อยที่สุด / Leveller 1,000
+                <option value="bestDrawdown" selected>
+                    V2 - เดิมพัน BANKER เท่านั้น + เน้นสมดุล / Leveller 50
                 </option>
             </select>
         </div>
@@ -289,19 +289,19 @@
         กำลังคำนวณทุนขั้นต่ำ...
     </div>
 
-    <div class="bg-slate-950/50 border border-emerald-500/20 rounded-xl px-3 py-2 text-[11px] text-slate-300 leading-relaxed space-y-1">
+        <div class="bg-slate-950/50 border border-emerald-500/20 rounded-xl px-3 py-2 text-[11px] text-slate-300 leading-relaxed space-y-1">
         <div class="font-bold text-emerald-300">
             📘 คู่มือ Strategy Mode
         </div>
 
         <div>
-            <span class="font-bold text-cyan-300">Best ROI</span> =
-            เน้นเอากำไร-ตามทุนไว ใช้ทุนสูง
+            <span class="font-bold text-cyan-300">V1</span> =
+            เดิมพันทั้ง BANKER-PLAYER เน้นทำกำไรไว
         </div>
 
         <div>
-            <span class="font-bold text-orange-300">Best Drawdown</span> =
-            เน้นรักษาทุน+ทำเทิร์น ใช้ทุนน้อยที่สุด และใช้ Banker Only Mode
+            <span class="font-bold text-orange-300">V2</span> =
+            เดิมพัน BANKER เท่านั้น + เน้นสมดุล
         </div>
 
         <div class="pt-1 border-t border-rose-500/20 font-bold text-rose-300">
@@ -310,13 +310,12 @@
     </div>
 </div>
 
-
-
-
 <div class="bg-slate-950/60 p-3 rounded-xl border border-cyan-500/20 space-y-3">
+
     <div class="text-xs font-bold text-cyan-300 border-b border-slate-800 pb-1">
         💰 Payout / Rebate Mode
     </div>
+
 
     <div class="grid grid-cols-2 gap-2">
         <div>
@@ -1011,7 +1010,7 @@ oninput="saveSettings();"
    CONFIG
 ========================================================= */
 const BANKER_PAYOUT = 0.95;
-const STORAGE_KEY = "test_004_single_port_sim_selector_v2";
+const STORAGE_KEY = "test_004_single_port_sim_selector_v3";
 
 const DEFAULT_SESSION_MAX_HANDS = 10000;
 const DEFAULT_SESSION_MAX_BETS = 50;
@@ -1028,20 +1027,23 @@ const DEFAULT_STRATEGY_MODE = "bestDrawdown";
 
 const STRATEGY_CONFIG = {
     bestRoi: {
-        label: "Best ROI",
-        description: "เน้นเอากำไร-ตามทุนไว ใช้ทุนสูง",
+        label: "V1",
+        description: "เดิมพันทั้ง BANKER-PLAYER เน้นทำกำไรไว",
         levellerDivisor: 40,
         capitalMultiplier: 1000000,
-        bankerOnly: false
+        bankerOnly: false,
+        fixedCapitalText: "ใช้ทุน 5,000,000 หน่วย จากสถิติการทดลอง 250,000 ขอน"
     },
     bestDrawdown: {
-        label: "Best Drawdown",
-        description: "เน้นรักษาทุน+ทำเทิร์น ใช้ทุนน้อยที่สุด",
-        levellerDivisor: 1000,
-        capitalMultiplier: 140000,
-        bankerOnly: true
+        label: "V2",
+        description: "เดิมพัน BANKER เท่านั้น + เน้นสมดุล",
+        levellerDivisor: 50,
+        capitalMultiplier: 6600000,
+        bankerOnly: true,
+        fixedCapitalText: "ใช้ทุน 33,000,000 หน่วย จากสถิติการทดลอง 1,000,000 รอบ"
     }
 };
+
 
 const DEFAULT_LEVELLER_DIVISOR = STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE].levellerDivisor;
 
@@ -1232,7 +1234,7 @@ lastChosenSideLabel: "-",
         totalBankerNetBet: 0,
 totalPlayerNetBet: 0,
 
-// Best Drawdown Banker Only Mode: ถ้า Strategy เลือก Player จะข้ามเดิมพัน
+// V2 Banker Only Mode: ถ้า Strategy เลือก Player จะข้ามเดิมพัน
 skippedPlayerSignals: 0,
 
 // =====================================================
@@ -1339,7 +1341,6 @@ function calculateAutoMaxBetFromMinChip() {
 function updateCapitalRequirementInfo() {
     const cfg = getStrategyConfig();
     const minChip = getMinChipValue();
-    const requiredCapital = calculateRequiredCapitalFromMinChip();
     const autoMaxBet = calculateAutoMaxBetFromMinChip();
 
     const el = document.getElementById("capital-requirement-info");
@@ -1349,7 +1350,9 @@ function updateCapitalRequirementInfo() {
 
     const modeBadge = cfg.bankerOnly
         ? `<span class="font-bold text-orange-300">Banker Only Mode</span>`
-        : `<span class="font-bold text-blue-300">Simulation B/P Mode</span>`;
+        : `<span class="font-bold text-blue-300">BANKER-PLAYER Mode</span>`;
+
+    const capitalText = cfg.fixedCapitalText || "-";
 
     el.innerHTML =
         `<div class="space-y-1">` +
@@ -1366,16 +1369,14 @@ function updateCapitalRequirementInfo() {
         `</div>` +
 
         `<div>` +
-        `ถ้าใช้ <span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span> ` +
-        `ต้องใช้ทุนขั้นต่ำคือ ` +
-        `<span class="font-black text-emerald-300">${formatNumber(requiredCapital)} หน่วย</span> ` +
-        `<span class="text-slate-400">(${formatNumber(cfg.capitalMultiplier)} × Min Chip)</span>` +
+        `<span class="font-bold text-amber-300">Min Chip ${formatNumber(minChip)} หน่วย</span> | ` +
+        `<span class="font-black text-emerald-300">${capitalText}</span>` +
         `</div>` +
 
         `<div>` +
-        `Max Bet คือ ` +
+        `Max Bet อัตโนมัติ = ` +
         `<span class="font-black text-orange-300">${formatNumber(autoMaxBet)} หน่วย</span> ` +
-        `มีค่ามาจาก Min Chip ชิปขั้นต่ำ × 30,000 หน่วย` +
+        `<span class="text-slate-400">(Min Chip × 30,000)</span>` +
         `</div>` +
 
         `<div class="pt-1 border-t border-amber-500/20 font-bold text-rose-300">` +
@@ -1384,7 +1385,6 @@ function updateCapitalRequirementInfo() {
 
         `</div>`;
 }
-
 
 function getNumberInputValue(id, fallback = 0) {
     const el = document.getElementById(id);
@@ -1946,7 +1946,7 @@ function calculatePendingBetsBeforeHand() {
 
         if (bankerOnlyMode) {
             // =====================================================
-            // Best Drawdown = Banker Only Mode
+            // V2 = Banker Only Mode
             // ถ้า Strategy เลือก Banker → แทง
             // ถ้า Strategy เลือก Player → ข้ามเดิมพัน
             // =====================================================
@@ -1965,7 +1965,7 @@ function calculatePendingBetsBeforeHand() {
             }
         } else {
             // =====================================================
-            // Best ROI = Simulation B/P Mode
+            // V1 = Simulation B/P Mode
             // แทงตามฝั่งที่ Simulation เลือก
             // =====================================================
             virtualBet = maxBetCap > 0
@@ -1987,8 +1987,8 @@ function calculatePendingBetsBeforeHand() {
         playerSim: simChoice.playerSim,
 
         simReason: skippedPlayerSignal
-            ? "Best Drawdown เลือก Player → Banker Only ข้ามเดิมพัน"
-            : simChoice.reason,
+    ? "V2 เลือก PLAYER → Banker Only ข้ามเดิมพัน"
+    : simChoice.reason,
 
         rawChosenSide: simChoice.chosenSide,
         rawChosenSideLabel: simChoice.chosenSideLabel,
@@ -2806,8 +2806,8 @@ const isCapped = actualBet > 0 && calculatedBet > actualBet;
         `${selection.reason} | ` +
         `${selection.shouldBet 
     ? (pending.bankerOnlyMode 
-        ? "Best Drawdown: จำลอง B/P แล้วแทงเฉพาะ Banker"
-        : "Best ROI: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า")
+        ? "V2: จำลอง B/P แล้วแทงเฉพาะ BANKER"
+        : "V1: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า")
     : "ไม่แทง"} | ` +
 
         `${isDeadChipMode() ? "💎 Dead Chip" : "💸 Fixed"} | ` +
@@ -3325,9 +3325,9 @@ function rowHtml(log) {
              <div>
     ${
         log.skippedPlayerSignal
-            ? `<span class="text-slate-400 font-bold">
-                    Best Drawdown เลือก PLAYER → Banker Only ข้ามเดิมพัน
-               </span>`
+    ? `<span class="text-slate-400 font-bold">
+            V2 เลือก PLAYER → Banker Only ข้ามเดิมพัน
+       </span>`
             : `<span class="${sideClass} font-bold">
                     แทงจริง: ${log.netSideLabel || "-"} ${Number(log.virtualBet || 0).toFixed(0)}
                </span>`
