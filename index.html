@@ -408,16 +408,18 @@ iframe.goog-te-banner-frame {
             <select id="strategy-mode"
                 class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-emerald-300 font-bold text-center">
                 <option value="bestRoi">
-                    V1 - เดิมพันทั้ง BANKER-PLAYER เดิมพันมากขึ้น+เสี่ยงสูง / Leveller 40
-                </option>
-                <option value="bestDrawdown" selected>
+    V1 - เดิมพันทั้ง BANKER-PLAYER เดิมพันมากขึ้น+เสี่ยงสูง / Leveller 40
+</option>
+
+<option value="bestDrawdown">
     V2 - เดิมพัน BANKER เท่านั้น + เน้นสมดุล / Leveller 100
 </option>
+
 <option value="bankerLowCapital">
     V3 - เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด / Leveller 750
 </option>
 
-<option value="hybrid">
+<option value="hybrid" selected>
     V4 - Hybrid: เลือก V1/V2/V3 ตาม Drawdown ตอนจบ Session
 </option>
 
@@ -1341,7 +1343,7 @@ const VIRTUAL_ONLY_MODE = true;
 // DEFAULT AUTO MONEY MANAGEMENT
 // =========================================================
 const DEFAULT_LEVELLER_AUTO = true;
-const DEFAULT_STRATEGY_MODE = "bestDrawdown";
+const DEFAULT_STRATEGY_MODE = "hybrid";
 
 const STRATEGY_CONFIG = {
     bestRoi: {
