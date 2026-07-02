@@ -414,8 +414,13 @@ iframe.goog-te-banner-frame {
     V2 - เดิมพัน BANKER เท่านั้น + เน้นสมดุล / Leveller 100
 </option>
 <option value="bankerLowCapital">
-        V3 - เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด / Leveller 750
-    </option>
+    V3 - เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด / Leveller 750
+</option>
+
+<option value="hybrid">
+    V4 - Hybrid: เลือก V1/V2/V3 ตาม Drawdown ตอนจบ Session
+</option>
+
             </select>
         </div>
 
@@ -445,6 +450,10 @@ iframe.goog-te-banner-frame {
 <div>
     <span class="font-bold text-rose-300">V3</span> =
     เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด
+</div>
+<div>
+    <span class="font-bold text-purple-300">V4</span> =
+    Hybrid เลือก V1/V2/V3 ตาม Drawdown ตอนจบ Session
 </div>
 
 
@@ -1353,13 +1362,24 @@ const STRATEGY_CONFIG = {
 },
 
     bankerLowCapital: {
-        label: "V3",
-        description: "เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด",
-        levellerDivisor: 750,
-        capitalMultiplier: 0,
-        bankerOnly: true,
-        fixedCapitalText: ""
-    }
+    label: "V3",
+    description: "เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด",
+    levellerDivisor: 750,
+    capitalMultiplier: 0,
+    bankerOnly: true,
+    fixedCapitalText: ""
+},
+
+hybrid: {
+    label: "V4",
+    description: "Hybrid: เลือก V1/V2/V3 ตาม Drawdown ตอนจบ Session",
+    levellerDivisor: 40,
+    capitalMultiplier: 0,
+    bankerOnly: false,
+    fixedCapitalText: "",
+    hybrid: true
+}
+
 };
 
 const DEFAULT_LEVELLER_DIVISOR = STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE].levellerDivisor;
@@ -1419,6 +1439,11 @@ function getDefaultState() {
         sessionNo: 1,
         sessionNonTieHands: 0,
         sessionLockedMinBet: null,
+
+hybridActiveMode: "bestRoi",
+hybridLastDD: 0,
+hybridLastDecision: "V4 เริ่มต้นใช้ V1",
+
 
         sessionVirtualBets: 0,
         sessionOldRealBets: 0,
@@ -1621,9 +1646,109 @@ function getStrategyMode() {
     return STRATEGY_CONFIG[mode] ? mode : DEFAULT_STRATEGY_MODE;
 }
 
+function isHybridStrategyMode() {
+    return getStrategyMode() === "hybrid";
+}
+
+function getSummaryDrawdownNow() {
+    const summaryProfit = Number(state.summaryVirtualProfit || 0);
+    const summaryPeak = Number(state.summaryVirtualPeakProfit || 0);
+    return Math.max(0, summaryPeak - summaryProfit);
+}
+
+function decideHybridActiveModeByDrawdown() {
+    const rawMinBet = getRawBaseMinBet();
+    const dd = getSummaryDrawdownNow();
+
+    const thresholdV2 = rawMinBet * 100;
+    const thresholdV3 = rawMinBet * 750;
+
+    let activeMode = "bestRoi";
+    let decision = "V4 ใช้ V1: Drawdown ต่ำกว่า Min Bet × 100";
+
+    if (dd >= thresholdV3) {
+        activeMode = "bankerLowCapital";
+        decision = "V4 ใช้ V3: Drawdown มากกว่าหรือเท่ากับ Min Bet × 750";
+    } else if (dd >= thresholdV2) {
+        activeMode = "bestDrawdown";
+        decision = "V4 ใช้ V2: Drawdown มากกว่าหรือเท่ากับ Min Bet × 100";
+    }
+
+    state.hybridActiveMode = activeMode;
+    state.hybridLastDD = dd;
+    state.hybridLastDecision = decision;
+
+    return activeMode;
+}
+
+function previewHybridDecisionByDrawdown() {
+    const rawMinBet = getRawBaseMinBet();
+    const dd = getSummaryDrawdownNow();
+
+    const thresholdV2 = rawMinBet * 100;
+    const thresholdV3 = rawMinBet * 750;
+
+    if (dd >= thresholdV3) {
+        return {
+            activeMode: "bankerLowCapital",
+            activeLabel: "V3",
+            dd,
+            decision: "V4 ใช้ V3: Drawdown มากกว่าหรือเท่ากับ Min Bet × 750"
+        };
+    }
+
+    if (dd >= thresholdV2) {
+        return {
+            activeMode: "bestDrawdown",
+            activeLabel: "V2",
+            dd,
+            decision: "V4 ใช้ V2: Drawdown มากกว่าหรือเท่ากับ Min Bet × 100"
+        };
+    }
+
+    return {
+        activeMode: "bestRoi",
+        activeLabel: "V1",
+        dd,
+        decision: "V4 ใช้ V1: Drawdown ต่ำกว่า Min Bet × 100"
+    };
+}
+
+
+function getEffectiveStrategyMode() {
+    const selectedMode = getStrategyMode();
+
+    if (selectedMode !== "hybrid") {
+        return selectedMode;
+    }
+
+    if (!state.hybridActiveMode || !STRATEGY_CONFIG[state.hybridActiveMode]) {
+        state.hybridActiveMode = "bestRoi";
+    }
+
+    return state.hybridActiveMode;
+}
+
+function getEffectiveStrategyConfig() {
+    return STRATEGY_CONFIG[getEffectiveStrategyMode()] || STRATEGY_CONFIG.bestRoi;
+}
+
+function getStrategyDisplayLabel() {
+    if (getStrategyMode() === "hybrid") {
+        return `V4→${getEffectiveStrategyConfig().label}`;
+    }
+
+    return getStrategyConfig().label;
+}
+
 function getStrategyConfig() {
+    if (getStrategyMode() === "hybrid") {
+        return getEffectiveStrategyConfig();
+    }
+
     return STRATEGY_CONFIG[getStrategyMode()] || STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE];
 }
+
 
 function isBankerOnlyStrategyMode() {
     const cfg = getStrategyConfig();
@@ -1631,6 +1756,10 @@ function isBankerOnlyStrategyMode() {
 }
 
 function applyStrategyModeToLeveller() {
+    if (isHybridStrategyMode()) {
+        decideHybridActiveModeByDrawdown();
+    }
+
     const cfg = getStrategyConfig();
 
     const levellerDivisorEl = document.getElementById("leveller-divisor");
@@ -1664,6 +1793,12 @@ function updateCapitalRequirementInfo() {
     if (!el) return;
 
     const modeDesc = cfg.description || "";
+const selectedMode = getStrategyMode();
+const isHybrid = selectedMode === "hybrid";
+const rawMinBet = getRawBaseMinBet();
+const hybridDD = getSummaryDrawdownNow();
+const hybridV2Threshold = rawMinBet * 100;
+const hybridV3Threshold = rawMinBet * 750;
 
     const modeBadge = cfg.bankerOnly
         ? `<span class="font-bold text-orange-300">Banker Only Mode</span>`
@@ -1675,15 +1810,34 @@ function updateCapitalRequirementInfo() {
         `<div class="space-y-1">` +
 
         `<div>` +
-        `<span class="font-bold text-cyan-300">${cfg.label}</span> | ` +
+        `<span class="font-bold text-cyan-300">${isHybrid ? "V4→" + cfg.label : cfg.label}</span> | ` +
         `${modeBadge} | ` +
         `Leveller Divisor = ` +
         `<span class="font-black text-purple-300">${formatNumber(cfg.levellerDivisor)}</span>` +
         `</div>` +
 
         `<div class="text-slate-200">` +
-        `${modeDesc}` +
-        `</div>` +
+`${modeDesc}` +
+`</div>` +
+
+(
+    isHybrid
+        ? `<div class="bg-slate-950/50 border border-purple-500/30 rounded-lg p-2 mt-1">` +
+          `<div class="font-bold text-purple-300">V4 Hybrid Active: ` +
+          `<span class="text-amber-300">${getEffectiveStrategyConfig().label}</span>` +
+          `</div>` +
+          `<div>Drawdown รวมปัจจุบัน: ` +
+          `<span class="font-bold text-rose-300">${moneyText(hybridDD)}</span>` +
+          `</div>` +
+          `<div class="text-slate-400">` +
+          `V2 Threshold = Min Bet × 100 = ${moneyText(hybridV2Threshold)} | ` +
+          `V3 Threshold = Min Bet × 750 = ${moneyText(hybridV3Threshold)}` +
+          `</div>` +
+          `<div class="text-cyan-300">${state.hybridLastDecision || "-"}</div>` +
+          `</div>`
+        : ``
+) +
+
 
         (
             capitalText
@@ -2306,7 +2460,7 @@ function calculatePendingBetsBeforeHand() {
         playerSim: simChoice.playerSim,
 
         simReason: skippedPlayerSignal
-    ? `${getStrategyConfig().label} เลือก PLAYER → Banker Only ข้ามเดิมพัน`
+    ? `${getStrategyDisplayLabel()} เลือก PLAYER → Banker Only ข้ามเดิมพัน`
     : simChoice.reason,
 
         rawChosenSide: simChoice.chosenSide,
@@ -2598,6 +2752,21 @@ ddBetStatTotalWaitBeforeBet: state.ddBetStatTotalWaitBeforeBet || 0,
 sessionBaseBet: Number(state.sessionLockedMinBet || 0),
 strategyMode: getStrategyMode(),
 strategyLabel: getStrategyConfig().label,
+effectiveStrategyMode: getEffectiveStrategyMode(),
+effectiveStrategyLabel: getEffectiveStrategyConfig().label,
+
+hybridActiveMode: state.hybridActiveMode || "-",
+hybridLastDD: Number(getSummaryDrawdownNow().toFixed(2)),
+hybridPreviewNextMode: getStrategyMode() === "hybrid"
+    ? previewHybridDecisionByDrawdown().activeMode
+    : "-",
+hybridPreviewNextLabel: getStrategyMode() === "hybrid"
+    ? previewHybridDecisionByDrawdown().activeLabel
+    : "-",
+hybridLastDecision: getStrategyMode() === "hybrid"
+    ? previewHybridDecisionByDrawdown().decision
+    : "-",
+
 levellerDivisor: getLevellerDivisor(),
 levellerAuto: isLevellerAutoMode(),
 
@@ -3147,8 +3316,8 @@ const isCapped = actualBet > 0 && calculatedBet > actualBet;
         `${selection.shouldBet 
     ? (
         pending.bankerOnlyMode 
-            ? `${getStrategyConfig().label}: จำลอง B/P แล้วแทงเฉพาะ BANKER`
-            : `${getStrategyConfig().label}: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า`
+            ? `${getStrategyDisplayLabel()}: จำลอง B/P แล้วแทงเฉพาะ BANKER`
+: `${getStrategyDisplayLabel()}: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า`
     )
     : "ไม่แทง"} | ` +
 
@@ -4011,8 +4180,11 @@ if (profitChart) {
     profitChart.update();
 }
 
-    saveState();
-    updateUI(null);
+applyStrategyModeToLeveller();
+
+saveState();
+updateUI(null);
+
 }
 
 
@@ -4250,9 +4422,9 @@ if (levellerEl) {
     levellerEl.checked = DEFAULT_LEVELLER_AUTO;
 }
 
-applyStrategyModeToLeveller();
 syncMinBetInput(true);
-updateCapitalRequirementInfo();}
+updateCapitalRequirementInfo();
+}
 
 function loadState() {
     try {
@@ -4301,8 +4473,10 @@ state.summaryChartDataVirtual = Array.isArray(state.summaryChartDataVirtual)
             trimChartData(100);
         }
 
-        loadSettings();
-syncMinBetInput(true);
+               loadSettings();
+
+        applyStrategyModeToLeveller();
+        syncMinBetInput(true);
 
         if (!realShoe || !realShoe.ready) {
             initRealShoe(true);
@@ -4324,6 +4498,7 @@ syncMinBetInput(true);
         }
 
         autoSaveFailed = false;
+
     } catch (e) {
         console.error("loadState failed:", e);
 
@@ -4387,8 +4562,7 @@ function resetFixedNonTieSession(exitReason = "session_end") {
     const savedSessionResults = Array.isArray(state.sessionResults)
         ? state.sessionResults.slice(-100)
         : [];
-
-    const carrySummary = {
+const carrySummary = {
     summarySessionCount: state.summarySessionCount || 0,
     summaryVirtualProfit: state.summaryVirtualProfit || 0,
     summaryVirtualPeakProfit: state.summaryVirtualPeakProfit || 0,
@@ -4411,6 +4585,10 @@ function resetFixedNonTieSession(exitReason = "session_end") {
     ddBetStatMaxWait: state.ddBetStatMaxWait || 0,
     ddBetStatTotalWaitBeforeBet: state.ddBetStatTotalWaitBeforeBet || 0,
 
+    hybridActiveMode: state.hybridActiveMode || "bestRoi",
+    hybridLastDD: state.hybridLastDD || 0,
+    hybridLastDecision: state.hybridLastDecision || "V4 เริ่มต้นใช้ V1",
+
     summaryChartLabels: Array.isArray(state.summaryChartLabels)
         ? state.summaryChartLabels.slice(-300)
         : ["Start"],
@@ -4420,15 +4598,18 @@ function resetFixedNonTieSession(exitReason = "session_end") {
         : [0]
 };
 
-
-
     state = {
-        ...getDefaultState(),
-        ...carrySummary,
-        sessionNo: nextSessionNo,
-        lastExitReason: exitReason,
-        sessionResults: savedSessionResults
-    };
+    ...getDefaultState(),
+    ...carrySummary,
+    sessionNo: nextSessionNo,
+    lastExitReason: exitReason,
+    sessionResults: savedSessionResults
+};
+
+if (getStrategyMode() === "hybrid") {
+    decideHybridActiveModeByDrawdown();
+}
+
 
    lockSessionMinBet(true);
 
@@ -4525,6 +4706,9 @@ function resetAll() {
     state = getDefaultState();
     state.summaryChartLabels = ["Start"];
     state.summaryChartDataVirtual = [0];
+state.hybridActiveMode = "bestRoi";
+state.hybridLastDD = 0;
+state.hybridLastDecision = "V4 เริ่มต้นใช้ V1";
 
     undoStack = [];
     externalResultsQueue = [];
