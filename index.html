@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
 
         body {
@@ -191,6 +192,59 @@
                 font-size: 10px;
             }
         }
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget-icon {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
+.goog-te-gadget {
+    color: transparent !important;
+    font-size: 0 !important;
+}
+
+.goog-te-gadget span {
+    display: none !important;
+}
+
+#google_translate_element select {
+    background: #0f172a;
+    color: #67e8f9;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+iframe.goog-te-banner-frame {
+    display: none !important;
+}
+
+.google-translate-holder {
+    position: fixed;
+    left: -9999px;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.goog-te-gadget {
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+#goog-gt-tt,
+.goog-te-balloon-frame {
+    display: none !important;
+}
+
     </style>
 </head>
     
@@ -199,25 +253,109 @@
 <div class="max-w-7xl mx-auto lg:h-full lg:flex lg:flex-col">
 
     <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center border-b border-slate-800 pb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">
-                Baccarat Single-Port Sim Side Selector
-            </h1>
-            <p class="text-slate-400 text-sm mt-1">
-                Single Port ใช้ Non-Tie Filter: Tie ไม่มีผล, สลับ B/P ไม่แทง, ผ่าน Selection แล้วใช้ Simulation Banker/Player เลือกฝั่งที่ไม้ใหญ่กว่า
-            </p>
-        </div>
+    <div>
+        <h1 data-i18n="appTitle"
+            class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">
+            Baccarat Single-Port Sim Side Selector
+        </h1>
 
-        <div class="mt-4 md:mt-0 flex items-center gap-3">
-            <span id="save-indicator" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-semibold">
-                Auto-Save Active 💾
-            </span>
+        <p data-i18n="appSubtitle" class="text-slate-400 text-sm mt-1">
+            Single Port ใช้ Non-Tie Filter: Tie ไม่มีผล, สลับ B/P ไม่แทง, ผ่าน Selection แล้วใช้ Simulation Banker/Player เลือกฝั่งที่ไม้ใหญ่กว่า
+        </p>
+    </div>
 
-            <button id="btn-reset" class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 hover:text-rose-300 text-[11px] font-medium py-1 px-2.5 rounded-lg border border-rose-800/50">
-                🔄 รีเซ็ตทั้งหมด
+    <div class="mt-4 md:mt-0 flex items-center gap-3">
+        <div class="relative" id="language-dropdown-wrap">
+            <button id="language-toggle"
+                type="button"
+                class="bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-cyan-300 font-bold flex items-center gap-1.5 min-w-[118px] justify-between">
+                <span id="language-current">🇹🇭 ภาษาไทย</span>
+                <span class="text-slate-400">▾</span>
             </button>
+
+            <div id="language-menu"
+                class="hidden absolute right-0 mt-2 w-[180px] max-h-[420px] overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 text-xs custom-scroll">
+
+                <button type="button" data-lang="th" data-label="🇹🇭 ภาษาไทย" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇹🇭 <span>ภาษาไทย</span>
+                </button>
+
+                <button type="button" data-lang="zh-CN" data-label="🇨🇳 简体中文" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇨🇳 <span>简体中文</span>
+                </button>
+
+                <button type="button" data-lang="zh-TW" data-label="🇭🇰 繁體中文" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇭🇰 <span>繁體中文</span>
+                </button>
+
+                <button type="button" data-lang="en" data-label="🇺🇸 English" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇺🇸 <span>English</span>
+                </button>
+
+                <button type="button" data-lang="ja" data-label="🇯🇵 日本語" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇯🇵 <span>日本語</span>
+                </button>
+
+                <button type="button" data-lang="ko" data-label="🇰🇷 한국어" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇰🇷 <span>한국어</span>
+                </button>
+
+                <button type="button" data-lang="es" data-label="🇪🇸 Español" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇪🇸 <span>Español</span>
+                </button>
+
+                <button type="button" data-lang="pt" data-label="🇧🇷 Português" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇧🇷 <span>Português</span>
+                </button>
+
+                <button type="button" data-lang="vi" data-label="🇻🇳 Tiếng Việt" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇻🇳 <span>Tiếng Việt</span>
+                </button>
+
+                <button type="button" data-lang="ar" data-label="🇸🇦 عربي" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇸🇦 <span>عربي</span>
+                </button>
+
+                <button type="button" data-lang="ru" data-label="🇷🇺 русский" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇷🇺 <span>русский</span>
+                </button>
+
+                <button type="button" data-lang="hi" data-label="🇮🇳 हिन्दी" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇮🇳 <span>हिन्दी</span>
+                </button>
+
+                <button type="button" data-lang="id" data-label="🇮🇩 Indonesia" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇮🇩 <span>Indonesia</span>
+                </button>
+
+                <button type="button" data-lang="fr" data-label="🇫🇷 français" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇫🇷 <span>français</span>
+                </button>
+
+                <button type="button" data-lang="de" data-label="🇩🇪 Deutsch" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇩🇪 <span>Deutsch</span>
+                </button>
+
+                <button type="button" data-lang="it" data-label="🇮🇹 italiano" class="lang-option w-full px-3 py-2 hover:bg-slate-800 flex items-center gap-2 text-left">
+                    🇮🇹 <span>italiano</span>
+                </button>
+            </div>
         </div>
-    </header>
+
+        <div id="google_translate_element" class="google-translate-holder"></div>
+        <input type="hidden" id="ui-language" value="th">
+
+        <span id="save-indicator" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-semibold">
+            Auto-Save Active 💾
+        </span>
+
+        <button id="btn-reset" data-i18n="resetAllBtn"
+            class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 hover:text-rose-300 text-[11px] font-medium py-1 px-2.5 rounded-lg border border-rose-800/50">
+            🔄 รีเซ็ตทั้งหมด
+        </button>
+    </div>
+</header>
+
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
 
@@ -226,12 +364,9 @@
 
             <!-- Control -->
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                <h2 class="text-lg font-semibold mb-4 text-amber-400">
+                <h2 data-i18n="controlTitle" class="text-lg font-semibold mb-4 text-amber-400">
     ⚙️ ตั้งค่า & แผงควบคุม
 </h2>
-
-
-
                 <div class="space-y-4">
                 
 <div class="space-y-2">
@@ -273,12 +408,14 @@
             <select id="strategy-mode"
                 class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-emerald-300 font-bold text-center">
                 <option value="bestRoi">
-                    V1 - เดิมพันทั้ง BANKER-PLAYER เน้นทำกำไรไว / Leveller 40
+                    V1 - เดิมพันทั้ง BANKER-PLAYER เดิมพันมากขึ้น+เสี่ยงสูง / Leveller 40
                 </option>
                 <option value="bestDrawdown" selected>
     V2 - เดิมพัน BANKER เท่านั้น + เน้นสมดุล / Leveller 100
 </option>
-
+<option value="bankerLowCapital">
+        V3 - เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด / Leveller 750
+    </option>
             </select>
         </div>
 
@@ -296,14 +433,20 @@
         </div>
 
         <div>
-            <span class="font-bold text-cyan-300">V1</span> =
-            เดิมพันทั้ง BANKER-PLAYER เน้นทำกำไรไว
-        </div>
+    <span class="font-bold text-cyan-300">V1</span> =
+    เดิมพันทั้ง BANKER-PLAYER + เดิมพันมากขึ้น+เสี่ยงสูง
+</div>
 
-        <div>
-            <span class="font-bold text-orange-300">V2</span> =
-            เดิมพัน BANKER เท่านั้น + เน้นสมดุล
-        </div>
+<div>
+    <span class="font-bold text-orange-300">V2</span> =
+    เดิมพัน BANKER เท่านั้น + เน้นสมดุล
+</div>
+
+<div>
+    <span class="font-bold text-rose-300">V3</span> =
+    เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด
+</div>
+
 
         <div class="pt-1 border-t border-rose-500/20 font-bold text-rose-300">
             ระยะยาวเจ้ามือชนะเสมอ เล่นเพื่อความบันเทิงเท่านั้น
@@ -436,9 +579,9 @@ oninput="saveSettings();"
                     </div>
 
                   <div>
-    <label class="block text-xs text-slate-400 mb-1.5">
-        🎯 ป้อนผลลัพธ์ด้วยตนเอง
-    </label>
+    <label data-i18n="manualInputTitle" class="block text-xs text-slate-400 mb-1.5">
+    🎯 ป้อนผลลัพธ์ด้วยตนเอง
+</label>
 
     <div class="grid grid-cols-3 gap-2">
         <button onclick="manualPlay('P')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-sm">
@@ -456,9 +599,10 @@ oninput="saveSettings();"
 </div>
 
 <div class="bg-slate-950/50 border border-cyan-500/20 rounded-xl p-3 space-y-2">
-    <div class="text-xs font-bold text-cyan-300 border-b border-slate-800 pb-1">
-        📥 Import ผลลัพธ์บาคาร่าแบบหลาย Shoe
-    </div>
+    <div data-i18n="importTitle" class="text-xs font-bold text-cyan-300 border-b border-slate-800 pb-1">
+    📥 Import ผลลัพธ์บาคาร่าแบบหลาย Shoe
+</div>
+
 
     <p class="text-[10px] text-slate-500 leading-relaxed">
         รูปแบบ: <span class="text-slate-300">1,B,T,P,B,...</span><br>
@@ -471,15 +615,17 @@ oninput="saveSettings();"
         class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-[11px] text-cyan-100 font-mono"></textarea>
 
     <div class="grid grid-cols-2 gap-2">
-        <button id="btn-load-external-results"
-            class="bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 rounded-lg text-xs">
-            📦 โหลดผลลัพธ์
-        </button>
+        <button id="btn-load-external-results" data-i18n="loadResultsBtn"
+    class="bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 rounded-lg text-xs">
+    📦 โหลดผลลัพธ์
+</button>
 
-        <button id="btn-clear-external-results"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2 rounded-lg text-xs">
-            🧹 ล้าง Import
-        </button>
+<button id="btn-clear-external-results" data-i18n="clearImportBtn"
+    class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2 rounded-lg text-xs">
+    🧹 ล้าง Import
+</button>
+
+
     </div>
 
     <div class="grid grid-cols-3 gap-2">
@@ -507,13 +653,15 @@ oninput="saveSettings();"
 
 
 <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800/50">
-                        <button id="btn-step" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-medium py-3 px-4 rounded-xl">
-                            🎲 สุ่มทีละตา
-                        </button>
+                        <button id="btn-step" data-i18n="randomOneBtn"
+    class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-medium py-3 px-4 rounded-xl">
+    🎲 สุ่มทีละตา
+</button>
 
-                        <button id="btn-auto" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium py-3 px-4 rounded-xl">
-                            ⚡ Run Auto
-                        </button>
+<button id="btn-auto" data-i18n="runAutoBtn"
+    class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium py-3 px-4 rounded-xl">
+    ⚡ Run Auto
+</button>
                     </div>
 		        <label class="flex items-center justify-between bg-slate-950/50 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs cursor-pointer">
     <span class="text-slate-300">
@@ -546,13 +694,15 @@ oninput="saveSettings();"
     class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-xs text-purple-300 font-bold text-center">
     <option value="10">10</option>
     <option value="40">40</option>
-<option value="50">50</option>
-<option value="100" selected>100</option>
+    <option value="50">50</option>
+    <option value="100" selected>100</option>
     <option value="500">500</option>
+    <option value="750">750</option>
     <option value="1000">1,000</option>
     <option value="5000">5,000</option>
     <option value="10000">10,000</option>
 </select>
+
     </div>
 </div>
 
@@ -916,9 +1066,9 @@ oninput="saveSettings();"
                 <div class="mt-4 bg-black/25 border border-emerald-500/20 rounded-xl p-3 space-y-3">
 
                     <div>
-                        <label class="block text-xs text-emerald-300 mb-1.5 font-bold">
-                            🎯 ป้อนผลลัพธ์ด้วยตนเอง
-                        </label>
+                        <label data-i18n="manualInputTitle" class="block text-xs text-emerald-300 mb-1.5 font-bold">
+    🎯 ป้อนผลลัพธ์ด้วยตนเอง
+</label>
 
                         <div class="grid grid-cols-3 gap-2">
                             <button onclick="manualPlay('P')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-sm">
@@ -1010,6 +1160,164 @@ oninput="saveSettings();"
 /* =========================================================
    CONFIG
 ========================================================= */
+
+/* =========================================================
+   I18N / LANGUAGE
+========================================================= */
+const LANGUAGE_META = {
+    th: { flag: "🇹🇭", label: "ภาษาไทย" },
+    "zh-CN": { flag: "🇨🇳", label: "简体中文" },
+    "zh-TW": { flag: "🇭🇰", label: "繁體中文" },
+    en: { flag: "🇺🇸", label: "English" },
+    ja: { flag: "🇯🇵", label: "日本語" },
+    ko: { flag: "🇰🇷", label: "한국어" },
+    es: { flag: "🇪🇸", label: "Español" },
+    pt: { flag: "🇧🇷", label: "Português" },
+    vi: { flag: "🇻🇳", label: "Tiếng Việt" },
+    ar: { flag: "🇸🇦", label: "عربي" },
+    ru: { flag: "🇷🇺", label: "русский" },
+    hi: { flag: "🇮🇳", label: "हिन्दी" },
+    id: { flag: "🇮🇩", label: "Indonesia" },
+    fr: { flag: "🇫🇷", label: "français" },
+    de: { flag: "🇩🇪", label: "Deutsch" },
+    it: { flag: "🇮🇹", label: "italiano" }
+};
+
+const I18N = {
+    th: {
+        appTitle: "Baccarat Single-Port Sim Side Selector",
+        appSubtitle: "Single Port ใช้ Non-Tie Filter: Tie ไม่มีผล, สลับ B/P ไม่แทง, ผ่าน Selection แล้วใช้ Simulation Banker/Player เลือกฝั่งที่ไม้ใหญ่กว่า",
+
+        resetAllBtn: "🔄 รีเซ็ตทั้งหมด",
+        controlTitle: "⚙️ ตั้งค่า & แผงควบคุม",
+        manualInputTitle: "🎯 ป้อนผลลัพธ์ด้วยตนเอง",
+
+        importTitle: "📥 Import ผลลัพธ์บาคาร่าแบบหลาย Shoe",
+        loadResultsBtn: "📦 โหลดผลลัพธ์",
+        clearImportBtn: "🧹 ล้าง Import",
+        randomOneBtn: "🎲 สุ่มทีละตา",
+        runAutoBtn: "⚡ Run Auto",
+
+        autoImportBtn: "⚡ Auto Import",
+        pauseImportBtn: "⏸️ Pause Import",
+        pauseAutoBtn: "⏸️ Pause Auto",
+        pauseNonStopBtn: "⏸️ Pause Non Stop",
+
+        sessionEnded: "Session จบแล้ว",
+        noImportData: "ยังไม่ได้โหลดข้อมูล",
+        importCompleted: "เล่นผลลัพธ์ Import ครบทั้งหมดแล้วครับ",
+
+        confirmPenetration: "เปลี่ยน Penetration จะสับ Shoe ใหม่ ต้องการดำเนินการต่อหรือไม่?",
+        resetConfirmText: "⚠️ ยืนยันรีเซ็ตทั้งหมด\nพิมพ์เลข",
+        resetConfirmSuffix: "เพื่อยืนยัน:",
+        resetSuccess: "รีเซ็ตข้อมูลเรียบร้อยแล้วครับ",
+        resetWrongCode: "รหัสไม่ถูกต้อง ยกเลิกการรีเซ็ต",
+
+        lockStrategy: "ไม่แนะนำให้เปลี่ยน Strategy กลาง Session กรุณากดรีเซ็ตทั้งหมดก่อนเปลี่ยน Strategy",
+        lockMinChip: "ไม่แนะนำให้เปลี่ยน Min Chip กลาง Session กรุณากดรีเซ็ตทั้งหมดก่อนเปลี่ยน Min Chip",
+
+        noHistoryUndo: "ไม่มีประวัติให้ย้อนกลับแล้วครับ"
+    },
+
+    en: {
+        appTitle: "Baccarat Single-Port Sim Side Selector",
+        appSubtitle: "Single Port with Non-Tie Filter: Tie ignored, alternating B/P skipped, passed selection uses Banker/Player simulation to choose the stronger side.",
+
+        resetAllBtn: "🔄 Reset All",
+        controlTitle: "⚙️ Settings & Control Panel",
+        manualInputTitle: "🎯 Manual Result Input",
+
+        importTitle: "📥 Import Baccarat Results - Multi Shoe",
+        loadResultsBtn: "📦 Load Results",
+        clearImportBtn: "🧹 Clear Import",
+        randomOneBtn: "🎲 Random One Hand",
+        runAutoBtn: "⚡ Run Auto",
+
+        autoImportBtn: "⚡ Auto Import",
+        pauseImportBtn: "⏸️ Pause Import",
+        pauseAutoBtn: "⏸️ Pause Auto",
+        pauseNonStopBtn: "⏸️ Pause Non Stop",
+
+        sessionEnded: "Session ended",
+        noImportData: "No import data loaded",
+        importCompleted: "All imported results have been played.",
+
+        confirmPenetration: "Changing penetration will reshuffle the shoe. Continue?",
+        resetConfirmText: "⚠️ Confirm Reset All\nType this number",
+        resetConfirmSuffix: "to confirm:",
+        resetSuccess: "Reset completed.",
+        resetWrongCode: "Incorrect code. Reset cancelled.",
+
+        lockStrategy: "Changing Strategy during an active session is not recommended. Please reset all before changing Strategy.",
+        lockMinChip: "Changing Min Chip during an active session is not recommended. Please reset all before changing Min Chip.",
+
+        noHistoryUndo: "No history available to undo."
+    }
+};
+
+function getUILanguage() {
+    const el = document.getElementById("ui-language");
+    const lang = el?.value || localStorage.getItem("ui_language_val") || "th";
+    return LANGUAGE_META[lang] ? lang : "th";
+}
+
+function t(key) {
+    const lang = getUILanguage();
+
+    if (lang === "en") {
+        return I18N.en?.[key] || I18N.th?.[key] || key;
+    }
+
+    return I18N[lang]?.[key] || I18N.th?.[key] || key;
+}
+
+
+function updateLanguageButton() {
+    const lang = getUILanguage();
+    const meta = LANGUAGE_META[lang] || LANGUAGE_META.th;
+
+    const current = document.getElementById("language-current");
+    if (current) {
+        current.innerText = `${meta.flag} ${meta.label}`;
+    }
+
+    const hiddenInput = document.getElementById("ui-language");
+    if (hiddenInput) {
+        hiddenInput.value = lang;
+    }
+}
+
+
+function applyLanguage() {
+    const lang = getUILanguage();
+
+    document.documentElement.lang = lang;
+document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+
+
+    updateLanguageButton();
+
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (!key) return;
+        el.innerText = t(key);
+    });
+
+    const autoBtn = document.getElementById("btn-auto");
+    if (autoBtn && !autoInterval) {
+        autoBtn.innerText = t("runAutoBtn");
+    }
+
+    const externalBtn = document.getElementById("btn-auto-external");
+    if (externalBtn && !externalAutoInterval) {
+        externalBtn.innerText = t("autoImportBtn");
+    }
+
+    if (typeof updateExternalResultsStatus === "function") {
+        updateExternalResultsStatus();
+    }
+}
+
 const BANKER_PAYOUT = 0.95;
 const STORAGE_KEY = "test_004_single_port_sim_selector_v3";
 
@@ -1042,9 +1350,17 @@ const STRATEGY_CONFIG = {
     capitalMultiplier: 0,
     bankerOnly: true,
     fixedCapitalText: ""
-}
-};
+},
 
+    bankerLowCapital: {
+        label: "V3",
+        description: "เดิมพัน BANKER เท่านั้น + เน้นคุมเดิมพันและใช้ทุนน้อยที่สุด",
+        levellerDivisor: 750,
+        capitalMultiplier: 0,
+        bankerOnly: true,
+        fixedCapitalText: ""
+    }
+};
 
 const DEFAULT_LEVELLER_DIVISOR = STRATEGY_CONFIG[DEFAULT_STRATEGY_MODE].levellerDivisor;
 
@@ -1235,7 +1551,7 @@ lastChosenSideLabel: "-",
         totalBankerNetBet: 0,
 totalPlayerNetBet: 0,
 
-// V2 Banker Only Mode: ถ้า Strategy เลือก Player จะข้ามเดิมพัน
+// V2/V3 Banker Only Mode: ถ้า Strategy เลือก Player จะข้ามเดิมพัน
 skippedPlayerSignals: 0,
 
 // =====================================================
@@ -1384,10 +1700,6 @@ function updateCapitalRequirementInfo() {
         `Max Bet อัตโนมัติ = ` +
         `<span class="font-black text-orange-300">${formatNumber(autoMaxBet)} หน่วย</span> ` +
         `<span class="text-slate-400">(Min Chip × 30,000)</span>` +
-        `</div>` +
-
-        `<div class="pt-1 border-t border-amber-500/20 font-bold text-rose-300">` +
-        `ระยะยาวเจ้ามือชนะเสมอ เล่นเพื่อความบันเทิงเท่านั้น` +
         `</div>` +
 
         `</div>`;
@@ -1660,7 +1972,7 @@ function changePenetration() {
     const penSelect = document.getElementById("penetration-select");
     const oldPen = realShoe?.penetration || 60;
 
-    const ok = confirm("เปลี่ยน Penetration จะสับ Shoe ใหม่ ต้องการดำเนินการต่อหรือไม่?");
+    const ok = confirm(t("confirmPenetration"));
     if (!ok) {
         if (penSelect) penSelect.value = String(oldPen);
         return;
@@ -1953,7 +2265,7 @@ function calculatePendingBetsBeforeHand() {
 
         if (bankerOnlyMode) {
             // =====================================================
-            // V2 = Banker Only Mode
+            // V2/V3 = Banker Only Mode
             // ถ้า Strategy เลือก Banker → แทง
             // ถ้า Strategy เลือก Player → ข้ามเดิมพัน
             // =====================================================
@@ -1994,7 +2306,7 @@ function calculatePendingBetsBeforeHand() {
         playerSim: simChoice.playerSim,
 
         simReason: skippedPlayerSignal
-    ? "V2 เลือก PLAYER → Banker Only ข้ามเดิมพัน"
+    ? `${getStrategyConfig().label} เลือก PLAYER → Banker Only ข้ามเดิมพัน`
     : simChoice.reason,
 
         rawChosenSide: simChoice.chosenSide,
@@ -2614,8 +2926,14 @@ simReason: pending.simReason,
 
 rawChosenSide: pending.rawChosenSide || "-",
 rawChosenSideLabel: pending.rawChosenSideLabel || "-",
+
+strategyMode: getStrategyMode(),
+strategyLabel: getStrategyConfig().label,
+strategyDescription: getStrategyConfig().description,
+
 bankerOnlyMode: Boolean(pending.bankerOnlyMode),
 skippedPlayerSignalRaw: Boolean(pending.skippedPlayerSignal),
+
 skippedPlayerSignal: Boolean(pending.skippedPlayerSignal && result !== "T"),
 
 netSide: effectiveVirtualSideForLog,
@@ -2646,28 +2964,43 @@ virtualAccumProfit: state.virtualProfit,
     checkAndMarkPortExit("virtual");
 
     if (state.virtualEnded) {
-        markFixedSessionEnded(state.virtualExitReason || "virtual_ended");
+    markFixedSessionEnded(state.virtualExitReason || "virtual_ended");
 
-        if (updateUIEnabled && !(autoInterval && isNonStopAutoMode())) {
-            updateUI(logEntry);
-            saveState();
-        }
-
-        return;
+    if (updateUIEnabled && !(autoInterval && isNonStopAutoMode())) {
+        updateUI(logEntry);
+        saveState();
     }
+
+    return { sessionEndedThisHand: true };
+}
 
     if ((state.hands || 0) >= getSessionMaxHands()) {
-        markPortEnded("virtual", "max_hands_virtual");
-        markFixedSessionEnded("max_hands");
-    }
+    markPortEnded("virtual", "max_hands_virtual");
+    markFixedSessionEnded("max_hands");
 
-    if (updateUIEnabled) {
+    if (
+        updateUIEnabled &&
+        !(autoInterval && isNonStopAutoMode()) &&
+        !externalAutoInterval
+    ) {
         updateUI(logEntry);
-
-        if (autoInterval) scheduleSave();
-        else saveState();
+        saveState();
     }
+
+    return { sessionEndedThisHand: true };
 }
+
+if (updateUIEnabled) {
+    updateUI(logEntry);
+
+    if (autoInterval) scheduleSave();
+    else saveState();
+}
+
+return { sessionEndedThisHand: false };
+
+} // ✅ ปิด function playOneHand
+
 
 function manualPlay(result) {
     if (autoInterval) toggleAuto();
@@ -2680,7 +3013,7 @@ function undo() {
     if (externalAutoInterval) toggleExternalAuto();
 
     if (undoStack.length === 0) {
-        alert("ไม่มีประวัติให้ย้อนกลับแล้วครับ");
+        alert(t("noHistoryUndo"));
         return;
     }
 
@@ -2812,9 +3145,11 @@ const isCapped = actualBet > 0 && calculatedBet > actualBet;
         `non_tie ล่าสุด: ${JSON.stringify(selection.nonTie.slice(0, 2))} | ` +
         `${selection.reason} | ` +
         `${selection.shouldBet 
-    ? (pending.bankerOnlyMode 
-        ? "V2: จำลอง B/P แล้วแทงเฉพาะ BANKER"
-        : "V1: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า")
+    ? (
+        pending.bankerOnlyMode 
+            ? `${getStrategyConfig().label}: จำลอง B/P แล้วแทงเฉพาะ BANKER`
+            : `${getStrategyConfig().label}: จำลอง B/P แล้วแทงตามฝั่งที่ไม้ใหญ่กว่า`
+    )
     : "ไม่แทง"} | ` +
 
         `${isDeadChipMode() ? "💎 Dead Chip" : "💸 Fixed"} | ` +
@@ -3333,7 +3668,7 @@ function rowHtml(log) {
     ${
         log.skippedPlayerSignal
     ? `<span class="text-slate-400 font-bold">
-            V2 เลือก PLAYER → Banker Only ข้ามเดิมพัน
+            ${log.strategyLabel || "Banker Only"} เลือก PLAYER → Banker Only ข้ามเดิมพัน
        </span>`
             : `<span class="${sideClass} font-bold">
                     แทงจริง: ${log.netSideLabel || "-"} ${Number(log.virtualBet || 0).toFixed(0)}
@@ -3709,6 +4044,7 @@ function saveSettings() {
 
         saveVal("min_chip_val", "min-chip");
 saveVal("strategy_mode_val", "strategy-mode");
+saveVal("ui_language_val", "ui-language");
         saveVal("min_bet_val", "min-bet");
         saveVal("rebate_rate_val", "rebate-rate");
         saveVal("target_profit_val", "target-profit");
@@ -3887,7 +4223,7 @@ function loadSettings() {
 
     loadVal("min_chip_val", "min-chip", "5");
 loadVal("strategy_mode_val", "strategy-mode", DEFAULT_STRATEGY_MODE);
-
+loadVal("ui_language_val", "ui-language", "th");
     loadVal("rebate_rate_val", "rebate-rate", "1.0");
     loadVal("target_profit_val", "target-profit", "50");
     loadVal("session_max_hands_val", "session-max-hands", "10000");
@@ -4304,15 +4640,15 @@ function requestReset() {
 
 
     const code = Math.floor(Math.random() * 10);
-    const input = prompt(`⚠️ ยืนยันรีเซ็ตทั้งหมด\nพิมพ์เลข "${code}" เพื่อยืนยัน:`);
+    const input = prompt(`${t("resetConfirmText")} "${code}" ${t("resetConfirmSuffix")}`);
 
     if (input === null) return;
 
     if (parseInt(input) === code) {
         resetAll();
-        alert("รีเซ็ตข้อมูลเรียบร้อยแล้วครับ");
+        alert(t("resetSuccess"));
     } else {
-        alert("รหัสไม่ถูกต้อง ยกเลิกการรีเซ็ต");
+        alert(t("resetWrongCode"));
     }
 }
 
@@ -4350,12 +4686,12 @@ function setAutoButtonsUI(isRunning) {
     for (const btn of buttons) {
         if (isRunning) {
             btn.innerText = isNonStopAutoMode()
-                ? "⏸️ Pause Non Stop"
-                : "⏸️ Pause Auto";
+                ? t("pauseNonStopBtn")
+                : t("pauseAutoBtn");
 
             btn.className = "bg-gradient-to-r from-rose-600 to-red-600 text-white font-medium py-3 px-4 rounded-xl";
         } else {
-            btn.innerText = "⚡ Run Auto";
+            btn.innerText = t("runAutoBtn");
             btn.className = "bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium py-3 px-4 rounded-xl";
         }
     }
@@ -4458,13 +4794,30 @@ function updateExternalResultsStatus() {
     const total = externalResultsQueue.length;
     const done = externalResultsIndex;
     const remain = Math.max(0, total - done);
+    const lang = getUILanguage();
 
     if (total === 0) {
-        el.innerText = "ยังไม่ได้โหลดข้อมูล";
+        el.innerText = t("noImportData");
         return;
     }
 
     const current = externalResultsQueue[externalResultsIndex] || null;
+
+    if (lang === "en") {
+        const currentText = current
+            ? `Next: Shoe ${current.shoeId}, Hand ${current.posInShoe} = ${current.result}`
+            : "All results played";
+
+        el.innerText =
+            `Loaded ${total.toLocaleString()} results | ` +
+            `Played ${done.toLocaleString()} | ` +
+            `Remaining ${remain.toLocaleString()} | ` +
+            `Current Shoe: ${externalCurrentShoeId || "-"} | ` +
+            currentText;
+
+        return;
+    }
+
     const currentText = current
         ? `ถัดไป: Shoe ${current.shoeId} มือที่ ${current.posInShoe} = ${current.result}`
         : "เล่นครบทั้งหมดแล้ว";
@@ -4568,7 +4921,7 @@ function playOneExternalResult(updateUIEnabled = true) {
     if (externalResultsIndex >= externalResultsQueue.length) {
         if (externalAutoInterval) toggleExternalAuto();
         updateExternalResultsStatus();
-        alert("เล่นผลลัพธ์ Import ครบทั้งหมดแล้วครับ");
+        alert(t("importCompleted"));
         return false;
     }
 
@@ -4587,10 +4940,29 @@ function playOneExternalResult(updateUIEnabled = true) {
     externalResultsIndex++;
 
     // ใช้ Logic หลักเดิมทั้งหมด
-    playOneHand(updateUIEnabled, item.result);
+const playResult = playOneHand(updateUIEnabled, item.result);
 
-    const dealArea = document.getElementById("dealArea");
-    if (dealArea) {
+// =====================================================
+// Safety Check:
+// ถ้ามือนี้ทำให้ Session จบ ให้หยุดการเขียน UI ของมือเก่าต่อ
+// ป้องกันทับ UI/State หลัง Session จบ
+// =====================================================
+if (
+    (playResult && playResult.sessionEndedThisHand) ||
+    state.sessionEnded
+) {
+    updateExternalResultsStatus();
+
+    if (updateUIEnabled) {
+        saveState();
+    }
+
+    return true;
+}
+
+const dealArea = document.getElementById("dealArea");
+
+if (dealArea) {
         const resultLabel =
     item.result === "B"
         ? "BANKER"
@@ -4660,7 +5032,7 @@ function toggleExternalAuto() {
 
         const btn = document.getElementById("btn-auto-external");
         if (btn) {
-            btn.innerText = "⚡ Auto Import";
+            btn.innerText = t("autoImportBtn");
             btn.className = "bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs";
         }
 
@@ -4686,7 +5058,7 @@ function toggleExternalAuto() {
 
     const btn = document.getElementById("btn-auto-external");
     if (btn) {
-        btn.innerText = "⏸️ Pause Import";
+        btn.innerText = t("pauseImportBtn");
         btn.className = "bg-rose-700 hover:bg-rose-600 text-white font-bold py-2 rounded-lg text-xs";
     }
 }
@@ -4695,6 +5067,91 @@ function toggleExternalAuto() {
 /* =========================================================
    EVENTS
 ========================================================= */
+
+function clearGoogleTranslateCookie() {
+    const host = location.hostname;
+
+    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+
+    if (
+        !host ||
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host.includes(":")
+    ) {
+        return;
+    }
+
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${host}`;
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${host}`;
+}
+
+function setGoogleTranslateCookie(lang) {
+    const value = `/th/${lang}`;
+    const host = location.hostname;
+
+    // cookie พื้นฐาน ใช้ได้กับ GitHub Pages และ local ส่วนใหญ่
+    document.cookie = `googtrans=${value}; path=/`;
+
+    // localhost / 127.0.0.1 ไม่ควร set domain
+    if (
+        !host ||
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host.includes(":")
+    ) {
+        return;
+    }
+
+    document.cookie = `googtrans=${value}; path=/; domain=${host}`;
+    document.cookie = `googtrans=${value}; path=/; domain=.${host}`;
+}
+
+
+function setGoogleTranslateLanguage(lang) {
+    localStorage.setItem("ui_language_val", lang);
+
+    if (lang === "th") {
+        clearGoogleTranslateCookie();
+        localStorage.setItem("ui_language_val", "th");
+
+        applyLanguage();
+
+        setTimeout(() => {
+            location.reload();
+        }, 200);
+
+        return;
+    }
+
+    setGoogleTranslateCookie(lang);
+
+    let tries = 0;
+    const maxTries = 30;
+
+    const trySet = () => {
+        const combo = document.querySelector(".goog-te-combo");
+
+        if (!combo) {
+            tries++;
+
+            if (tries >= maxTries) {
+                console.warn("Google Translate combo not found.");
+                return;
+            }
+
+            setTimeout(trySet, 300);
+            return;
+        }
+
+        combo.value = lang;
+        combo.dispatchEvent(new Event("change", { bubbles: true }));
+
+        console.log("Google Translate language set:", lang);
+    };
+
+    trySet();
+}
 window.addEventListener("beforeunload", forceSaveNow);
 window.addEventListener("pagehide", forceSaveNow);
 window.addEventListener("freeze", forceSaveNow);
@@ -4702,6 +5159,46 @@ window.addEventListener("freeze", forceSaveNow);
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
         forceSaveNow();
+    }
+});
+document.getElementById("language-toggle")?.addEventListener("click", () => {
+    const menu = document.getElementById("language-menu");
+    if (menu) menu.classList.toggle("hidden");
+});
+
+document.querySelectorAll(".lang-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const lang = btn.getAttribute("data-lang") || "th";
+        const label = btn.getAttribute("data-label") || "🇹🇭 ภาษาไทย";
+
+        const hiddenInput = document.getElementById("ui-language");
+        if (hiddenInput) hiddenInput.value = lang;
+
+        const current = document.getElementById("language-current");
+        if (current) current.innerText = label;
+
+        localStorage.setItem("ui_language_val", lang);
+
+        const menu = document.getElementById("language-menu");
+        if (menu) menu.classList.add("hidden");
+
+        applyLanguage();
+        updateUI(null);
+        saveState();
+
+        setTimeout(() => {
+            setGoogleTranslateLanguage(lang);
+        }, 100);
+    });
+});
+document.addEventListener("click", e => {
+    const wrap = document.getElementById("language-dropdown-wrap");
+    const menu = document.getElementById("language-menu");
+
+    if (!wrap || !menu) return;
+
+    if (!wrap.contains(e.target)) {
+        menu.classList.add("hidden");
     }
 });
 
@@ -4768,8 +5265,48 @@ if (externalAutoInterval) {
     if (!el) return;
 
     const handler = () => {
+    const isActiveSession =
+        Number(state.hands || 0) > 0 &&
+        !state.sessionEnded &&
+        !state.sessionRecorded;
+
     if (id === "strategy-mode") {
+        if (isActiveSession) {
+            alert(t("lockStrategy"));
+
+            const savedMode = localStorage.getItem("strategy_mode_val") || DEFAULT_STRATEGY_MODE;
+            const elMode = document.getElementById("strategy-mode");
+
+            if (elMode && STRATEGY_CONFIG[savedMode]) {
+                elMode.value = savedMode;
+            }
+
+            updateCapitalRequirementInfo();
+            calculateNextBet();
+            updateUI(null);
+
+            return;
+        }
+
         applyStrategyModeToLeveller();
+    }
+
+    if (id === "min-chip" && isActiveSession) {
+        alert(t("lockMinChip"));
+
+        const savedMinChip = localStorage.getItem("min_chip_val") || "5";
+        const elMinChip = document.getElementById("min-chip");
+
+        if (elMinChip) {
+            elMinChip.value = savedMinChip;
+        }
+
+        syncMinBetInput(true);
+        updateCapitalRequirementInfo();
+        calculateNextBet();
+        updateUI(null);
+
+        return;
     }
 
     syncMinBetInput(id === "min-chip");
@@ -4780,9 +5317,11 @@ if (externalAutoInterval) {
         id === "leveller-divisor" ||
         id === "leveller-auto"
     ) {
-        state.sessionLockedMinBet = null;
-        lockSessionMinBet(true);
-        syncAutoSessionValuesFromMinBet();
+        if (!isActiveSession) {
+            state.sessionLockedMinBet = null;
+            lockSessionMinBet(true);
+            syncAutoSessionValuesFromMinBet();
+        }
     }
 
     updateCapitalRequirementInfo();
@@ -4790,6 +5329,7 @@ if (externalAutoInterval) {
     updateUI(null);
     saveState();
 };
+
 
 
 
@@ -4816,20 +5356,42 @@ window.addEventListener("DOMContentLoaded", () => {
     syncMinBetInput(true);
     updateCapitalRequirementInfo();
 
-
     if (!state.sessionLockedMinBet || Number(state.sessionLockedMinBet) <= 0) {
         lockSessionMinBet(true);
     }
 
     syncAutoSessionValuesFromMinBet();
 
+    applyLanguage();
+
     updateUI(null);
     setAutoButtonsUI(false);
     updateExternalResultsStatus();
     saveState();
+
+    // ✅ สำคัญ: ถ้าผู้ใช้เคยเลือกภาษาต่างประเทศไว้ ให้สั่ง Google Translate ทำงานหลังโหลดหน้า
+    const savedLang = localStorage.getItem("ui_language_val") || "th";
+
+    if (savedLang && savedLang !== "th" && LANGUAGE_META[savedLang]) {
+        setTimeout(() => {
+            setGoogleTranslateLanguage(savedLang);
+        }, 800);
+    }
 });
 </script>
+<script>
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'th',
+        includedLanguages: 'th,en,zh-CN,zh-TW,ja,ko,es,pt,vi,ar,ru,hi,id,fr,de,it',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+    }, 'google_translate_element');
+}
+</script>
 
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
 </html>
+
