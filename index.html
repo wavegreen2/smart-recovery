@@ -1393,7 +1393,7 @@ let externalResultsQueue = [];
 let externalResultsIndex = 0;
 let externalAutoInterval = null;
 let externalCurrentShoeId = null;
-
+let isChangingLanguage = false;
 
 let realShoe = {
     deck: [],
@@ -5108,7 +5108,9 @@ function setGoogleTranslateCookie(lang) {
 }
 
 
-function setGoogleTranslateLanguage(lang) {
+function setGoogleTranslateLanguage(lang, options = {}) {
+    const forceReload = options.forceReload !== false;
+
     localStorage.setItem("ui_language_val", lang);
 
     if (lang === "th") {
@@ -5117,17 +5119,30 @@ function setGoogleTranslateLanguage(lang) {
 
         applyLanguage();
 
-        setTimeout(() => {
-            location.reload();
-        }, 200);
+        if (forceReload) {
+            setTimeout(() => {
+                location.reload();
+            }, 150);
+        }
 
         return;
     }
 
     setGoogleTranslateCookie(lang);
 
+    // ✅ สำคัญ:
+    // ให้ reload หลังตั้ง cookie เพื่อให้ Google Translate อ่าน cookie ตอนโหลดหน้า
+    // แก้ปัญหาต้องกด F5 เอง
+    if (forceReload) {
+        setTimeout(() => {
+            location.reload();
+        }, 150);
+        return;
+    }
+
+    // ใช้เฉพาะกรณีไม่ต้องการ reload เช่นหลัง DOMContentLoaded
     let tries = 0;
-    const maxTries = 30;
+    const maxTries = 40;
 
     const trySet = () => {
         const combo = document.querySelector(".goog-te-combo");
@@ -5140,12 +5155,18 @@ function setGoogleTranslateLanguage(lang) {
                 return;
             }
 
-            setTimeout(trySet, 300);
+            setTimeout(trySet, 250);
             return;
         }
 
         combo.value = lang;
         combo.dispatchEvent(new Event("change", { bubbles: true }));
+
+        // trigger ซ้ำเล็กน้อย บาง browser ต้องการ
+        setTimeout(() => {
+            combo.value = lang;
+            combo.dispatchEvent(new Event("change", { bubbles: true }));
+        }, 500);
 
         console.log("Google Translate language set:", lang);
     };
@@ -5168,8 +5189,22 @@ document.getElementById("language-toggle")?.addEventListener("click", () => {
 
 document.querySelectorAll(".lang-option").forEach(btn => {
     btn.addEventListener("click", () => {
+        if (isChangingLanguage) return;
+
         const lang = btn.getAttribute("data-lang") || "th";
         const label = btn.getAttribute("data-label") || "🇹🇭 ภาษาไทย";
+        const currentLang = localStorage.getItem("ui_language_val") || getUILanguage();
+
+        const menu = document.getElementById("language-menu");
+        if (menu) menu.classList.add("hidden");
+
+        // ✅ ถ้าเลือกภาษาเดิม ไม่ต้อง reload ซ้ำ
+        if (lang === currentLang) {
+            updateLanguageButton();
+            return;
+        }
+
+        isChangingLanguage = true;
 
         const hiddenInput = document.getElementById("ui-language");
         if (hiddenInput) hiddenInput.value = lang;
@@ -5179,16 +5214,12 @@ document.querySelectorAll(".lang-option").forEach(btn => {
 
         localStorage.setItem("ui_language_val", lang);
 
-        const menu = document.getElementById("language-menu");
-        if (menu) menu.classList.add("hidden");
-
         applyLanguage();
         updateUI(null);
         saveState();
 
-        setTimeout(() => {
-            setGoogleTranslateLanguage(lang);
-        }, 100);
+        // ✅ ตั้ง cookie แล้ว reload อัตโนมัติ
+        setGoogleTranslateLanguage(lang, { forceReload: true });
     });
 });
 document.addEventListener("click", e => {
@@ -5372,11 +5403,14 @@ window.addEventListener("DOMContentLoaded", () => {
     // ✅ สำคัญ: ถ้าผู้ใช้เคยเลือกภาษาต่างประเทศไว้ ให้สั่ง Google Translate ทำงานหลังโหลดหน้า
     const savedLang = localStorage.getItem("ui_language_val") || "th";
 
-    if (savedLang && savedLang !== "th" && LANGUAGE_META[savedLang]) {
-        setTimeout(() => {
-            setGoogleTranslateLanguage(savedLang);
-        }, 800);
-    }
+if (savedLang && savedLang !== "th" && LANGUAGE_META[savedLang]) {
+    setTimeout(() => {
+        // ✅ หลัง reload แล้ว ไม่ต้อง reload ซ้ำ
+        // แค่พยายาม trigger combo เผื่อ Google ยังไม่แปลจาก cookie
+        setGoogleTranslateLanguage(savedLang, { forceReload: false });
+    }, 1000);
+}
+
 });
 </script>
 <script>
